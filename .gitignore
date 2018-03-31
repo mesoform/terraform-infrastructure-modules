@@ -8,7 +8,7 @@
 *.tfstate.*
 
 # .tfvars files
-*.tfvars
+secrets.tfvars
 ### macOS template
 # General
 .DS_Store
