@@ -1,3 +1,3 @@
-resource "google_compute_network" "gcp_vpc" {
+resource "google_compute_network" "self" {
   name       = "${var.name}"
 }

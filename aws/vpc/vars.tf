@@ -1,5 +1,18 @@
+variable "name" {}
 variable "cidr_block" {}
-variable "tags" {
+variable "vpc_tags" {
   type = "map"
   default = {}
+}
+variable "instance_tenancy" {default = "shared"}
+variable "base_tags" {
+  type = "map"
+  default = {
+    provider = "aws"
+    services = [
+    "ec2",
+    "s3",
+    "sqs",
+    "sns"]
+  }
 }
