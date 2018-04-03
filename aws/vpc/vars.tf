@@ -9,10 +9,6 @@ variable "base_tags" {
   type = "map"
   default = {
     provider = "aws"
-    services = [
-    "ec2",
-    "s3",
-    "sqs",
-    "sns"]
+    services = "ec2"
   }
 }
