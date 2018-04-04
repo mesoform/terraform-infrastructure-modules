@@ -1,3 +1,3 @@
 output "id" {
-  value = 1
+  value = "$(aws_vpc.self.id)"
 }
