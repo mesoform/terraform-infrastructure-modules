@@ -1,7 +1,7 @@
-resource "aws_subnet" "external" {
+resource "aws_subnet" "self_public" {
   count = "${length(var.public_subnets) > 0 ? length(var.public_subnets) : 0}"
 
-  vpc_id                  = "${var.vpc_id}"
+  vpc_id                   = "${var.vpc_id}"
   cidr_block              = "${var.public_subnets[count.index]}"
   map_public_ip_on_launch = true
 
@@ -11,10 +11,10 @@ resource "aws_subnet" "external" {
 #################
 # Private subnet
 #################
-resource "aws_subnet" "underlay" {
+resource "aws_subnet" "self_private" {
   count = "${length(var.private_subnets) > 0 ? length(var.private_subnets) : 0}"
 
-  vpc_id            = "${var.vpc_id}"
+  vpc_id             = "${var.vpc_id}"
   cidr_block        = "${var.private_subnets[count.index]}"
 
   tags = "${merge(var.base_tags, var.subnet_tags, map("name", format("aws-subnet-%s-%s", var.name, count.index)))}"
