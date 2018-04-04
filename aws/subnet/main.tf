@@ -1,4 +1,4 @@
-resource "aws_subnet" "self" {
+resource "aws_subnet" "external" {
   count = "${length(var.public_subnets) > 0 ? length(var.public_subnets) : 0}"
 
   vpc_id                  = "${var.vpc_id}"
@@ -11,7 +11,7 @@ resource "aws_subnet" "self" {
 #################
 # Private subnet
 #################
-resource "aws_subnet" "self" {
+resource "aws_subnet" "underlay" {
   count = "${length(var.private_subnets) > 0 ? length(var.private_subnets) : 0}"
 
   vpc_id            = "${var.vpc_id}"

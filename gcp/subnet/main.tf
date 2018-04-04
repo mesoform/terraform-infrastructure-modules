@@ -1,4 +1,4 @@
-resource "google_compute_subnetwork" "self" {
+resource "google_compute_subnetwork" "external" {
   count = "${length(var.public_api_access_subnets) > 0 ? length(var.public_api_access_subnets) : 0}"
 
   name          = "${element(var.name, count.index)}"
@@ -10,7 +10,7 @@ resource "google_compute_subnetwork" "self" {
 ##########################################################################################
 # The VMs in this subnet can access Google services without assigned external IP addresses
 ##########################################################################################
-resource "google_compute_subnetwork" "self" {
+resource "google_compute_subnetwork" "underlay" {
   count = "${length(var.private_api_access_subnets) > 0 ? length(var.private_api_access_subnets) : 0}"
 
   name          = "${element(var.name, count.index)}"
