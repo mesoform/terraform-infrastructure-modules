@@ -4,7 +4,8 @@ variable "name" {
 }
 
 variable "ip_cidr_range" {
-  type        = "string"
+  type        = "list"
+  default = []
   description = "IP range to book"
 }
 
