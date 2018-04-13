@@ -13,12 +13,12 @@ variable "vpc" {
   description = "Direct link to the network"
 }
 
-variable "public_api_access_subnets" {
+variable "gcp_api_public_access_subnets" {
   type = "list"
   default = []
 }
 
-variable "private_api_access_subnets" {
+variable "gcp_api_private_access_subnets" {
   type = "list"
   default = []
 }
