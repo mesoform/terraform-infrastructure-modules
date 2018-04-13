@@ -3,12 +3,7 @@ variable "name" {
   description = "Subnet name to create on GCP"
 }
 
-variable "external_ip_cidr_range" {
-  type        = "list"
-  default     = []
-}
-
-variable "underlay_ip_cidr_range" {
+variable "ip_cidr_range" {
   type        = "list"
   default     = []
 }
@@ -16,4 +11,8 @@ variable "underlay_ip_cidr_range" {
 variable "vpc" {
   type        = "string"
   description = "Direct link to the network"
+}
+
+variable "private_ip_google_access" {
+  type        = "string"
 }
