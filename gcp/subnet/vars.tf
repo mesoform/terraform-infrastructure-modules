@@ -14,5 +14,5 @@ variable "vpc" {
 }
 
 variable "private_ip_google_access" {
-  type        = "string"
+  description = "If a private ip has access to GCP APIs"
 }
