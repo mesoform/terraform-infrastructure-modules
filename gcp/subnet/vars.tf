@@ -3,9 +3,13 @@ variable "name" {
   description = "Subnet name to create on GCP"
 }
 
-variable "ip_cidr_range" {
-  type        = "list"
-  default     = []
+variable "private_subnets" {
+  type = "list"
+  default = []
+}
+variable "public_subnets" {
+  type = "list"
+  default = []
 }
 
 variable "vpc" {
@@ -13,6 +17,3 @@ variable "vpc" {
   description = "Direct link to the network"
 }
 
-variable "private_ip_google_access" {
-  description = "If a private ip has access to GCP APIs"
-}
