@@ -3,7 +3,12 @@ variable "name" {
   description = "Subnet name to create on GCP"
 }
 
-variable "ip_cidr_range" {
+variable "external_ip_cidr_range" {
+  type        = "list"
+  default     = []
+}
+
+variable "underlay_ip_cidr_range" {
   type        = "list"
   default     = []
 }
