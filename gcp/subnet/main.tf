@@ -1,4 +1,4 @@
-resource "google_compute_subnetwork" "self_public_gcp_api_ccess" {
+resource "google_compute_subnetwork" "self_public_gcp_api_access" {
   count = "${length(var.public_subnets) > 0 ? length(var.public_subnets) : 0}"
 
   name          = "${var.name}"

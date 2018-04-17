@@ -1,3 +1,3 @@
 output "id" {
-  value = "$(aws_vpc.self.id)"
+  value = "${aws_vpc.self.id}"
 }
