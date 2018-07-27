@@ -18,15 +18,26 @@ variable project {
   default     = ""
 }
 
+variable "directive" {
+  description = "Whether to create an allow or deny rule. Options are: allow/deny"
+  type = "string"
+}
+
+variable "type" {
+  description = "Whether to create a rule based on tags, IPs or service accounts. Options are: tags/accounts/ips"
+  type = "string"
+}
+
 /* deny block */
 variable ports {
-  description = "List of ports and/or ranges to deny."
+  description = "List of ports and/or ranges"
   type        = "list"
   default     = []
 }
 
 variable protocol {
-  description = "The name of the protocol to deny."
+  description = "The name of the protocol. E.g. icmp, tcp, udp"
+  description = "The name of the protocol. E.g. icmp, tcp, udp"
   type        = "string"
 }
 
@@ -44,6 +55,12 @@ variable priority {
 }
 
 variable source_ranges {
+  description = "Ingress CIDR ranges. List of strings."
+  type        = "list"
+  default     = []
+}
+
+variable destination_ranges {
   description = "Ingress CIDR ranges. List of strings."
   type        = "list"
   default     = []
