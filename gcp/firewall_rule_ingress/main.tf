@@ -83,7 +83,7 @@ resource "google_compute_firewall" "self_allow_ips" {
     ports    = "${var.ports}"
   }
 
-  source_ranges = "${var.source_ranges}"
+  source_ranges      = "${var.source_ranges}"
   destination_ranges = "${var.destination_ranges}"
 }
 
@@ -100,6 +100,7 @@ resource "google_compute_firewall" "self_deny_ips" {
     ports    = "${var.ports}"
   }
 
-  source_ranges = "${var.source_ranges}"
-  destination_ranges = "${var.destination_ranges}"
+  source_ranges      = "${var.source_ranges}"
+//  destination_ranges returns a conflict error with source_ranges
+//  destination_ranges = "${var.destination_ranges}"
 }
