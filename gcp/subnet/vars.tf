@@ -3,13 +3,9 @@ variable "name" {
   description = "Subnet name to create on GCP"
 }
 
-variable "private_subnets" {
-  type = "list"
-  default = []
-}
-variable "public_subnets" {
-  type = "list"
-  default = []
+variable "ip_cidr_range" {
+  type        = "string"
+  description = "IP range to book"
 }
 
 variable "vpc" {
@@ -17,3 +13,12 @@ variable "vpc" {
   description = "Direct link to the network"
 }
 
+variable "public_api_access_subnets" {
+  type = "list"
+  default = []
+}
+
+variable "private_api_access_subnets" {
+  type = "list"
+  default = []
+}
