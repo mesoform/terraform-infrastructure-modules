@@ -101,6 +101,6 @@ resource "google_compute_firewall" "self_deny_ips" {
   }
 
   source_ranges      = "${var.source_ranges}"
-//  destination_ranges returns a conflict error with source_ranges
+//  destination_ranges returns a conflict error with source_ranges. API will only accept tags, all instances or service accounts
 //  destination_ranges = "${var.destination_ranges}"
 }
