@@ -3,7 +3,7 @@ resource "aws_iam_policy" "default_manage_keys" {
   path        = "/"
   description = "Allows users to manage own keys"
 
-  policy = <<EOF
+  policy = <<EOL
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -22,7 +22,7 @@ resource "aws_iam_policy" "default_manage_keys" {
         }
     ]
 }
-EOF
+EOL
 }
 
 resource "aws_iam_policy" "default_restrict_resource_location" {
@@ -30,7 +30,7 @@ resource "aws_iam_policy" "default_restrict_resource_location" {
   path        = "/"
   description = "restricts geographical locations which resources can be deployed to"
 
-  policy = <<EOF
+  policy = <<EOL
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -64,5 +64,6 @@ resource "aws_iam_policy" "default_restrict_resource_location" {
         }
     ]
 }
+EOL
 }
 
