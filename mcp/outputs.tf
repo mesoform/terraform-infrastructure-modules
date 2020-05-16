@@ -8,3 +8,7 @@ output "gae" {
 output "kubernetes" {
   value = local.kubernetes
 }
+
+output "common_files" {
+  value = local.common_files
+}
