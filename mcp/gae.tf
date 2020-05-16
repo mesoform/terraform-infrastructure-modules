@@ -1,5 +1,5 @@
 locals {
-  gae_files = fileset(path.root, "../**/app.y?ml")
+  gae_files = fileset(path.root, "../**/app.y{a,}ml")
   gae_app = {
     for app_file in local.gae_files:
       basename(dirname(app_file)) => yamldecode(file(app_file))
