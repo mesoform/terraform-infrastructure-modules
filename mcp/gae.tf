@@ -3,7 +3,8 @@ locals {
   gae_app = {
     for app_file in local.gae_files:
       basename(dirname(app_file)) => yamldecode(file(app_file))
-      if !contains(split("/", app_file), "terraform")
+      if !contains(split("/", app_file), "terraform") &&
+         substr(app_file, 2, 18) != "/build/staged-app/"
   }
 }
 //resource "google_project" "my_project" {
