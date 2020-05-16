@@ -1,5 +1,12 @@
+variable "google_project" {
+  type = string
+  description = "project ID of the GCP project"
+  default = null
+}
+
 module "deployment" {
   source = "../../../mcp"
+  google_project = var.google_project
 }
 output "module_kubernetes_out" {
   value = module.deployment.kubernetes
