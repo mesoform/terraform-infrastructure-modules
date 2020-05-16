@@ -2,8 +2,8 @@ locals {
   gae_files = fileset(path.root, "../**/app.yml")
   gae_app = {
     for app_file in local.gae_files:
-      split("/", app_file)[1] => yamldecode(file(app_file))
-      if split("/", app_file)[1] != "terraform"
+      basename(dirname(app_file)) => yamldecode(file(app_file))
+      if !contains(split("/", app_file), "terraform")
   }
 }
 //resource "google_project" "my_project" {
