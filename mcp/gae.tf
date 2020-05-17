@@ -8,7 +8,7 @@ locals {
   }
   gae_apps_list = {
     for app, config in local.gae_apps:
-      app => merge(app, local.common[app])
+      app => merge(config, lookup(local.common, app, {}))
   }
 }
 resource "google_project" "self" {
@@ -40,15 +40,16 @@ resource "google_project_iam_member" "self" {
 resource "google_app_engine_flexible_app_version" "myapp_v1" {
   for_each = local.gae_apps_list
 
-  version_id = each.value.version_id == null ? v1 : each.value.version_id
+  version_id = each.value.version_id == null ? "v1" : each.value.version_id
   project = google_project_iam_member.self.project
-  service = "default"
+  service = each.value.service == null ? "default" : each.value.service
   runtime = "nodejs"
 
-  liveness_check = each.value.liveness_check == null ? v1 : each.value.liveness_check
+  liveness_check {
+    path = "/"
+  }
 
-  readiness_check
-  {
+  readiness_check {
     path = "/"
   }
 
