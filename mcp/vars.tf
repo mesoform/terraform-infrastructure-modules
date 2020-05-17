@@ -1,12 +1,20 @@
-variable "google_project" {
+variable google_project {
   type = string
   default = null
 }
-variable "google_org_id" {
+variable google_org_id {
   type = string
   default = null
 }
-variable "google_billing_account" {
+variable google_billing_account {
   type = string
+  default = null
+}
+variable tf_noop_on_destroy {
+  type = bool
+  default = null
+}
+variable tf_delete_service_on_destroy {
+  type = bool
   default = null
 }
