@@ -273,3 +273,90 @@ resource "google_app_engine_flexible_app_version" "self" {
   noop_on_destroy = var.tf_noop_on_destroy
   delete_service_on_destroy = var.tf_delete_service_on_destroy
 }
+
+//noinspection HILUnresolvedReference
+resource "google_app_engine_standard_app_version" "self" {
+  for_each = local.gae_std_list
+
+  project = google_project_iam_member.self.project
+
+  version_id = lookup(each.value, "version_id", null) == null ? null : each.value.version_id
+  service = lookup(each.value, "service", null) == null ? "default" : each.value.service
+  runtime = lookup(each.value, "runtime", null) == null ? null : each.value.runtime
+  instance_class = lookup(each.value, "instance_class", null) == null ? null : each.value.instance_class
+  runtime_api_version = lookup(each.value, "runtime_api_version", null) == null ? null : each.value.runtime_api_version
+  threadsafe = lookup(each.value, "threadsafe", null) == null ? null : each.value.threadsafe
+
+  dynamic "deployment" {
+    for_each = lookup(each.value, "deployment", {})
+    content {
+      dynamic "files" {
+        for_each = lookup(each.value, "files", {})
+        //noinspection HILUnresolvedReference
+        content {
+          name = lookup(each.value, "name", null) == null ? null : each.value.name
+          source_url = lookup(each.value, "source_url", null) == null ? null : each.value.source_url
+          sha1_sum = lookup(each.value, "sha1_sum", null) == null ? null : each.value.sha1_sum
+        }
+      }
+      dynamic "zip" {
+        for_each = lookup(each.value, "zip", {})
+        //noinspection HILUnresolvedReference
+        content {
+          source_url = lookup(each.value, "source_url", null) == null ? null : each.value.source_url
+          files_count = lookup(each.value, "files_count", null) == null ? null : each.value.files_count
+        }
+      }
+    }
+  }
+
+  dynamic "entrypoint" {
+    for_each = lookup(each.value, "entrypoint", {})
+    //noinspection HILUnresolvedReference
+    content {
+      shell = lookup(each.value, "shell", null) == null ? null : each.value.shell
+    }
+  }
+
+  handlers {}
+
+  libraries {}
+
+  dynamic "basic_scaling" {
+    for_each = lookup(each.value, "basic_scaling", {})
+    content {
+      max_instances = 0
+    }
+  }
+
+  dynamic "automatic_scaling" {
+    for_each = lookup(each.value, "automatic_scaling", {cpu_utilization: {}})  # required default. Also see attribute below
+    //noinspection HILUnresolvedReference
+    content {
+      max_concurrent_requests = lookup(each.value, "max_concurrent_requests", null) == null ? null : each.value.max_concurrent_requests
+      max_idle_instances = lookup(each.value, "max_idle_instances", null) == null ? null : each.value.max_idle_instances
+      max_pending_latency = lookup(each.value, "max_pending_latency", null) == null ? null : each.value.max_pending_latency
+      min_idle_instances = lookup(each.value, "min_idle_instances", null) == null ? null : each.value.min_idle_instances
+      min_pending_latency = lookup(each.value, "min_pending_latency", null) == null ? null : each.value.min_pending_latency
+      standard_scheduler_settings {}
+    }
+  }
+
+
+  dynamic "manual_scaling" {
+    for_each = lookup(each.value, "manual_scaling", {})
+    //noinspection HILUnresolvedReference
+    content {
+      instances = lookup(each.value, "instances", null) == null ? null : each.value.instances
+    }
+  }
+
+  env_variables = {
+    for key, value in lookup(each.value, "env_variables", {}):
+    key => value
+  }
+
+  # Terraform in-built properties
+  noop_on_destroy = var.tf_noop_on_destroy
+  delete_service_on_destroy = var.tf_delete_service_on_destroy
+}
