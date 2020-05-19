@@ -1,8 +1,8 @@
 runtime: custom
 env: flex
 service: ecat-admin
-automatic_scaling:
-  min_num_instances: 1
+manual_scaling:
+  instances: 1
 inbound_services:
 - warmup
 derived_file_type:
