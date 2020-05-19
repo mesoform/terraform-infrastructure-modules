@@ -319,29 +319,29 @@ resource "google_app_engine_standard_app_version" "self" {
   }
 
   dynamic "handlers" {
-    for_each = lookup(each.value, "handlers", {})
+    for_each = lookup(each.value, "handlers", [])
     content {
       auth_fail_action = lookup(handlers.value, "auth_fail_action", null)
-      login = lookup(handlers.value, "login", null)
-      redirect_http_response_code = lookup(handlers.value, "redirect_http_response_code", null) == null ? null : "REDIRECT_HTTP_RESPONSE_CODE_${lookup(each.value, "redirect_http_response_code")}"
-      security_level = lookup(handlers.value, "secure", null)
+      login = lookup(handlers.value, "login", null) == null ? null : "LOGIN_${upper(lookup(handlers.value, "login"))}"
+      redirect_http_response_code = lookup(handlers.value, "redirect_http_response_code", null) == null ? null : "REDIRECT_HTTP_RESPONSE_CODE_${upper(lookup(handlers.value, "redirect_http_response_code"))}"
+      security_level = lookup(handlers.value, "secure", null) == null ? null : "SECURE_${upper(lookup(handlers.value, "secure"))}"
       url_regex = lookup(handlers.value, "url", null)
       dynamic "script" {
-        for_each = handlers.value
+        for_each = lookup(handlers.value, "script", null) == null ? [] : [1]
         content {
-          script_path = lookup(script, "script_path", null)
+          script_path = lookup(handlers.value, "script", null)
         }
       }
       dynamic "static_files" {
-        for_each = lookup(handlers.value, "static_files", {})
+        for_each = lookup(handlers.value, "static_files", null) == null ? [] : [1]
         content {
-          application_readable = lookup(static_files, "application_readable", null)
-          expiration = lookup(static_files, "expiration", null)
-          mime_type = lookup(static_files, "mime_type", null)
-          path = lookup(static_files, "path", null)
-          require_matching_file = lookup(static_files, "require_matching_file", null)
-          upload_path_regex = lookup(static_files, "upload_path_regex", null)
-          http_headers = lookup(static_files, "http_headers", {})
+          application_readable = lookup(handlers.value, "application_readable", null)
+          expiration = lookup(handlers.value, "expiration", null)
+          mime_type = lookup(handlers.value, "mime_type", null)
+          path = lookup(handlers.value, "static_files", null)
+          require_matching_file = lookup(handlers.value, "require_matching_file", null)
+          upload_path_regex = lookup(handlers.value, "upload", null)
+          http_headers = lookup(handlers.value, "http_headers", {})
         }
       }
     }
