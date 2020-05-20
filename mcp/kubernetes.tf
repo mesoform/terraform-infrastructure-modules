@@ -16,3 +16,19 @@ locals {
         app => merge(config, lookup(local.kubernetes_deployments, app, {}))
   }
 }
+
+//resource "kubernetes_deployment" "self" {
+//  metadata {}
+//  spec {
+//    template {
+//      metadata {}
+//      spec {}
+//    }
+//  }
+//}
+//
+//resource "kubernetes_service" "self" {
+//  metadata {}
+//  spec {}
+//}
+

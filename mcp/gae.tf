@@ -207,33 +207,31 @@ resource "google_app_engine_flexible_app_version" "self" {
     }
   }
 
-  # possibly dynamic
+  //noinspection HILUnresolvedReference
   dynamic "liveness_check" {
-    for_each = lookup(each.value, "liveness_check", {path: "/"})  # required default. Also see attribute below
-    //noinspection HILUnresolvedReference
+    for_each = lookup(each.value, "liveness_check", null) == null ? {liveness_check: {path: "/"}} : {liveness_check: each.value.liveness_check}  # required default. Also see attribute below
     content {
-      path = lookup(each.value, "path", "/")
-      check_interval = lookup(each.value, "check_interval", null)
-      failure_threshold = lookup(each.value, "failure_threshold", null)
-      host = lookup(each.value, "host", null)
-      initial_delay = lookup(each.value, "initial_delay", null)
-      success_threshold = lookup(each.value, "success_threshold", null)
-      timeout = lookup(each.value, "timeout", null)
+      path = lookup(liveness_check.value, "path", "/")
+      check_interval = lookup(liveness_check.value, "check_interval_sec", null)
+      failure_threshold = lookup(liveness_check.value, "failure_threshold", null)
+      host = lookup(liveness_check.value, "host", null)
+      initial_delay = lookup(liveness_check.value, "initial_delay", null)
+      success_threshold = lookup(liveness_check.value, "success_threshold", null)
+      timeout = lookup(liveness_check.value, "timeout_sec", null)
     }
   }
 
-  # possibly dynamic
+  //noinspection HILUnresolvedReference
   dynamic "readiness_check" {
-    for_each = lookup(each.value, "readiness_check", {path: "/"})  # required default. Also see attribute below
-    //noinspection HILUnresolvedReference
+    for_each = lookup(each.value, "readiness_check", null) == null ? {readiness_check: {path: "/"}} : {readiness_check: each.value.readiness_check}  # required default. Also see attribute below
     content {
-      path = lookup(each.value, "path", "/")
-      app_start_timeout = lookup(each.value, "app_start_timeout", null)
-      check_interval = lookup(each.value, "check_interval", null)
-      failure_threshold = lookup(each.value, "failure_threshold", null)
-      host = lookup(each.value, "host", null)
-      success_threshold = lookup(each.value, "success_threshold", null)
-      timeout = lookup(each.value, "timeout", null)
+      path = lookup(readiness_check.value, "path", "/")
+      app_start_timeout = lookup(readiness_check.value, "app_start_timeout_sec", null)
+      check_interval = lookup(readiness_check.value, "check_interval_sec", null)
+      failure_threshold = lookup(readiness_check.value, "failure_threshold", null)
+      host = lookup(readiness_check.value, "host", null)
+      success_threshold = lookup(readiness_check.value, "success_threshold", null)
+      timeout = lookup(readiness_check.value, "timeout_sec", null)
     }
   }
 
