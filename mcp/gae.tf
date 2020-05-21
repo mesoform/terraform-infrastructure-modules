@@ -66,39 +66,40 @@ resource "google_app_engine_flexible_app_version" "self" {
   runtime_main_executable_path = lookup(each.value, "runtime_main_executable_path", null)
   serving_status = lookup(each.value, "serving_status", null)
 
+  //noinspection HILUnresolvedReference
   dynamic "deployment" {
-    for_each = lookup(each.value, "deployment", {})
+    for_each = lookup(each.value, "deployment", null) == null ? {} : {deployment: each.value.deployment}
     content {
+      //noinspection HILUnresolvedReference
       dynamic "cloud_build_options" {
-        for_each = lookup(each.value, "cloud_build_options", {})
-        //noinspection HILUnresolvedReference
+        for_each = lookup(deployment.value, "cloud_build_options", null) == null ? {} : {cloud_build_options: deployment.value.cloud_build_options}
         content {
-          app_yaml_path = lookup(each.value, "app_yaml_path", null)
-          cloud_build_timeout = lookup(each.value, "cloud_build_timeout", null)
+          app_yaml_path = lookup(cloud_build_options.value, "app_yaml_path", null)
+          cloud_build_timeout = lookup(cloud_build_options.value, "cloud_build_timeout_sec", null)
         }
       }
+      //noinspection HILUnresolvedReference
       dynamic "container" {
-        for_each = lookup(each.value, "container", {})
-        //noinspection HILUnresolvedReference
+        for_each = lookup(deployment.value, "container", null) == null ? {} : {container: deployment.value.container}
         content {
-          image = lookup(each.value, "image", null)
+          image = lookup(container.value, "image", null)
         }
       }
+      //noinspection HILUnresolvedReference
       dynamic "files" {
-        for_each = lookup(each.value, "files", {})
-        //noinspection HILUnresolvedReference
+        for_each = lookup(deployment.value, "files", null) == null ? {} : {files: deployment.value.files}
         content {
-          name = lookup(each.value, "name", null)
-          source_url = lookup(each.value, "source_url", null)
-          sha1_sum = lookup(each.value, "sha1_sum", null)
+          name = lookup(files.value, "name", null)
+          source_url = lookup(files.value, "source_url", null)
+          sha1_sum = lookup(files.value, "sha1_sum", null)
         }
       }
+      //noinspection HILUnresolvedReference
       dynamic "zip" {
-        for_each = lookup(each.value, "zip", {})
-        //noinspection HILUnresolvedReference
+        for_each = lookup(deployment.value, "zip", null) == null ? {} : {zip: deployment.value.zip}
         content {
-          source_url = lookup(each.value, "source_url", null)
-          files_count = lookup(each.value, "files_count", null)
+          source_url = lookup(zip.value, "source_url", null)
+          files_count = lookup(zip.value, "files_count", null)
         }
       }
     }
@@ -182,6 +183,7 @@ resource "google_app_engine_flexible_app_version" "self" {
       instances = lookup(manual_scaling, "value", null)
     }
   }
+
 
   dynamic "network" {
     for_each = lookup(each.value, "network", {})

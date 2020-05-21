@@ -18,3 +18,10 @@ liveness_check:
   timeout_sec: 4
   failure_threshold: 2
   success_threshold: 2
+deployment:
+  zip:
+    source_url: http://zip.com
+    files_count: 1
+  cloud_build_options:
+    app_yaml_path: /test_files
+    cloud_build_timeout_sec: 900
