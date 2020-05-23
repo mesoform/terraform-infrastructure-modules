@@ -2,13 +2,13 @@ locals {
   gae_config = yamldecode(file("${path.cwd}/../gcp_ae.yml"))
   //noinspection HILUnresolvedReference
   as_flex_map = {
-    for as, config in local.gae_config.components:
+    for as, config in local.gae_config.components.specs:
       as => merge(config, lookup(local.common, as, {}))
       if lookup(config, "env", "standard") == "flex"
   }
   //noinspection HILUnresolvedReference
   as_std_map = {
-    for as, config in local.gae_config.components:
+    for as, config in local.gae_config.components.specs:
       as => merge(config, lookup(local.common, as, {}))
       if lookup(config, "env", "standard") == "standard"
   }
@@ -258,7 +258,8 @@ resource "google_app_engine_flexible_app_version" "self" {
 
   env_variables = {
     for key, value in lookup(each.value, "env_variables", {}):
-    key => value
+      key => value
+//    key => merge(each.value.defaults.env_variables, value)
   }
 
   dynamic "resources" {

@@ -41,7 +41,7 @@ mesoform-service/
 Details on how Google App Engine would do such a thing can be found
 
 ## MCFv1
-### common.yml
+### project.yml
 
 * **mcf_version**: (integer) version of MCF to use. Defaults to 1
 * **name**: (string) Name of the resource. The name must be 1-63 characters long, and comply with
@@ -100,58 +100,63 @@ project_id: my-mesoform-project
 org_id: 123890123
 billing_account: "1234-5678-2345-7890"
 
+
 components:
-  app1:
-    runtime: custom
-    env: flex
-    service: mesoform-admin
-    manual_scaling:
-      instances: 6
-    inbound_services:
-    - warmup
-    derived_file_type:
-    - java_precompiled
-    threadsafe: True
-    auto_id_policy: default
-    env_variables:
-      'IS_GAE': 'true'
-    api_version: 'user_defined'
-    liveness_check:
-      path: "/liveness_check"
-      check_interval_sec: 10
-      timeout_sec: 4
-      failure_threshold: 2
-      success_threshold: 2
-    deployment:
-      zip:
-        source_url: http://zip.com
-        files_count: 1
-      cloud_build_options:
-        app_yaml_path: /test_files
-        cloud_build_timeout_sec: 900
-  default:
-    runtime: java8
-    manual_scaling:
-      instances: 1
-    inbound_services:
-    - warmup
-    derived_file_type:
-    - java_precompiled
-    threadsafe: True
-    auto_id_policy: default
-    env_variables:
-      'IS_GAE': 'true'
-    api_version: 'user_defined'
-    handlers:
-    - url: (/.*)
-      static_files: __static__\1
-      upload: __NOT_USED__
-      require_matching_file: True
-      login: optional
-      secure: optional
-    - url: /.*
-      script: unused
-      login: optional
-      secure: optional
-    skip_files: app.yaml
+    common:
+      env_variables:
+        'env': dev
+      threadsafe: True
+    specs:
+      app1:
+        runtime: custom
+        env: flex
+        service: mesoform-admin
+        manual_scaling:
+          instances: 6
+        inbound_services:
+        - warmup
+        derived_file_type:
+        - java_precompiled
+        auto_id_policy: default
+        env_variables:
+          'IS_GAE': 'true'
+        api_version: 'user_defined'
+        liveness_check:
+          path: "/liveness_check"
+          check_interval_sec: 10
+          timeout_sec: 4
+          failure_threshold: 2
+          success_threshold: 2
+        deployment:
+          zip:
+            source_url: http://zip.com
+            files_count: 1
+          cloud_build_options:
+            app_yaml_path: /test_files
+            cloud_build_timeout_sec: 900
+      default:
+        runtime: java8
+        manual_scaling:
+          instances: 1
+        inbound_services:
+        - warmup
+        derived_file_type:
+        - java_precompiled
+        threadsafe: False
+        auto_id_policy: default
+        env_variables:
+          'IS_GAE': 'true'
+        api_version: 'user_defined'
+        handlers:
+        - url: (/.*)
+          static_files: __static__\1
+          upload: __NOT_USED__
+          require_matching_file: True
+          login: optional
+          secure: optional
+        - url: /.*
+          script: unused
+          login: optional
+          secure: optional
+        skip_files: app.yaml
 ```
