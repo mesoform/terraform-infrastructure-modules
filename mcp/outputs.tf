@@ -2,9 +2,9 @@ output "common" {
   value = local.common
 }
 output "gae" {
-  value = local.gae_apps
+  value = local.gae_config
 }
 
 output "kubernetes" {
-  value = local.kubernetes
+  value = local.k8s
 }

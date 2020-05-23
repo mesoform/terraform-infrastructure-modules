@@ -1,39 +1,57 @@
 locals {
-  gae_files = fileset(path.root, "../**/app.y{a,}ml")
-  gae_apps = {
-    for app_file in local.gae_files:
-      basename(dirname(app_file)) => yamldecode(file(app_file))
-      if !contains(split("/", app_file), "terraform") &&
-          substr(app_file, 2, 18) != "/build/staged-app/"
-  }
-  gae_flex_list = {
-    for app, config in local.gae_apps:
-      app => merge(config, lookup(local.common, app, {}))
+  gae_config = yamldecode(file("${path.cwd}/../gcp_ae.yml"))
+  //noinspection HILUnresolvedReference
+  as_flex_map = {
+    for as, config in local.gae_config.components:
+      as => merge(config, lookup(local.common, as, {}))
       if lookup(config, "env", "standard") == "flex"
   }
-  gae_std_list = {
-    for app, config in local.gae_apps:
-      app => merge(config, lookup(local.common, app, {}))
+  //noinspection HILUnresolvedReference
+  as_std_map = {
+    for as, config in local.gae_config.components:
+      as => merge(config, lookup(local.common, as, {}))
       if lookup(config, "env", "standard") == "standard"
   }
 }
 
+//noinspection HILUnresolvedReference
 data "google_project" "self" {
-  count = var.create_google_project ? 0 : 1
-  project_id = var.google_project
+  count = local.gae_config.create_google_project ? 0 : 1
+  project_id = lookup(local.gae_config, "project_id", null)
 }
 
+//noinspection HILUnresolvedReference
 resource "google_project" "self" {
-  count = var.create_google_project ? 1 : 0
-  name = var.google_project
-  project_id = var.google_project
-  org_id = var.google_org_id
-  billing_account = var.google_billing_account
+  count = local.gae_config.create_google_project ? 1 : 0
+  name = lookup(local.gae_config, "name", local.gae_config.project_id)
+  project_id = lookup(local.gae_config, "project_id", null)
+  org_id = lookup(local.gae_config, "org_id", null)
+  billing_account = lookup(local.gae_config, "billing_account", null)
 }
 
+//noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
-  project = var.create_google_project ? google_project.self.0.id : data.google_project.self.0.id
-  location_id = var.google_location
+  project = local.gae_config.create_google_project ? google_project.self.0.id : data.google_project.self.0.id
+  location_id = lookup(local.gae_config, "location_id", null)
+  auth_domain = lookup(local.gae_config, "auth_domain", null)
+  serving_status = lookup(local.gae_config, "serving_status", null)
+  //noinspection HILUnresolvedReference
+  dynamic "iap" {
+    for_each = lookup(local.gae_config, "iap_enabled", null) == null ? [] : [1]
+    content {
+      enabled = lookup(local.gae_config, "iap_enabled", null)
+      oauth2_client_id = lookup(local.gae_config, "iap_oauth2_client_id", null)
+      oauth2_client_secret = lookup(local.gae_config, "iap_oauth2_client_secret", null)
+    }
+  }
+  //noinspection HILUnresolvedReference
+  dynamic "feature_settings" {
+    for_each = lookup(local.gae_config, "split_health_checks", null) == null ? [] : [1]
+    content {
+      split_health_checks = lookup(local.gae_config, "split_health_checks", null)
+    }
+  }
+
 }
 
 resource "google_project_service" "self" {
@@ -45,12 +63,13 @@ resource "google_project_service" "self" {
 resource "google_project_iam_member" "self" {
   project = google_project_service.self.project
   role = "roles/compute.networkUser"
-  member = "serviceAccount:service-${var.create_google_project ? google_project.self.0.number : data.google_project.self.0.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
+  //noinspection HILUnresolvedReference
+  member = "serviceAccount:service-${local.gae_config.create_google_project ? google_project.self.0.number : data.google_project.self.0.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_flexible_app_version" "self" {
-  for_each = local.gae_flex_list
+  for_each = local.as_flex_map
 
   project = google_project_iam_member.self.project
 
@@ -276,7 +295,7 @@ resource "google_app_engine_flexible_app_version" "self" {
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_standard_app_version" "self" {
-  for_each = local.gae_std_list
+  for_each = local.as_std_map
 
   project = google_project_iam_member.self.project
 
