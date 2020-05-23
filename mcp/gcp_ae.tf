@@ -3,13 +3,13 @@ locals {
   //noinspection HILUnresolvedReference
   as_flex_map = {
     for as, config in local.gae_config.components.specs:
-      as => merge(config, lookup(local.common, as, {}))
+      as => merge(lookup(local.gae_config.components, "common", {}), config)
       if lookup(config, "env", "standard") == "flex"
   }
   //noinspection HILUnresolvedReference
   as_std_map = {
     for as, config in local.gae_config.components.specs:
-      as => merge(config, lookup(local.common, as, {}))
+      as => merge(lookup(local.gae_config.components, "common", {}), config)
       if lookup(config, "env", "standard") == "standard"
   }
 }

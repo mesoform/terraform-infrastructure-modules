@@ -20,7 +20,6 @@ components:
       - warmup
       derived_file_type:
       - java_precompiled
-      threadsafe: True
       auto_id_policy: default
       env_variables:
         'IS_GAE': 'true'
@@ -47,7 +46,7 @@ components:
       - warmup
       derived_file_type:
       - java_precompiled
-      threadsafe: True
+      threadsafe: false
       auto_id_policy: default
       env_variables:
         'IS_GAE': 'true'
