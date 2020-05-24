@@ -3,6 +3,12 @@ locals {
     automatic_scaling = {
       target_utilization = 0.5
     }
+    liveness_check = {
+      path = “/“
+    }
+    readiness_check = {
+      path = “/“
+    }
   }
   gae_config = yamldecode(file("${path.cwd}/../gcp_ae.yml"))
   //noinspection HILUnresolvedReference
@@ -54,7 +60,7 @@ resource "google_app_engine_application" "self" {
 
     //noinspection HILUnresolvedReference
     content {
-      enabled = lookup(local.gae_config.iap, "ienabled", null)
+      enabled = lookup(local.gae_config.iap, "enabled", null)
       oauth2_client_id = lookup(local.gae_config.iap, "oauth2_client_id", null)
       oauth2_client_secret = lookup(local.gae_config.iap, "oauth2_client_secret", null)
     }
@@ -289,10 +295,10 @@ resource "google_app_engine_flexible_app_version" "self" {
   //noinspection HILUnresolvedReference
   dynamic "liveness_check" {
     # liveness_check is required and path = / is the default
-    for_each = lookup(each.value, "liveness_check", null) == null ? {liveness_check: {path: "/"}} : {liveness_check: each.value.liveness_check}  # required default. Also see attribute below
+    for_each = lookup(each.value, "liveness_check", null) == null ? {liveness_check: {path: local.default.automatic_scaling.liveness_check.path}} : {liveness_check: each.value.liveness_check}  # required default. Also see attribute below
 
     content {
-      path = lookup(liveness_check.value, "path", "/")
+      path = lookup(liveness_check.value, "path", local.default.automatic_scaling.liveness_check.path)
       check_interval = lookup(liveness_check.value, "check_interval", null)
       failure_threshold = lookup(liveness_check.value, "failure_threshold", null)
       host = lookup(liveness_check.value, "host", null)
@@ -305,10 +311,10 @@ resource "google_app_engine_flexible_app_version" "self" {
   //noinspection HILUnresolvedReference
   dynamic "readiness_check" {
     # readiness_check is required and path = / is the default
-    for_each = lookup(each.value, "readiness_check", null) == null ? {readiness_check: {path: "/"}} : {readiness_check: each.value.readiness_check}  # required default. Also see attribute below
+    for_each = lookup(each.value, "readiness_check", null) == null ? {readiness_check: {path: local.default.automatic_scaling.readiness_check.path}} : {readiness_check: each.value.readiness_check}  # required default. Also see attribute below
 
     content {
-      path = lookup(readiness_check.value, "path", "/")
+      path = lookup(readiness_check.value, "path", local.default.automatic_scaling.readiness_check.path)
       app_start_timeout = lookup(readiness_check.value, "app_start_timeout", null)
       check_interval = lookup(readiness_check.value, "check_interval", null)
       failure_threshold = lookup(readiness_check.value, "failure_threshold", null)
