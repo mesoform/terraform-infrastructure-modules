@@ -14,13 +14,13 @@ components:
       runtime: custom
       env: flex
       service: *name
-      manual_scaling:
-        instances: 6
+#      manual_scaling:
+#        instances: 6
+      automatic_scaling:
+        disk_utilization:
+          target_read_bytes_per_second: 1024
       inbound_services:
       - warmup
-      derived_file_type:
-      - java_precompiled
-      auto_id_policy: default
       env_variables:
         'IS_GAE': 'true'
       api_version: 'user_defined'
@@ -37,9 +37,26 @@ components:
         cloud_build_options:
           app_yaml_path: /test_files
           cloud_build_timeout_sec: 900
+      endpoints_api_service:
+        name: my-endpoint-api
+      entrypoint:
+        shell: echo "hello world"
+      network:
+        name: my-network
+        subnetwork: my-network-subnet
+      resources:
+        memory_gb: 0.5
+        volumes:
+          name: my-volume
+          size_gb: 10
+          volume_type: tmpfs
     default:
       name: default
       runtime: java8
+      deployment:
+        zip:
+          source_url: http://zip.com
+          files_count: 1
       manual_scaling:
         instances: 1
       inbound_services:
@@ -52,14 +69,20 @@ components:
         'IS_GAE': 'true'
       api_version: 'user_defined'
       handlers:
-      - url: (/.*)
-        static_files: __static__\1
+      - url_regex: (/.*)
+        static_files:
+          path: __static__\1
+          expiration: "3.5s"
+          http_headers:
+            content-type: json
+            cache-control: true
         upload: __NOT_USED__
         require_matching_file: True
-        login: optional
-        secure: optional
-      - url: /.*
-        script: unused
-        login: optional
-        secure: optional
+        login: LOGIN_OPTIONAL
+        security_level: SECURE_DEFAULT
+      - url_regex: /.*
+        script:
+          script_path: unused
+        login: LOGIN_REQUIRED
+        security_level: SECURE_OPTIONAL
       skip_files: app.yaml

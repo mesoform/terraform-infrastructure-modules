@@ -66,6 +66,8 @@ labels:
 * **create_google_project**: whether or not to create a new project with the details provided.
  implies the project will be deleted with the deployment when asked to delete.
 * **project_id**: (string) The GCP project identifier. https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project
+* **project_name**: (string) more descriptive and human understandable identifier for the project. 
+ Defaults to the `project_id`
 * **org_id**: (string) The numeric ID of the organization this project belongs to. Only one of
  org_id or folder_id may be specified
 * **folder_id**: (string) The numeric ID of the folder this project should be created under. Only
