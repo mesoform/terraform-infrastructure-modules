@@ -1,5 +1,5 @@
-output "common" {
-  value = local.common
+output "project" {
+  value = local.project
 }
 output "gae" {
   value = local.gae_config
