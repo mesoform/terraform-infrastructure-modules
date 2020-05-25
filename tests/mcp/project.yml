@@ -1,1 +1,5 @@
-name: test1
+mcf_version: 1
+name: &project_name mesoform-project
+version: 1
+labels: &project_labels
+  billing: central

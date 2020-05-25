@@ -1,13 +1,18 @@
-create_google_project: true
-project_id: my-mesoform-project
-org_id: 123890123
+#create_google_project: true
+project_id: &project_id my-mesoform-project
+organization_name: mesoform.com
+folder_name: development
 billing_account: "1234-5678-2345-7890"
 location_id: "europe-west"
+project_labels: &google_project_labels
+  type: frontend
+
 components:
   common:
     env_variables:
       'env': dev
     threadsafe: True
+    name: &name common-name
   specs:
     app1:
       name: &name ecat-admin
