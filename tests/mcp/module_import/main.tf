@@ -32,5 +32,5 @@ output "module_gae_flex" {
   value = module.deployment.gae_flex
 }
 output "module_common_out" {
-  value = module.deployment.common
+  value = module.deployment.project
 }
