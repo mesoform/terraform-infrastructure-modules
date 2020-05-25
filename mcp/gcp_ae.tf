@@ -32,26 +32,45 @@ locals {
 
 //noinspection HILUnresolvedReference
 data "google_project" "self" {
-  count = local.gae.create_google_project ? 0 : 1
+  count = lookup(local.gae, "create_google_project", false) ? 0 : 1
 
   project_id = lookup(local.gae, "project_id", null)
+}
+
+
+//noinspection HILUnresolvedReference
+data "google_organization" "self" {
+  count = lookup(local.gae, "organization_name", null) == null ? 0 : 1
+
+  domain = lookup(local.gae, "organization_name", null)
+}
+
+
+//noinspection HILUnresolvedReference
+data "google_active_folder" "self" {
+  count = lookup(local.gae, "folder_name", null) == null ? 0 : 1
+  display_name = lookup(local.gae, "folder_name", null)
+  parent = "organizations/${data.google_organization.self.0.org_id}"
 }
 
 
 //noinspection HILUnresolvedReference
 resource "google_project" "self" {
-  count = local.gae.create_google_project ? 1 : 0
+  count = lookup(local.gae, "create_google_project", false) ? 1 : 0
 
   name = lookup(local.gae, "project_name", local.gae.project_id)
   project_id = lookup(local.gae, "project_id", null)
-  org_id = lookup(local.gae, "org_id", null)
   billing_account = lookup(local.gae, "billing_account", null)
+  org_id = lookup(local.gae, "organization_name", null) == null ? null : data.google_organization.self.0.org_id
+  folder_id = lookup(local.gae, "folder_name", null) == null ? null : data.google_active_folder.self.0.id
+  labels = lookup(local.gae, "project_labels", null)
+  auto_create_network = lookup(local.gae, "auto_create_network", null)
 }
 
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
-  project = local.gae.create_google_project ? google_project.self.0.id : data.google_project.self.0.id
+  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   location_id = lookup(local.gae, "location_id", null)
   auth_domain = lookup(local.gae, "auth_domain", null)
   serving_status = lookup(local.gae, "serving_status", null)
@@ -62,7 +81,7 @@ resource "google_app_engine_application" "self" {
 
     //noinspection HILUnresolvedReference
     content {
-      enabled = lookup(local.gae.iap, "enabled", null)
+      enabled = true
       oauth2_client_id = lookup(local.gae.iap, "oauth2_client_id", null)
       oauth2_client_secret = lookup(local.gae.iap, "oauth2_client_secret", null)
     }
@@ -103,7 +122,7 @@ resource "google_project_iam_member" "self" {
   project = length(local.as_flex_map) > 0 ? google_project_service.flex.0.id : google_project_service.std.0.id
   role = "roles/compute.networkUser"
   //noinspection HILUnresolvedReference
-  member = "serviceAccount:service-${local.gae.create_google_project ? google_project.self.0.number : data.google_project.self.0.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
+  member = "serviceAccount:service-${lookup(local.gae, "create_google_project", false) ? google_project.self.0.number : data.google_project.self.0.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
 
