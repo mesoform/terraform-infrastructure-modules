@@ -200,7 +200,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   //noinspection HILUnresolvedReference
   dynamic "automatic_scaling" {
     # Only one of automatic_scaling or manual_scaling are allowed
-    for_each = lookup(each.value, "automatic_scaling", null) != null ? {} : {automatic_scaling: each.value.automatic_scaling}
+    for_each = lookup(each.value, "automatic_scaling", null) == null ? {} : {automatic_scaling: each.value.automatic_scaling}
 
     content {
       cool_down_period = lookup(automatic_scaling.value, "cool_down_period", null)
@@ -261,7 +261,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   //noinspection HILUnresolvedReference
   dynamic "manual_scaling" {
     # Only one of automatic_scaling or manual_scaling are allowed
-    for_each = lookup(each.value, "manual_scaling", null) != null ? {} : {manual_scaling: each.value.manual_scaling}
+    for_each = lookup(each.value, "manual_scaling", null) == null ? {} : {manual_scaling: each.value.manual_scaling}
 
     content {
       instances = lookup(manual_scaling.value, "instances", null)
@@ -467,7 +467,7 @@ resource "google_app_engine_standard_app_version" "self" {
   //noinspection HILUnresolvedReference,ConflictingProperties
   dynamic "basic_scaling" {
     # Only one of automatic_scaling, basic_scaling or manual_scaling are allowed so check for the other here
-    for_each = lookup(each.value, "basic_scaling", null) != null ? {} : {basic_scaling: each.value.basic_scaling}
+    for_each = lookup(each.value, "basic_scaling", null) == null ? {} : {basic_scaling: each.value.basic_scaling}
 
     content {
       max_instances = lookup(basic_scaling.value, "max_instances", null)
@@ -477,7 +477,7 @@ resource "google_app_engine_standard_app_version" "self" {
   //noinspection HILUnresolvedReference,ConflictingProperties
   dynamic "automatic_scaling" {
     # Only one of automatic_scaling, basic_scaling or manual_scaling are allowed so check for the other here
-    for_each = lookup(each.value, "automatic_scaling", null) != null ? {} : {automatic_scaling: each.value.automatic_scaling}
+    for_each = lookup(each.value, "automatic_scaling", null) == null ? {} : {automatic_scaling: each.value.automatic_scaling}
 
     content {
       max_concurrent_requests = lookup(automatic_scaling.value, "max_concurrent_requests", null)
@@ -503,7 +503,7 @@ resource "google_app_engine_standard_app_version" "self" {
   //noinspection HILUnresolvedReference,ConflictingProperties
   dynamic "manual_scaling" {
     # Only one of automatic_scaling, basic_scaling or manual_scaling are allowed so check for the other here
-    for_each = lookup(each.value, "manual_scaling", null) != null ? {} : {manual_scaling: each.value.manual_scaling}
+    for_each = lookup(each.value, "manual_scaling", null) == null ? {} : {manual_scaling: each.value.manual_scaling}
 
     content {
       instances = lookup(manual_scaling.value, "instances", null)
