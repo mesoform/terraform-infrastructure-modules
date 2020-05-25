@@ -128,7 +128,8 @@ labels: &project_labels
 feature_settings map exists, `split_health_checks` must be non-empty
     * **split_health_checks**: (boolean) Set to false to use the legacy health check instead of the 
     readiness and liveness checks.
-
+* **project_parent**: The ID of the parent which the projects is contained within. I.e. organization
+ or folder. Format is {type/id}. E.g. `folder/development` or `organization/mesoform.com`
 ---- one of ----
 * **organization_name**: (string) The name of the organization this project belongs to. Only one of
  organization_name or folder_name may be specified. To specify an organization for the project to 
