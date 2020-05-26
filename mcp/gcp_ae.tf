@@ -42,7 +42,7 @@ data "google_project" "self" {
 data "google_organization" "self" {
   count = lookup(local.gae, "organization_name", null) != null ? 1 : 0
 
-  domain = local.gae.organization_name
+  domain = lookup(local.gae, "organization_name", null)
 }
 
 
