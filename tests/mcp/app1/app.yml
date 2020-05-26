@@ -1,5 +1,0 @@
-runtime: custom
-env: flex
-service: ecat-admin
-automatic_scaling:
-  min_num_instances: 1
