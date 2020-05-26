@@ -128,7 +128,9 @@ labels: &project_labels
 feature_settings map exists, `split_health_checks` must be non-empty
     * **split_health_checks**: (boolean) Set to false to use the legacy health check instead of the 
     readiness and liveness checks.
+
 ---- one of ----
+
 * **organization_name**: (string) The name of the organization this project belongs to. Only one of
  organization_name or folder_id may be specified. To specify an organization for the project to 
  be part of, the account performing the deployment 
