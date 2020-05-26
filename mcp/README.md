@@ -109,7 +109,7 @@ labels: &project_labels
 * As a minimum, the account performing the deployment will need Storage Object Admin role on the
  project being deployed to.
 * If creating a new project, the account performing the deployment also needs project creator role;
- and either organization viewer role or folder viewer role
+ Project Billing Manager and either organization viewer role or folder viewer role
 * You may need to download a service account key and set an environment variable if not being ran
  from within Google Cloud `export GOOGLE_CLOUD_KEYFILE_JSON=/path/to/my-key.json`
  
@@ -121,7 +121,8 @@ labels: &project_labels
 * **project_name**: (string) more descriptive and human understandable identifier for the project. 
  Defaults to the `project_id`
 * **auto_create_network**: (boolean) automatically create a default network in the Google project
-* **billing_account**: (string) The alphanumeric ID of the billing account this project belongs to. 
+* **[NOTICE] billing_account**: (string) The alphanumeric ID of the billing account this project belongs to.
+ Required if creating a new project from scratch 
 * **[REQUIRED] location_id**: (string) The geographical location to serve the app from
 * **auth_domain**: (string) The domain to authenticate users with when using App Engine's User API
 * **serving_status**: (enum) The serving status of the app. Options are SERVING and STOPPED

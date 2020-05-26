@@ -60,9 +60,17 @@ resource "google_project" "self" {
 }
 
 
+resource "google_project_service" "billing" {
+  count = lookup(local.gae, "create_google_project", false) ? 1 : 0
+
+  project = google_project.self.0.project_id
+  service = "billing.googleapis.com"
+  disable_dependent_services = false
+}
+
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket" "self" {
-  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
+  project = lookup(local.gae, "create_google_project", false) ? google_project_service.billing.0.project : data.google_project.self.0.project_id
   name = lower(format("%s-%s", local.project.name, lookup(local.project, "version", "1")))
   bucket_policy_only = true
   default_event_based_hold = false
