@@ -110,6 +110,8 @@ labels: &project_labels
  project being deployed to.
 * If creating a new project, the account performing the deployment also needs project creator role;
  and either organization viewer role or folder viewer role
+* You may need to download a service account key and set an environment variable if not being ran
+ from within Google Cloud `export GOOGLE_CLOUD_KEYFILE_JSON=/path/to/my-key.json`
  
 #### Google App Engine basic configuration
 * **create_google_project**: whether or not to create a new project with the details provided.

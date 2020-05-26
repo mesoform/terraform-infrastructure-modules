@@ -60,10 +60,6 @@ components:
       name: default
       runtime: java8
       src_path: app2
-      deployment:
-        zip:
-          source_url: http://zip.com
-          files_count: 1
       manual_scaling:
         instances: 1
       inbound_services:
