@@ -82,7 +82,7 @@ resource "google_storage_bucket_object" "self" {
 
   name   = each.key
   bucket = google_storage_bucket.self.name
-  source = each.value.src_path
+  source = "${path.cwd}/../${each.value.src_path}"
 }
 
 
