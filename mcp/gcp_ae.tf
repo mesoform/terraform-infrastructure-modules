@@ -55,7 +55,7 @@ resource "google_project" "self" {
   billing_account = lookup(local.gae, "billing_account", null)
   org_id = lookup(local.gae, "organization_name", null) == null ? null : data.google_organization.self.0.org_id
   folder_id = lookup(local.gae, "folder_id", null) == null ? null : local.gae.folder_id
-  labels = lookup(local.gae, "project_labels", null)
+  labels = merge(lookup(local.project, "labels", null), lookup(local.gae, "project_labels", null))
   auto_create_network = lookup(local.gae, "auto_create_network", null)
 }
 
