@@ -1,4 +1,4 @@
-#create_google_project: true
+create_google_project: true
 project_id: &project_id protean-buffer-230514
 organization_name: mesoform.com
 folder_id: 320337270566
@@ -16,6 +16,7 @@ components:
   specs:
     app1:
       name: &name ecat-admin
+      src_path: app1
       runtime: custom
       env: flex
       service: *name
@@ -58,6 +59,7 @@ components:
     default:
       name: default
       runtime: java8
+      src_path: app2
       deployment:
         zip:
           source_url: http://zip.com

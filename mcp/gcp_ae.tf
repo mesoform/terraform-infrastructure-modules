@@ -61,6 +61,32 @@ resource "google_project" "self" {
 
 
 //noinspection HILUnresolvedReference
+resource "google_storage_bucket" "self" {
+  project = google_project.self.0.project_id
+  name = lower(format("%s-%s", local.project.name, local.project.version))
+  bucket_policy_only = true
+  default_event_based_hold = false
+  labels = local.project.labels
+  location = local.gae.location_id
+  requester_pays = false
+  storage_class = "REGIONAL"
+  versioning {
+    enabled = false
+  }
+}
+
+
+//noinspection HILUnresolvedReference
+resource "google_storage_bucket_object" "self" {
+  for_each = local.gae.components.specs
+
+  name   = each.key
+  bucket = google_storage_bucket.self.name
+  source = each.value.src_path
+}
+
+
+//noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
   project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   location_id = lookup(local.gae, "location_id", null)
@@ -142,9 +168,20 @@ resource "google_app_engine_flexible_app_version" "self" {
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
-    for_each = lookup(each.value, "deployment", null) == null ? {} : {deployment: each.value.deployment}
+    for_each = lookup(each.value, "deployment", null) == null ? {deployment: {files: {}}} : {deployment: each.value.deployment}
 
     content {
+      //noinspection HILUnresolvedReference
+      dynamic "files" {
+        for_each = lookup(deployment.value, "files", null) == null ? {files: {name: each.key, source_url: "https://storage.googleapis.com/${google_storage_bucket.self.name}/${each.key}"}} : {files: deployment.value.files}
+
+        content {
+          name = lookup(files.value, "name", null)
+          source_url = lookup(files.value, "source_url", null)
+          sha1_sum = lookup(files.value, "sha1_sum", null)
+        }
+      }
+
       //noinspection HILUnresolvedReference
       dynamic "cloud_build_options" {
         for_each = lookup(deployment.value, "cloud_build_options", null) == null ? {} : {cloud_build_options: deployment.value.cloud_build_options}
@@ -161,17 +198,6 @@ resource "google_app_engine_flexible_app_version" "self" {
 
         content {
           image = lookup(container.value, "image", null)
-        }
-      }
-
-      //noinspection HILUnresolvedReference
-      dynamic "files" {
-        for_each = lookup(deployment.value, "files", null) == null ? {} : {files: deployment.value.files}
-
-        content {
-          name = lookup(files.value, "name", null)
-          source_url = lookup(files.value, "source_url", null)
-          sha1_sum = lookup(files.value, "sha1_sum", null)
         }
       }
 

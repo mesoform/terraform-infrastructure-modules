@@ -86,7 +86,10 @@ The following sections describe how to use MMCF for different target platforms. 
  [a-z]\([-a-z0-9]*[a-z0-9])?. The first character must be a lowercase letter, and all following 
  characters (except for the last character) must be a dash, lowercase letter, or digit. The last 
  character must be a lowercase letter or digit.
-* **version**: (string) deployment version of your application/service
+* **version**: (string) deployment version of your application/service. Version must contain only
+ lowercase letters, numbers, dashes (-), underscores (_), and dots (.). Spaces are not allowed, and
+ dashes, underscores and dots cannot be consecutive (e.g. "1..2" or "1.\_2") and cannot be at the 
+ beginning or end (e.g. "-1.2" or "1.2\_")
 * **labels**: (map) a collection of keys and values to represent labels required for your deployment.
 
 Example:
@@ -102,8 +105,12 @@ labels: &project_labels
 
 ### gcp_ae.yml
 #### Prerequisites
-* If creating a new project, the account performing the deployment needs either organization viewer 
- role or folder viewer role; and project creator role
+##### IAM permission
+* As a minimum, the account performing the deployment will need Storage Object Admin role on the
+ project being deployed to.
+* If creating a new project, the account performing the deployment also needs project creator role;
+ and either organization viewer role or folder viewer role
+ 
 #### Google App Engine basic configuration
 * **create_google_project**: whether or not to create a new project with the details provided.
  _Default: false_
