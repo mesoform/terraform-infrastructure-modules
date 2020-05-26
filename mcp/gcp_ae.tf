@@ -63,7 +63,7 @@ resource "google_project" "self" {
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket" "self" {
   project = google_project.self.0.project_id
-  name = lower(format("%s-%s", local.project.name, lookup(local.project.version, "1")))
+  name = lower(format("%s-%s", local.project.name, lookup(local.project, "version", "1")))
   bucket_policy_only = true
   default_event_based_hold = false
   labels = local.project.labels

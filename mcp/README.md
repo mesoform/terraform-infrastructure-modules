@@ -79,7 +79,7 @@ The following sections describe how to use MMCF for different target platforms. 
 ### project.yml
 
 * **mcf_version**: (string) version of MCF to use. _Defaults to 1.0_
-* **name**: (string) Name of the project. If you want to reference this in later configuration, it
+* **[REQUIRED] name**: (string) Name of the project. If you want to reference this in later configuration, it
  must meet the minimum requirements of the target platform(s) being deployed to. For example, 
  Google App Engine requires that many IDs/names must be 1-63 characters long, and comply with
  RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression 
