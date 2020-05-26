@@ -173,7 +173,7 @@ resource "google_app_engine_flexible_app_version" "self" {
     content {
       //noinspection HILUnresolvedReference
       dynamic "files" {
-        for_each = lookup(deployment.value, "files", null) == null ? {files: {name: each.key, source_url: "https://storage.googleapis.com/${google_storage_bucket.self.name}/${each.key}"}} : {files: deployment.value.files}
+        for_each = lookup(deployment.value, "files", null) == null ? {files: {name: each.key, source_url: "${google_storage_bucket.self.name}/${each.key}"}} : {files: deployment.value.files}
 
         content {
           name = lookup(files.value, "name", null)
@@ -418,12 +418,12 @@ resource "google_app_engine_standard_app_version" "self" {
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
-    for_each = lookup(each.value, "deployment", null) == null ? {} : {deployment: each.value.deployment}
+    for_each = lookup(each.value, "deployment", null) == null ? {deployment: {files: {}}} : {deployment: each.value.deployment}
 
     content {
       //noinspection HILUnresolvedReference
       dynamic "files" {
-        for_each = lookup(deployment.value, "files", null) == null ? {} : {files: deployment.value.files}
+        for_each = lookup(deployment.value, "files", null) == null ? {files: {name: each.key, source_url: "${google_storage_bucket.self.url}/${each.key}"}} : {files: deployment.value.files}
 
         content {
           name = lookup(files.value, "name", null)
