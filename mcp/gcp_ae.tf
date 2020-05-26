@@ -40,17 +40,9 @@ data "google_project" "self" {
 
 //noinspection HILUnresolvedReference
 data "google_organization" "self" {
-  count = lookup(local.gae, "organization_name", null) == null ? 0 : 1
+  count = lookup(local.gae, "organization_name", null) != null ? 1 : 0
 
-  domain = lookup(local.gae, "organization_name", null)
-}
-
-
-//noinspection HILUnresolvedReference
-data "google_active_folder" "self" {
-  count = lookup(local.gae, "folder_name", null) == null ? 0 : 1
-  display_name = lookup(local.gae, "folder_name", null)
-  parent = "organizations/${data.google_organization.self.0.org_id}"
+  domain = local.gae.organization_name
 }
 
 
@@ -62,7 +54,7 @@ resource "google_project" "self" {
   project_id = lookup(local.gae, "project_id", null)
   billing_account = lookup(local.gae, "billing_account", null)
   org_id = lookup(local.gae, "organization_name", null) == null ? null : data.google_organization.self.0.org_id
-  folder_id = lookup(local.gae, "folder_name", null) == null ? null : data.google_active_folder.self.0.id
+  folder_id = lookup(local.gae, "folder_id", null) == null ? null : local.gae.folder_id
   labels = lookup(local.gae, "project_labels", null)
   auto_create_network = lookup(local.gae, "auto_create_network", null)
 }

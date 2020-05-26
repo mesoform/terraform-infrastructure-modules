@@ -128,14 +128,13 @@ labels: &project_labels
 feature_settings map exists, `split_health_checks` must be non-empty
     * **split_health_checks**: (boolean) Set to false to use the legacy health check instead of the 
     readiness and liveness checks.
-* **project_parent**: The ID of the parent which the projects is contained within. I.e. organization
- or folder. Format is {type/id}. E.g. `folder/development` or `organization/mesoform.com`
 ---- one of ----
 * **organization_name**: (string) The name of the organization this project belongs to. Only one of
- organization_name or folder_name may be specified. To specify an organization for the project to 
+ organization_name or folder_id may be specified. To specify an organization for the project to 
  be part of, the account performing the deployment 
-* **folder_name**: (string) The name of the folder this project should be created under. Only
- one of organization_name or folder_name may be specified
+* **folder_id**: (string) The numeric ID of the folder this project should be created under. Only
+ one of organization_name or folder_name may be specified. The folder ID can be found in the 
+ [resource manager section of the GCP console](https://console.cloud.google.com/cloud-resource-manager)
  
 ---- end ----
 
@@ -150,9 +149,13 @@ feature_settings map exists, `split_health_checks` must be non-empty
 Example:
 ```yamlex
 create_google_project: true
-project_id: my-mesoform-project
-org_id: 123890123
+project_id: &project_id protean-buffer-230514
+organization_name: mesoform.com
+folder_id: 320337270566
 billing_account: "1234-5678-2345-7890"
+location_id: "europe-west"
+project_labels: &google_project_labels
+  type: frontend
 
 
 components:

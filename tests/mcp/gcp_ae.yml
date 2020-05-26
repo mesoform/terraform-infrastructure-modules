@@ -1,8 +1,7 @@
 #create_google_project: true
-project_id: &project_id my-mesoform-project
-project_parent:
+project_id: &project_id protean-buffer-230514
 organization_name: mesoform.com
-folder_name: development
+folder_id: 320337270566
 billing_account: "1234-5678-2345-7890"
 location_id: "europe-west"
 project_labels: &google_project_labels
