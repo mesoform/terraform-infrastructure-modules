@@ -87,6 +87,7 @@ resource "archive_file" "self" {
 resource "google_storage_bucket_object" "self" {
   for_each = local.gae.components.specs
 
+  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   name   = each.key
   bucket = google_storage_bucket.self.name
   source = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
@@ -94,9 +95,27 @@ resource "google_storage_bucket_object" "self" {
 }
 
 
+resource "google_project_service" "flex" {
+  count = length(local.as_flex_map) > 0 ? 1 : 0
+
+  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
+  service = "appengineflex.googleapis.com"
+  disable_dependent_services = false
+}
+
+
+resource "google_project_service" "std" {
+  count = length(local.as_std_map) > 0 ? 1 : 0
+
+  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
+  service = "appengine.googleapis.com"
+  disable_dependent_services = false
+}
+
+
 //noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
-  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
+  project = length(local.as_flex_map) > 0 ? google_project_service.flex.0.id : google_project_service.std.0.id
   location_id = lookup(local.gae, "location_id", null)
   auth_domain = lookup(local.gae, "auth_domain", null)
   serving_status = lookup(local.gae, "serving_status", null)
@@ -122,24 +141,6 @@ resource "google_app_engine_application" "self" {
       split_health_checks = lookup(local.gae.feature_settings, "split_health_checks", null)
     }
   }
-}
-
-
-resource "google_project_service" "flex" {
-  count = length(local.as_flex_map) > 0 ? 1 : 0
-
-  project = google_app_engine_application.self.project
-  service = "appengineflex.googleapis.com"
-  disable_dependent_services = false
-}
-
-
-resource "google_project_service" "std" {
-  count = length(local.as_std_map) > 0 ? 1 : 0
-
-  project = google_app_engine_application.self.project
-  service = "appengine.googleapis.com"
-  disable_dependent_services = false
 }
 
 
