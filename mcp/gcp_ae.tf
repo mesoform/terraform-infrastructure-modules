@@ -114,7 +114,7 @@ resource "google_project_service" "std" {
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
-  project = length(local.as_flex_map) > 0 ? google_project_service.flex.0.id : google_project_service.std.0.id
+  project = length(local.as_flex_map) > 0 ? google_project_service.flex.0.project : google_project_service.std.0.project
   location_id = lookup(local.gae, "location_id", null)
   auth_domain = lookup(local.gae, "auth_domain", null)
   serving_status = lookup(local.gae, "serving_status", null)
