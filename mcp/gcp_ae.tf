@@ -90,6 +90,7 @@ resource "google_storage_bucket_object" "self" {
   name   = each.key
   bucket = google_storage_bucket.self.name
   source = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
+  content_type = "application/zip"
 }
 
 
