@@ -106,12 +106,17 @@ labels: &project_labels
 ### gcp_ae.yml
 #### Prerequisites
 ##### IAM permission
+* You must have a project on Google Cloud Platform that will be used as the build project and as a
+ monitoring namespace. "Cloud Resource Manager" and "Cloud Billing" APIs need to be enabled on the 
+ project. Even if you are running the deployment from a remote machine, you will need a service 
+ account and key from this project.
 * As a minimum, the account performing the deployment will need Storage Object Admin role on the
  project being deployed to.
 * If creating a new project, the account performing the deployment also needs project creator role;
  Project Billing Manager and either organization viewer role or folder viewer role
 * You may need to download a service account key and set an environment variable if not being ran
  from within Google Cloud `export GOOGLE_CLOUD_KEYFILE_JSON=/path/to/my-key.json`
+
  
 #### Google App Engine basic configuration
 * **create_google_project**: whether or not to create a new project with the details provided.
