@@ -56,7 +56,7 @@ resource "google_project" "self" {
   org_id = lookup(local.gae, "organization_name", null) == null ? null : data.google_organization.self.0.org_id
   folder_id = lookup(local.gae, "folder_id", null) == null ? null : local.gae.folder_id
   labels = merge(lookup(local.project, "labels", {}), lookup(local.gae, "project_labels", {}))
-  auto_create_network = lookup(local.gae, "auto_create_network", null)
+  auto_create_network = lookup(local.gae, "auto_create_network", true)
 }
 
 
@@ -76,13 +76,20 @@ resource "google_storage_bucket" "self" {
 }
 
 
+resource "archive_file" "self" {
+  for_each = local.gae.components.specs
+  output_path = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
+  type = "zip"
+  source_dir = "${path.cwd}/../${each.value.src_path}"
+}
+
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket_object" "self" {
   for_each = local.gae.components.specs
 
   name   = each.key
   bucket = google_storage_bucket.self.name
-  source = "${path.cwd}/../${each.value.src_path}"
+  source = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
 }
 
 

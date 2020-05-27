@@ -106,22 +106,32 @@ labels: &project_labels
 ### gcp_ae.yml
 #### Prerequisites
 ##### IAM permission
-* You must have a project on Google Cloud Platform that will be used as the build project and as a
+* You must have a seed project on Google Cloud Platform that will be used as the build project and as a
  monitoring namespace. "Cloud Resource Manager" and "Cloud Billing" APIs need to be enabled on the 
  project. Even if you are running the deployment from a remote machine, you will need a service 
  account and key from this project.
 * As a minimum, the account performing the deployment will need Storage Object Admin role on the
- project being deployed to.
+ project being deployed to. If you are creating the project from scratch, then this will come with
+ roles/owner
 * If creating a new project, the account performing the deployment also needs project creator role;
  Project Billing Manager and either organization viewer role or folder viewer role
 * You may need to download a service account key and set an environment variable if not being ran
  from within Google Cloud `export GOOGLE_CLOUD_KEYFILE_JSON=/path/to/my-key.json`
 
+Full list of roles are:
+* roles/resourcemanager.folderViewer on the folder that you want to create the project in; or
+ roles/resourcemanager.organizationViewer on the organization
+* roles/resourcemanager.projectCreator on the organization or folder
+* roles/billing.user on the organization
+* roles/storage.admin on GAE project
  
 #### Google App Engine basic configuration
-* **create_google_project**: whether or not to create a new project with the details provided.
- _Default: false_
- implies the project will be deleted with the deployment when asked to delete.
+
+| key | type | description | default |
+|:---:|:----:|:-----------:|:-------:|
+| **create_google_project**| boolean | whether or not to create a new project with the details provided. implies the project will be deleted with the deployment when asked to delete.| false |
+ 
+ 
 * **[REQUIRED] project_id**: (string) The GCP project identifier. https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project
 * **project_name**: (string) more descriptive and human understandable identifier for the project. 
  Defaults to the `project_id`
