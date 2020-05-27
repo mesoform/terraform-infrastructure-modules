@@ -87,7 +87,6 @@ resource "archive_file" "self" {
 resource "google_storage_bucket_object" "self" {
   for_each = local.gae.components.specs
 
-  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   name   = each.key
   bucket = google_storage_bucket.self.name
   source = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
