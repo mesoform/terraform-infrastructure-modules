@@ -68,7 +68,7 @@ resource "google_storage_bucket" "self" {
   bucket_policy_only = true
   default_event_based_hold = false
   labels = local.project.labels
-  location = local.gae.location_id
+  location = "${local.gae.location_id}1"
   requester_pays = false
   storage_class = "REGIONAL"
   versioning {
