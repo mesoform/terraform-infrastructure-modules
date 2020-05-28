@@ -160,7 +160,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   for_each = local.as_flex_map
   # force dependency on the required service account being created and given permission to operate
 
-  project = google_project_iam_member.self.project
+  project = google_project_iam_member.self.0.project
   version_id = lookup(each.value, "api_version", null)
   service = lookup(each.value, "service", null)
   runtime = lookup(each.value, "runtime", null)
@@ -415,7 +415,7 @@ resource "google_app_engine_flexible_app_version" "self" {
 resource "google_app_engine_standard_app_version" "self" {
   for_each = local.as_std_map
 
-  project = google_project_iam_member.self.project
+  project = google_project_service.std.0.project
   version_id = lookup(each.value, "api_version", null)
   service = lookup(each.value, "service", "default")
   runtime = lookup(each.value, "runtime", null)
