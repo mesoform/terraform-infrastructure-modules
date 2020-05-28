@@ -161,7 +161,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   # force dependency on the required service account being created and given permission to operate
 
   project = google_project_iam_member.self.0.project
-  version_id = lookup(each.value, "api_version", null)
+  version_id = lookup(each.value, "version_id", local.project.version)
   service = lookup(each.value, "service", null)
   runtime = lookup(each.value, "runtime", null)
   default_expiration = lookup(each.value, "default_expiration", null)
@@ -416,7 +416,7 @@ resource "google_app_engine_standard_app_version" "self" {
   for_each = local.as_std_map
 
   project = google_project_service.std.0.project
-  version_id = lookup(each.value, "api_version", null)
+  version_id = lookup(each.value, "version_id", local.project.version)
   service = lookup(each.value, "service", "default")
   runtime = lookup(each.value, "runtime", null)
   instance_class = lookup(each.value, "instance_class", null)

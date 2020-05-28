@@ -106,8 +106,9 @@ labels: &project_labels
 ### gcp_ae.yml
 #### Prerequisites
 ##### IAM permission
-* You must have a seed project on Google Cloud Platform that will be used as the build project and as a
- monitoring namespace. "Cloud Resource Manager" and "Cloud Billing" APIs need to be enabled on the 
+* If creating a project from scratch, you must have a seed project on Google Cloud Platform that
+ will be used as the build project and as a place for identity and access management. "Cloud 
+ Resource Manager", "App Engine Admin, and "Cloud Billing" APIs need to be enabled on the 
  project. Even if you are running the deployment from a remote machine, you will need a service 
  account and key from this project.
 * As a minimum, the account performing the deployment will need Storage Object Admin role on the
