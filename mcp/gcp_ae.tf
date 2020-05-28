@@ -146,8 +146,9 @@ resource "google_app_engine_application" "self" {
 
 
 resource "google_project_iam_member" "self" {
+  count = length(local.as_flex_map) > 0 ? 1 : 0
   # force dependency on the APIs being enabled
-  project = length(local.as_flex_map) > 0 ? google_project_service.flex.0.project : google_project_service.std.0.project
+  project = google_project_service.flex.0.project
   role = "roles/compute.networkUser"
   //noinspection HILUnresolvedReference
   member = "serviceAccount:service-${lookup(local.gae, "create_google_project", false) ? google_project.self.0.number : data.google_project.self.0.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
