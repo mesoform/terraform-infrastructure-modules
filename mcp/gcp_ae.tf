@@ -76,12 +76,13 @@ resource "google_storage_bucket" "self" {
 }
 
 
-resource "archive_file" "self" {
+data "archive_file" "self" {
   for_each = local.gae.components.specs
   output_path = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
   type = "zip"
   source_dir = "${path.cwd}/../${each.value.src_path}"
 }
+
 
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket_object" "self" {
