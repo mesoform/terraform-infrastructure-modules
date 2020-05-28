@@ -77,6 +77,7 @@ resource "google_storage_bucket" "self" {
 }
 
 
+//noinspection HILUnresolvedReference
 data "archive_file" "self" {
   for_each = local.gae.components.specs
   output_path = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
@@ -179,20 +180,9 @@ resource "google_app_engine_flexible_app_version" "self" {
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
-    for_each = lookup(each.value, "deployment", null) == null ? {deployment: {files: {}}} : {deployment: each.value.deployment}
+    for_each = lookup(each.value, "deployment", null) == null ? {deployment: {zip: {}}} : {deployment: each.value.deployment}
 
     content {
-      //noinspection HILUnresolvedReference
-      dynamic "files" {
-        for_each = lookup(deployment.value, "files", null) == null ? {files: {}} : {files: deployment.value.files}
-
-        content {
-          name = lookup(files.value, "name", each.key)
-          source_url = lookup(files.value, "source_url", "${google_storage_bucket.self.url}/${each.key}")
-          sha1_sum = lookup(files.value, "sha1_sum", null)
-        }
-      }
-
       //noinspection HILUnresolvedReference
       dynamic "cloud_build_options" {
         for_each = lookup(deployment.value, "cloud_build_options", null) == null ? {} : {cloud_build_options: deployment.value.cloud_build_options}
@@ -214,11 +204,11 @@ resource "google_app_engine_flexible_app_version" "self" {
 
       //noinspection HILUnresolvedReference
       dynamic "zip" {
-        for_each = lookup(deployment.value, "zip", null) == null ? {} : {zip: deployment.value.zip}
+        for_each = lookup(deployment.value, "zip", null) == null ? {zip: {}} : {zip: deployment.value.zip}
 
         content {
-          source_url = lookup(zip.value, "source_url", null)
-          files_count = lookup(zip.value, "files_count", null)
+          source_url = lookup(zip.value, "source_url", "https://storage.googleapis.com/${google_storage_bucket.self.name}/${each.key}")
+          files_count = lookup(zip.value, "files_count", 1)
         }
       }
     }
@@ -429,27 +419,16 @@ resource "google_app_engine_standard_app_version" "self" {
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
-    for_each = lookup(each.value, "deployment", null) == null ? {deployment: {files: {}}} : {deployment: each.value.deployment}
+    for_each = lookup(each.value, "deployment", null) == null ? {deployment: {zip: {}}} : {deployment: each.value.deployment}
 
     content {
       //noinspection HILUnresolvedReference
-      dynamic "files" {
-        for_each = lookup(deployment.value, "files", null) == null ? {files: {}} : {files: deployment.value.files}
-
-        content {
-          name = lookup(files.value, "name", each.key)
-          source_url = lookup(files.value, "source_url", "${google_storage_bucket.self.url}/${each.key}")
-          sha1_sum = lookup(files.value, "sha1_sum", null)
-        }
-      }
-
-      //noinspection HILUnresolvedReference
       dynamic "zip" {
-        for_each = lookup(deployment.value, "zip", null) == null ? {} : {zip: deployment.value.zip}
+        for_each = lookup(deployment.value, "zip", null) == null ? {zip: {}} : {zip: deployment.value.zip}
 
         content {
-          source_url = lookup(zip.value, "source_url", null)
-          files_count = lookup(zip.value, "files_count", null)
+          source_url = lookup(zip.value, "source_url", "https://storage.googleapis.com/${google_storage_bucket.self.name}/${each.key}")
+          files_count = lookup(zip.value, "files_count", 1)
         }
       }
     }
