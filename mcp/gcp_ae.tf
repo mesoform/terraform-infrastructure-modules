@@ -14,6 +14,13 @@ locals {
   gae = yamldecode(local.user_gae_config_yml)
 
   //noinspection HILUnresolvedReference
+  as_all_map = {
+    for as, config in local.gae.components.specs:
+      #This doesn't merge complex maps. Any nested map requirements need to handled at the property
+      # level. See env_variables below
+      as => merge(lookup(local.gae.components, "common", {}), config)
+  }
+  //noinspection HILUnresolvedReference
   as_flex_map = {
     for as, config in local.gae.components.specs:
       #This doesn't merge complex maps. Any nested map requirements need to handled at the property
@@ -26,6 +33,25 @@ locals {
     for as, config in local.gae.components.specs:
       as => merge(lookup(local.gae.components, "common", {}), config)
       if lookup(config, "env", "standard") == "standard"
+  }
+  //noinspection HILUnresolvedReference
+  as_all_map = {
+    for as, config in local.gae.components.specs:
+      #This doesn't merge complex maps. Any nested map requirements need to handled at the property
+      # level. See env_variables below
+      as => merge(lookup(local.gae.components, "common", {}), config)
+  }
+  //noinspection HILUnresolvedReference
+  each_as_manifest = flatten([
+    for as, config in local.as_all_map: [
+      for file in jsondecode(file(config.manifest_path)):
+          file
+    ]
+  ])
+  //noinspection HILUnresolvedReference
+  complete_manifest = {
+    for file_config in local.each_as_manifest:
+        file_config.path => file_config.sha1Sum
   }
 }
 
@@ -68,6 +94,7 @@ resource "google_storage_bucket" "self" {
   bucket_policy_only = true
   default_event_based_hold = false
   labels = local.project.labels
+  # ToDo handle region better between app engine and cloud storage
   location = "${local.gae.location_id}1"
   requester_pays = false
   storage_class = "REGIONAL"
@@ -83,17 +110,18 @@ data "archive_file" "self" {
   output_path = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
   type = "zip"
   source_dir = "${path.cwd}/../${each.value.src_path}"
+  
 }
 
 
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket_object" "self" {
-  for_each = local.gae.components.specs
+  for_each = local.complete_manifest
 
-  name   = each.key
+  name   = each.value
   bucket = google_storage_bucket.self.name
-  source = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
-  content_type = "application/zip"
+  source = "${path.cwd}/../${each.key}"
+//  content_type = "application/zip"
 }
 
 
@@ -146,7 +174,17 @@ resource "google_app_engine_application" "self" {
 }
 
 
-resource "google_project_iam_member" "self" {
+resource "google_project_iam_member" "gae_api" {
+  count = length(local.as_flex_map) > 0 ? 1 : 0
+  # force dependency on the APIs being enabled
+  project = google_project_service.flex.0.project
+  role = "roles/compute.networkUser"
+  //noinspection HILUnresolvedReference
+  member = "serviceAccount:service-${lookup(local.gae, "create_google_project", false) ? google_project.self.0.number : data.google_project.self.0.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
+}
+
+
+resource "google_project_iam_member" "cloud_build" {
   count = length(local.as_flex_map) > 0 ? 1 : 0
   # force dependency on the APIs being enabled
   project = google_project_service.flex.0.project
@@ -161,7 +199,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   for_each = local.as_flex_map
   # force dependency on the required service account being created and given permission to operate
 
-  project = google_project_iam_member.self.0.project
+  project = google_project_iam_member.gae_api.0.project
   version_id = lookup(each.value, "version_id", local.project.version)
   service = lookup(each.value, "service", null)
   runtime = lookup(each.value, "runtime", null)

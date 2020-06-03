@@ -173,6 +173,9 @@ feature_settings map exists, `split_health_checks` must be non-empty
 
 
 #### Google App Engine Standard component configuration
+static_files:
+path: /static [REQUIRED IN CONTEXT]
+upload_path_regex: * [REQUIRED IN CONTEXT]
 
 Example:
 ```yamlex

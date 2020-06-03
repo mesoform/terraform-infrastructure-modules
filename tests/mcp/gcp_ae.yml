@@ -36,13 +36,7 @@ components:
         timeout_sec: 4
         failure_threshold: 2
         success_threshold: 2
-      deployment:
-        zip:
-          source_url: http://zip.com
-          files_count: 1
-        cloud_build_options:
-          app_yaml_path: /test_files
-          cloud_build_timeout_sec: 900
+      manifest_path: app1/manifest.json
       endpoints_api_service:
         name: my-endpoint-api
       entrypoint:
@@ -71,6 +65,7 @@ components:
       env_variables:
         'IS_GAE': 'true'
       api_version: 'user_defined'
+      manifest_path: app2/manifest.json
       handlers:
       - url_regex: (/.*)
         static_files:
