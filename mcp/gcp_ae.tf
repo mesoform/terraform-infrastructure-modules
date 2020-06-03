@@ -21,7 +21,7 @@ locals {
       as => merge(lookup(local.gae.components, "common", {}), config)
   }
   //noinspection HILUnresolvedReference
-  as_flex_map = {
+  as_flex_specs = {
     for as, config in local.gae.components.specs:
       #This doesn't merge complex maps. Any nested map requirements need to handled at the property
       # level. See env_variables below
@@ -29,28 +29,36 @@ locals {
       if lookup(config, "env", "standard") == "flex"
   }
   //noinspection HILUnresolvedReference
-  as_std_map = {
+  as_std_specs = {
     for as, config in local.gae.components.specs:
       as => merge(lookup(local.gae.components, "common", {}), config)
       if lookup(config, "env", "standard") == "standard"
   }
   //noinspection HILUnresolvedReference
-  as_all_map = {
+  as_all_specs = {
     for as, config in local.gae.components.specs:
       #This doesn't merge complex maps. Any nested map requirements need to handled at the property
       # level. See env_variables below
       as => merge(lookup(local.gae.components, "common", {}), config)
   }
   //noinspection HILUnresolvedReference
-  each_as_manifest = flatten([
-    for as, config in local.as_all_map: [
-      for file in jsondecode(file(config.manifest_path)):
-          file
+  manifest_files = {
+    for as, spec in local.as_all_specs:
+          as => lookup(spec, "manifest_path", null)
+          if lookup(spec, "manifest_path", null) != null
+  }
+  manifest_files_values = values(local.manifest_files)
+  //noinspection HILUnresolvedReference
+  combined_manifests = flatten([
+    for manifest_path in values(local.manifest_files): [
+      for manifest in jsondecode(file(manifest_path)): [
+        manifest
+      ]
     ]
   ])
   //noinspection HILUnresolvedReference
   complete_manifest = {
-    for file_config in local.each_as_manifest:
+    for file_config in local.combined_manifests:
         file_config.path => file_config.sha1Sum
   }
 }
@@ -105,28 +113,17 @@ resource "google_storage_bucket" "self" {
 
 
 //noinspection HILUnresolvedReference
-data "archive_file" "self" {
-  for_each = local.gae.components.specs
-  output_path = "${path.cwd}/../${each.value.src_path}/${each.key}.zip"
-  type = "zip"
-  source_dir = "${path.cwd}/../${each.value.src_path}"
-  
-}
-
-
-//noinspection HILUnresolvedReference
 resource "google_storage_bucket_object" "self" {
   for_each = local.complete_manifest
 
   name   = each.value
   bucket = google_storage_bucket.self.name
   source = "${path.cwd}/../${each.key}"
-//  content_type = "application/zip"
 }
 
 
 resource "google_project_service" "flex" {
-  count = length(local.as_flex_map) > 0 ? 1 : 0
+  count = length(local.as_flex_specs) > 0 ? 1 : 0
 
   project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   service = "appengineflex.googleapis.com"
@@ -135,7 +132,7 @@ resource "google_project_service" "flex" {
 
 
 resource "google_project_service" "std" {
-  count = length(local.as_std_map) > 0 ? 1 : 0
+  count = length(local.as_std_specs) > 0 ? 1 : 0
 
   project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   service = "appengine.googleapis.com"
@@ -145,7 +142,7 @@ resource "google_project_service" "std" {
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
-  project = length(local.as_flex_map) > 0 ? google_project_service.flex.0.project : google_project_service.std.0.project
+  project = length(local.as_flex_specs) > 0 ? google_project_service.flex.0.project : google_project_service.std.0.project
   location_id = lookup(local.gae, "location_id", null)
   auth_domain = lookup(local.gae, "auth_domain", null)
   serving_status = lookup(local.gae, "serving_status", null)
@@ -175,7 +172,7 @@ resource "google_app_engine_application" "self" {
 
 
 resource "google_project_iam_member" "gae_api" {
-  count = length(local.as_flex_map) > 0 ? 1 : 0
+  count = length(local.as_flex_specs) > 0 ? 1 : 0
   # force dependency on the APIs being enabled
   project = google_project_service.flex.0.project
   role = "roles/compute.networkUser"
@@ -185,7 +182,7 @@ resource "google_project_iam_member" "gae_api" {
 
 
 resource "google_project_iam_member" "cloud_build" {
-  count = length(local.as_flex_map) > 0 ? 1 : 0
+  count = length(local.as_flex_specs) > 0 ? 1 : 0
   # force dependency on the APIs being enabled
   project = google_project_service.flex.0.project
   role = "roles/compute.networkUser"
@@ -196,7 +193,7 @@ resource "google_project_iam_member" "cloud_build" {
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_flexible_app_version" "self" {
-  for_each = local.as_flex_map
+  for_each = local.as_flex_specs
   # force dependency on the required service account being created and given permission to operate
 
   project = google_project_iam_member.gae_api.0.project
@@ -441,7 +438,7 @@ resource "google_app_engine_flexible_app_version" "self" {
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_standard_app_version" "self" {
-  for_each = local.as_std_map
+  for_each = local.as_std_specs
 
   project = google_project_service.std.0.project
   version_id = lookup(each.value, "version_id", local.project.version)

@@ -36,7 +36,7 @@ components:
         timeout_sec: 4
         failure_threshold: 2
         success_threshold: 2
-      manifest_path: app1/manifest.json
+      manifest_path: /Users/gaz/PycharmProjects/terraform-infrastructure-modules/tests/mcp/app1/manifest.json
       endpoints_api_service:
         name: my-endpoint-api
       entrypoint:
@@ -65,7 +65,7 @@ components:
       env_variables:
         'IS_GAE': 'true'
       api_version: 'user_defined'
-      manifest_path: app2/manifest.json
+      manifest_path: /Users/gaz/PycharmProjects/terraform-infrastructure-modules/tests/mcp/app2/manifest.json
       handlers:
       - url_regex: (/.*)
         static_files:
