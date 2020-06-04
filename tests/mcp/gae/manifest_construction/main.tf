@@ -1,3 +1,4 @@
+//expected logic for constructing a manifest suitable for uploads
 locals {
   user_gae_config_yml = file("./gcp_ae.yml")
   gae = yamldecode(local.user_gae_config_yml)
@@ -29,22 +30,21 @@ locals {
   }
 }
 
-output "specs" {
-  value = local.as_all_specs
+//simulate google_storage_bucket_object
+resource "local_file" "google_storage_bucket_object" {
+  for_each = local.complete_manifest
+  content     = each.key
+  filename = "/tmp/${each.value}"
 }
 
-output "combined_manifests" {
-  value = local.combined_manifests
+data "external" "test" {
+  query = {
+    for storage_file in local_file.google_storage_bucket_object:
+      storage_file.filename => storage_file.content
+  }
+  program = ["/usr/local/bin/python3", "${path.module}/test_data_upload.py"]
 }
 
-output "complete_manifest" {
-  value = local.complete_manifest
-}
-
-output "manifest_files" {
-  value = local.manifest_files
-}
-
-output "manifest_file_values" {
-  value = local.manifest_files_values
+output "test_result" {
+  value = data.external.test.result
 }
