@@ -1,3 +1,7 @@
+variable user_project_config_yml {
+  type = string
+  default = "../project.yml"
+}
 variable google_project {
   type = string
   default = null
@@ -25,4 +29,9 @@ variable "google_location" {
 variable tf_delete_service_on_destroy {
   type = bool
   default = null
+}
+variable gcp_ae_yml {
+  description = "path to YAML file containing configuration for GAE Applications/Services"
+  type = string
+  default = "../gcp_ae.yml"
 }

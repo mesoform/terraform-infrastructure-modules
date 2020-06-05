@@ -42,10 +42,8 @@ def test_filepath_key(query):
     ]
     """
     expected_data = {
-        "/tmp/WEB-INF/appengine-web.xml": "",
-        "/tmp/WEB-INF/appengine-web.xml": "",
-        "/tmp/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "",
-        "/tmp/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": ""
+        "WEB-INF/appengine-web.xml": "",
+        "WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": ""
     }
     if query == expected_data:
         return {"test_src_files_manifest_format": "pass"}
