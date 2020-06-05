@@ -11,7 +11,7 @@ except Exception as e:
 
 
 @python_validator
-def test_src_files_manifest_format(query):
+def test_filepath_key(query):
     """
     checks that the data given to the test function is as expected to be used in
     google_storage_object.
@@ -42,10 +42,8 @@ def test_src_files_manifest_format(query):
     ]
     """
     expected_data = {
-        "/tmp/app1/WEB-INF/appengine-web.xml": "7946062fc18172c73015988114ed989670397f8b",
-        "/tmp/app2/WEB-INF/appengine-web.xml": "7946062fc18172c73015988114ed989670397f8b",
-        "/tmp/app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f",
-        "/tmp/app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
+        "/tmp/WEB-INF/appengine-web.xml": "",
+        "/tmp/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": ""
     }
     if query == expected_data:
         return {"test_src_files_manifest_format": "pass"}
@@ -54,4 +52,4 @@ def test_src_files_manifest_format(query):
 
 
 if __name__ == '__main__':
-    test_src_files_manifest_format()
+    test_filepath_key()

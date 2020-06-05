@@ -1,6 +1,6 @@
 //expected logic for constructing a manifest suitable for uploads
 locals {
-  user_gae_config_yml = file("./gcp_ae.yml")
+  user_gae_config_yml = file("./multiple_manifest.yml")
   gae = yamldecode(local.user_gae_config_yml)
   //noinspection HILUnresolvedReference
   as_all_specs = {
@@ -14,30 +14,35 @@ locals {
           as => lookup(spec, "manifest_path", null)
           if lookup(spec, "manifest_path", null) != null
   }
-  manifest_files_values = values(local.manifest_files)
   //noinspection HILUnresolvedReference
-  combined_manifests = flatten([
+  src_files = flatten([
     for manifest_path in values(local.manifest_files): [
-      for manifest in jsondecode(file(manifest_path)): [
-        manifest
+      for src_file in jsondecode(file(manifest_path)): [
+        src_file
       ]
     ]
   ])
   //noinspection HILUnresolvedReference
   complete_manifest = {
-    for file_config in local.combined_manifests:
-        file_config.path => file_config.sha1Sum
+    for file_config in local.src_files:
+        file_config => filesha1("${path.cwd}/../../${file_config}")
   }
 }
 
 //simulate google_storage_bucket_object
 resource "local_file" "google_storage_bucket_object" {
   for_each = local.complete_manifest
-  content     = each.key
-  filename = "/tmp/${each.value}"
+  content     = each.value
+  filename = "/tmp/${each.key}"
 }
 
-data "external" "test" {
+resource "local_file" "regex_path" {
+  for_each = local.complete_manifest
+  filename = "/tmp/${element(regex("^.*/(.*)", each.key), 0)}"
+}
+
+data "external" "test_src_files_manifest_format" {
+  depends_on = [local_file.google_storage_bucket_object]
   query = {
     for storage_file in local_file.google_storage_bucket_object:
       storage_file.filename => storage_file.content
@@ -45,6 +50,22 @@ data "external" "test" {
   program = ["/usr/local/bin/python3", "${path.module}/test_data_upload.py"]
 }
 
-output "test_result" {
-  value = data.external.test.result
+//data "external" "test_filepath_key" {
+//  depends_on = [local_file.regex_path]
+//  query = {
+//    for storage_file in local_file.regex_path:
+//      storage_file.filename => ""
+//  }
+//  program = ["/usr/local/bin/python3", "${path.module}/test_filepath_key.py"]
+//}
+
+output complete_manifest {
+  value = local.complete_manifest
 }
+output test_src_files_manifest_format_result {
+  value = data.external.test_src_files_manifest_format.result
+}
+
+//output test_filepath_key_result {
+//  value = data.external.test_filepath_key.result
+//}

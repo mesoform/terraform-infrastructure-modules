@@ -33,18 +33,12 @@ def test_src_files_manifest_format(query):
 
     manifest files for this test should include
     [
-        "app1/WEB-INF/appengine-web.xml",
-        "app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
-    ]
-    [
         "app2/WEB-INF/appengine-web.xml",
         "app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
     ]
     """
     expected_data = {
-        "/tmp/app1/WEB-INF/appengine-web.xml": "7946062fc18172c73015988114ed989670397f8b",
         "/tmp/app2/WEB-INF/appengine-web.xml": "7946062fc18172c73015988114ed989670397f8b",
-        "/tmp/app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f",
         "/tmp/app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
     }
     if query == expected_data:

@@ -1,0 +1,7 @@
+components:
+  specs:
+    app1:
+      name: app1
+    default:
+      name: app2
+      manifest_path: manifest2.json

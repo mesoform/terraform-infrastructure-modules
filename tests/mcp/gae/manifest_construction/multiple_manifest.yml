@@ -2,7 +2,7 @@ components:
   specs:
     app1:
       name: app1
-#      manifest_path: manifest1.json
+      manifest_path: manifest1.json
     default:
       name: app2
       manifest_path: manifest2.json

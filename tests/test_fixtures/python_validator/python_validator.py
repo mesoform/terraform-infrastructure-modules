@@ -31,7 +31,7 @@ def validate(data):
 def python_validator(function):
     """
     Query data is received on stdin as a JSON object.
-    Result data must be returned on stdout as a JSON object.
+    Result data must be returned on stdout as a JSON object and string values
     The wrapped function must expect its first positional argument to be a dictionary of the query
     data.
     """

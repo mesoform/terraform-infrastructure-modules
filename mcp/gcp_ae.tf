@@ -47,19 +47,18 @@ locals {
           as => lookup(spec, "manifest_path", null)
           if lookup(spec, "manifest_path", null) != null
   }
-  manifest_files_values = values(local.manifest_files)
   //noinspection HILUnresolvedReference
-  combined_manifests = flatten([
+  src_files = flatten([
     for manifest_path in values(local.manifest_files): [
-      for manifest in jsondecode(file(manifest_path)): [
-        manifest
+      for src_file in jsondecode(file(manifest_path)): [
+        src_file
       ]
     ]
   ])
   //noinspection HILUnresolvedReference
   complete_manifest = {
-    for file_config in local.combined_manifests:
-        file_config.path => file_config.sha1Sum
+    for file_config in local.src_files:
+        file_config => filesha1("${path.cwd}/../${file_config}")
   }
 }
 
@@ -239,7 +238,7 @@ resource "google_app_engine_flexible_app_version" "self" {
 
       //noinspection HILUnresolvedReference
       dynamic "files" {
-        for_each = lookup(deployment.value, "files", null) == null ? {files: local.complete_manifest} : {files: deployment.value.zip}
+        for_each = local.complete_manifest
 
         content {
           name = files.key
