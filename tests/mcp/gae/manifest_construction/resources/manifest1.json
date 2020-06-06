@@ -1,4 +1,7 @@
-[
-  "app1/WEB-INF/appengine-web.xml",
-  "app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
-]
+{
+  "artifactDir": "/exploaded-experiences-search",
+  "contents": [
+    "WEB-INF/appengine-web.xml",
+    "/tmp/app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
+  ]
+}

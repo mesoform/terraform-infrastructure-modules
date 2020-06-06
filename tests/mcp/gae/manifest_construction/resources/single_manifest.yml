@@ -4,4 +4,6 @@ components:
       name: app1
     default:
       name: app2
-      manifest_path: resources/manifest2.json
+      root_dir: app2 # optional. Defaults to AS name
+      build_dir: /build  #  where build output files are located. It is also where mmcf-manifest.json needs to be
+

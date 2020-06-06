@@ -76,6 +76,19 @@ output filepath_regex {
   }
 }
 
+output as_all_specs {
+  value = local.as_all_specs
+}
+output manifest_paths {
+  value = local.manifest_paths
+}
+output manifests {
+  value = local.manifests
+}
+output src_files {
+  value = local.src_files
+}
+
 output complete_manifest {
   value = local.complete_manifest
 }
@@ -86,3 +99,4 @@ output test_src_files_manifest_format_result {
 output test_filepath_key_result {
   value = data.external.test_filepath_key.result
 }
+
