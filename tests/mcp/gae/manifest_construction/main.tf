@@ -79,8 +79,8 @@ output filepath_regex {
 output as_all_specs {
   value = local.as_all_specs
 }
-output manifest_paths {
-  value = local.manifest_paths
+output file_sha {
+  value = local.file_sha
 }
 output manifests {
   value = local.manifests
