@@ -45,26 +45,32 @@ locals {
       as => merge(lookup(local.gae.components, "common", {}), config)
   }
   //noinspection HILUnresolvedReference
-  manifest_paths = {
+  as_paths = {
     for as, spec in local.as_all_specs:
-          as => format("../%s/%s/mmcf-manifest.json", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build"))
-          if fileexists(format("../%s/%s/mmcf-manifest.json", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build")))
+          as => {
+            "build_dir": format(“../%s/%s”, lookup(spec, “root_dir”, as), lookup(spec, “build_dir”, “build”))
+            "manifest": format(“../%s/%s/mmcf-manifest.json”, lookup(spec, “root_dir”, as), lookup(spec, “build_dir”, “build”))
+          }
   }
   manifests = {
-    for as, manifest_path in local.manifest_paths:
-        as => jsondecode(file(manifest_path))
+    for as, path in local.as_paths:
+        as => jsondecode(file(path.manifest))
+        if fileexists(path.manifest)
   }
-//  src_files = flatten([
-//    for manifest_path in values(local.manifest_files): [
-//      for src_file in jsondecode(file(manifest_path)): [
-//        src_file
-//      ]
-//    ]
-//  ])
+  
+  file_sha = {
+    for as, manifest in local.manifests:
+          as => {
+            for src_file in manifest.contents:
+              src_file: filesha1(formatlist(“%s/%s/%s”, lookup(lookup(local.as_paths, as), “build_dir”), manifest.artifactDir, manifest.contents))
+          }
+  }
+
+
   //noinspection HILUnresolvedReference
   src_files = local.manifests == [] ? [] : flatten([
-    for manifest in values(local.manifests):
-      formatlist("%s/%s", manifest.artifactDir, manifest.contents)
+    for as, manifest in local.manifests:
+      formatlist("%s/%s/%s", lookup(lookup(local.as_paths, as), "build_dir"), manifest.artifactDir, manifest.contents)
   ])
   //noinspection HILUnresolvedReference
   complete_manifest = local.src_files == [] ? {} : {
