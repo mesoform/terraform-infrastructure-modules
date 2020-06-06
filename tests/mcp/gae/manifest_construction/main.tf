@@ -42,9 +42,9 @@
 
 //simulate google_storage_bucket_object
 resource "local_file" "google_storage_bucket_object" {
-  for_each = local.complete_manifest
+  for_each = local.upload_manifest
   content     = each.value
-  filename = "/tmp/${each.key}"
+  filename = "/tmp/test/${each.key}"
 }
 
 //resource "local_file" "regex_path" {
@@ -63,7 +63,7 @@ data "external" "test_src_files_manifest_format" {
 
 data external test_filepath_key {
   query = {
-    for full_path in keys(local.complete_manifest):
+    for full_path in keys(local.upload_manifest):
       element(regex("[[:ascii:]]/(.*)$", full_path), 0) => ""
   }
   program = ["/usr/local/bin/python3", "${path.module}/single_test_filepath_key.py"]
@@ -71,7 +71,7 @@ data external test_filepath_key {
 
 output filepath_regex {
   value = {
-    for full_path in keys(local.complete_manifest):
+    for full_path in keys(local.upload_manifest):
       element(regex("[[:ascii:]]/(.*)$", full_path), 0) => ""
   }
 }
@@ -79,18 +79,21 @@ output filepath_regex {
 output as_all_specs {
   value = local.as_all_specs
 }
-output file_sha {
-  value = local.file_sha
+output as_paths {
+  value = local.as_paths
 }
 output manifests {
   value = local.manifests
+}
+output file_sha1sums {
+  value = local.file_sha1sums
 }
 output src_files {
   value = local.src_files
 }
 
-output complete_manifest {
-  value = local.complete_manifest
+output upload_manifest {
+  value = local.upload_manifest
 }
 output test_src_files_manifest_format_result {
   value = data.external.test_src_files_manifest_format.result

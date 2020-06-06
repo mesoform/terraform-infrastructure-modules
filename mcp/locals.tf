@@ -59,11 +59,11 @@ locals {
   }
 
   //noinspection HILUnresolvedReference
-  file_sha = {
+  file_sha1sums = {
     for as, manifest in local.manifests:
           as => {
             for src_file in manifest.contents:
-              src_file => filesha1(formatlist("%s/%s/%s", lookup(lookup(local.as_paths, as), "build_dir"), manifest.artifactDir, manifest.contents))
+              src_file => filesha1(format("%s/%s/%s", lookup(local.as_paths, as).build_dir, manifest.artifactDir, src_file))
           }
   }
 
@@ -71,11 +71,11 @@ locals {
   //noinspection HILUnresolvedReference
   src_files = local.manifests == [] ? [] : flatten([
     for as, manifest in local.manifests:
-      formatlist("%s/%s/%s", lookup(lookup(local.as_paths, as), "build_dir"), manifest.artifactDir, manifest.contents)
+      formatlist("%s/%s/%s", lookup(local.as_paths, as).build_dir, manifest.artifactDir, manifest.contents)
   ])
   //noinspection HILUnresolvedReference
-  complete_manifest = local.src_files == [] ? {} : {
-    for file_config in local.src_files:
-        file_config => filesha1("${path.module}/../${file_config}")
+  upload_manifest = local.src_files == [] ? {} : {
+    for src_file in local.src_files:
+        src_file => filesha1(src_file)
   }
 }
