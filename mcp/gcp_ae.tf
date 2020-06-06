@@ -49,11 +49,11 @@ resource "google_storage_bucket" "self" {
 
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket_object" "self" {
-  for_each = local.complete_manifest
+  for_each = local.upload_manifest
 
   name   = each.value
   bucket = google_storage_bucket.self.name
-  source = "${path.cwd}/../${each.key}"
+  source = each.key
 }
 
 
@@ -174,12 +174,12 @@ resource "google_app_engine_flexible_app_version" "self" {
 
       //noinspection HILUnresolvedReference
       dynamic "files" {
-        for_each = local.complete_manifest
+        for_each = lookup(local.file_sha1sums, each.key, {})
 
         content {
           name = files.key
-          source_url = lookup(files.value, "source_url", "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.key}")
-          sha1_sum = files.key
+          source_url = lookup(files.value, "source_url", "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.value}")
+          sha1_sum = files.value
         }
       }
     }
@@ -395,12 +395,12 @@ resource "google_app_engine_standard_app_version" "self" {
     content {
       //noinspection HILUnresolvedReference
       dynamic "files" {
-        for_each = lookup(deployment.value, "files", null) == null ? {files: local.complete_manifest} : {files: deployment.value.files}
+        for_each = lookup(local.file_sha1sums, each.key, {})
 
         content {
           name = files.key
-          source_url = lookup(files.value, "source_url", "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.key}")
-          sha1_sum = files.key
+          source_url = lookup(files.value, "source_url", "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.value}")
+          sha1_sum = files.value
         }
       }
     }

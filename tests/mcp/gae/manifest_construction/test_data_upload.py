@@ -1,10 +1,11 @@
 """
 Terraform external provider just handles strings in maps, so tests need to consider this
 """
-from sys import path, stderr
+from sys import path as sys_path, stderr
+from os import path as os_path
 
 try:
-    path.insert(1, '../../../test_fixtures/python_validator')
+    sys_path.insert(1, '../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
     print(e, file=stderr)
@@ -41,20 +42,20 @@ def test_src_files_manifest_format(query):
         "app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
     ]
     """
-    # expected_data = {
-    #     "/tmp/app1/WEB-INF/appengine-web.xml": "7946062fc18172c73015988114ed989670397f8b",
-    #     "/tmp/app2/WEB-INF/appengine-web.xml": "7946062fc18172c73015988114ed989670397f8b",
-    #     "/tmp/app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f",
-    #     "/tmp/app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
-    # }
     expected_data = {
-        "/$PROJECT_ROOT/app2/WEB-INF/appengine-web.xml": "7946062fc18172c73015988114ed989670397f8b",
-        "/tmp/app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
+        "{}/tests/mcp/gae/app2/build/exploded-app2/WEB-INF/appengine-web.xml".format(
+            os_path.abspath("../../../../")): "3c7a18e3d3b8be3afd75d7a4823d6aca43d65123",
+        "{}/tests/mcp/gae/app2/build/exploded-app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class".format(
+            os_path.abspath("../../../../")): "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f",
+        "{}/tests/mcp/gae/app1/build/exploded-app1/WEB-INF/appengine-web.xml".format(
+            os_path.abspath("../../../../")): "b3fc24644f48f686b0757a6b70973accbcbdee70",
+        "{}/tests/mcp/gae/app1/build/exploded-app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class".format(
+            os_path.abspath("../../../../")): "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
     }
     if query == expected_data:
-        return {"test_src_files_manifest_format": "pass"}
+        return {"result": "pass"}
     else:
-        return {"test_src_files_manifest_format": "fail"}
+        return {"result": "fail"}
 
 
 if __name__ == '__main__':

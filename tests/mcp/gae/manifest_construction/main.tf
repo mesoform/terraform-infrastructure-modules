@@ -1,105 +1,21 @@
+//(gaz@gMacBookPro)-(23:34:58):manifest_construction/
+//$ terraform apply -var-file resources/single_manifest.tfvars -auto-approve
+//data.external.test_src_files_manifest_format: Refreshing state...
 //
-////simulate google_storage_bucket_object
-//resource local_file single_google_storage_bucket_object {
-//  for_each = local.single_complete_manifest
-//  content     = each.value
-//  filename = "/tmp/${each.key}"
-//}
+//Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
 //
-//data external single_test_src_files_manifest_format {
-//  depends_on = [local_file.single_google_storage_bucket_object]
-//  query = {
-//    for storage_file in local_file.single_google_storage_bucket_object:
-//      storage_file.filename => storage_file.content
-//  }
-//  program = ["/usr/local/bin/python3", "${path.module}/single_test_data_upload.py"]
-//}
+//Outputs:
 //
-//data external single_test_filepath_key {
-//  query = {
-//    for full_path in keys(local.single_complete_manifest):
-//      element(regex("[[:ascii:]]/(.*)$", full_path), 0) => ""
-//  }
-//  program = ["/usr/local/bin/python3", "${path.module}/single_test_filepath_key.py"]
-//}
-//
-//output single_filepath_regex {
-//  value = {
-//    for full_path in keys(local.single_complete_manifest):
-//      element(regex("[[:ascii:]]/(.*)$", full_path), 0) => ""
-//  }
-//}
-//
-//output single_complete_manifest {
-//  value = local.single_complete_manifest
-//}
-//output single_test_src_files_manifest_format {
-//  value = data.external.single_test_src_files_manifest_format.result
-//}
-//output single_test_filepath_key {
-//  value = data.external.single_test_filepath_key.result
+//test_upload_manifest_format = {
+//  "result" = "pass"
 //}
 
-//simulate google_storage_bucket_object
-resource "local_file" "google_storage_bucket_object" {
-  for_each = local.upload_manifest
-  content     = each.value
-  filename = "/tmp/test/${each.key}"
-}
-
-//resource "local_file" "regex_path" {
-//  for_each = local.complete_manifest
-//  filename = "/tmp/${element(regex("[[:ascii:]]/(.*)$", each.key), 0)}"
-//}
-
-data "external" "test_src_files_manifest_format" {
-  depends_on = [local_file.google_storage_bucket_object]
-  query = {
-    for storage_file in local_file.google_storage_bucket_object:
-      storage_file.filename => storage_file.content
-  }
+data external test_src_files_manifest_format {
+//  depends_on = [local_file.google_storage_bucket_object]
+  query = local.upload_manifest
   program = ["/usr/local/bin/python3", "${path.module}/test_data_upload.py"]
 }
 
-data external test_filepath_key {
-  query = {
-    for full_path in keys(local.upload_manifest):
-      element(regex("[[:ascii:]]/(.*)$", full_path), 0) => ""
-  }
-  program = ["/usr/local/bin/python3", "${path.module}/single_test_filepath_key.py"]
-}
-
-output filepath_regex {
-  value = {
-    for full_path in keys(local.upload_manifest):
-      element(regex("[[:ascii:]]/(.*)$", full_path), 0) => ""
-  }
-}
-
-output as_all_specs {
-  value = local.as_all_specs
-}
-output as_paths {
-  value = local.as_paths
-}
-output manifests {
-  value = local.manifests
-}
-output file_sha1sums {
-  value = local.file_sha1sums
-}
-output src_files {
-  value = local.src_files
-}
-
-output upload_manifest {
-  value = local.upload_manifest
-}
-output test_src_files_manifest_format_result {
+output test_upload_manifest_format {
   value = data.external.test_src_files_manifest_format.result
 }
-
-output test_filepath_key_result {
-  value = data.external.test_filepath_key.result
-}
-
