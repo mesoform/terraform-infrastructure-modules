@@ -198,10 +198,10 @@ resource "google_app_engine_flexible_app_version" "self" {
 
   //noinspection HILUnresolvedReference
   dynamic "entrypoint" {
-    for_each = lookup(each.value, "entrypoint", null) == null ? {} : {entrypoint: each.value.entrypoint}
+    for_each = lookup(each.value, "entrypoint", null) == null ? {} : {entrypoint: {shell: each.value.entrypoint}}
 
     content {
-      shell = lookup(entrypoint.value, "shell", null)
+      shell = lookup(entrypoint, "shell", null)
     }
   }
 
@@ -406,10 +406,10 @@ resource "google_app_engine_standard_app_version" "self" {
 
   //noinspection HILUnresolvedReference
   dynamic "entrypoint" {
-    for_each = lookup(each.value, "entrypoint", null) == null ? {} : {entrypoint: each.value.entrypoint}
+    for_each = lookup(each.value, "entrypoint", null) == null ? {} : {entrypoint: {shell: each.value.entrypoint}}
 
     content {
-      shell = lookup(entrypoint.value, "shell", null)
+      shell = lookup(entrypoint, "shell", null)
     }
   }
 
