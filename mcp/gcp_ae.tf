@@ -133,7 +133,7 @@ resource "google_app_engine_flexible_app_version" "self" {
 
   project = google_project_iam_member.gae_api.0.project
   version_id = lookup(each.value, "version_id", local.project.version)
-  service = lookup(each.value, "service", null)
+  service = lookup(each.value, "service", each.key)
   runtime = lookup(each.value, "runtime", null)
   default_expiration = lookup(each.value, "default_expiration", null)
   inbound_services = lookup(each.value, "inbound_services", null)
@@ -377,7 +377,7 @@ resource "google_app_engine_standard_app_version" "self" {
 
   project = google_project_service.std.0.project
   version_id = lookup(each.value, "version_id", local.project.version)
-  service = lookup(each.value, "service", "default")
+  service = lookup(each.value, "service", each.key)
   runtime = lookup(each.value, "runtime", null)
   instance_class = lookup(each.value, "instance_class", null)
   runtime_api_version = lookup(each.value, "runtime_api_version", null)
