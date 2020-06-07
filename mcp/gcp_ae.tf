@@ -33,7 +33,7 @@ resource "google_project" "self" {
 resource "google_storage_bucket" "self" {
   force_destroy = true # code should be transient in GCS and maintained in version control
   project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
-  name = lower(format("%s-%s", local.project.name, lookup(local.project, "version", "1")))
+  name = local.project.name
   bucket_policy_only = true
   default_event_based_hold = false
   labels = local.project.labels
@@ -42,7 +42,7 @@ resource "google_storage_bucket" "self" {
   requester_pays = false
   storage_class = "REGIONAL"
   versioning {
-    enabled = false
+    enabled = true
   }
 }
 
