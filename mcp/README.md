@@ -111,20 +111,29 @@ labels: &project_labels
  Resource Manager", "App Engine Admin, and "Cloud Billing" APIs need to be enabled on the 
  project. Even if you are running the deployment from a remote machine, you will need a service 
  account and key from this project.
-* As a minimum, the account performing the deployment will need Storage Object Admin role on the
- project being deployed to. If you are creating the project from scratch, then this will come with
- roles/owner
+ 
+* As a minimum, the account performing the deployment will need some roles on the project being 
+ deployed to. If you are creating the project from scratch, then these will come with roles/owner
+    * App Engine Deployer
+    * Cloud Build Service Account
+    * Service Usage Consumer
+    * Storage Admin
+
+* Other roles when managing the whole project set-up are
+    * roles/resourcemanager.folderViewer on the folder that you want to create the project in; or
+     roles/resourcemanager.organizationViewer on the organization
+    * roles/resourcemanager.projectCreator on the organization or folder
+    * roles/billing.user on the organization
+    * roles/storage.admin on GAE project
+ 
 * If creating a new project, the account performing the deployment also needs project creator role;
  Project Billing Manager and either organization viewer role or folder viewer role
+ 
 * You may need to download a service account key and set an environment variable if not being ran
- from within Google Cloud `export GOOGLE_CLOUD_KEYFILE_JSON=/path/to/my-key.json`
+ from within Google Cloud 
+    * `export GOOGLE_CLOUD_KEYFILE_JSON=/path/to/my-key.json`
+    * `export GOOGLE_APPLICATION_CREDENTIALS=/path/to/my-key.json`
 
-Full list of roles are:
-* roles/resourcemanager.folderViewer on the folder that you want to create the project in; or
- roles/resourcemanager.organizationViewer on the organization
-* roles/resourcemanager.projectCreator on the organization or folder
-* roles/billing.user on the organization
-* roles/storage.admin on GAE project
  
 #### Google App Engine basic configuration
 
