@@ -40,17 +40,11 @@ def test_src_files_manifest_format(query):
             "WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
         ]
     }
-    for both app1 and app2 (default) but with slightly different content in appengine-web.xml
+    for app1
     """
     expected_data = {
-        "{}/tests/mcp/gae/app2/build/exploded-app2/WEB-INF/appengine-web.xml".format(
-            os_path.abspath("../../../../")): "3c7a18e3d3b8be3afd75d7a4823d6aca43d65123",
-        "{}/tests/mcp/gae/app2/build/exploded-app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class".format(
-            os_path.abspath("../../../../")): "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f",
-        "{}/tests/mcp/gae/app1/build/exploded-app1/WEB-INF/appengine-web.xml".format(
-            os_path.abspath("../../../../")): "b3fc24644f48f686b0757a6b70973accbcbdee70",
-        "{}/tests/mcp/gae/app1/build/exploded-app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class".format(
-            os_path.abspath("../../../../")): "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
+        "WEB-INF/appengine-web.xml": "b3fc24644f48f686b0757a6b70973accbcbdee70",
+        "WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class": "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
     }
     if query == expected_data:
         return {"result": "pass"}

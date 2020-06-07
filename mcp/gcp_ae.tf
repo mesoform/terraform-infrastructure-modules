@@ -172,7 +172,6 @@ resource "google_app_engine_flexible_app_version" "self" {
         }
       }
 
-      //noinspection HILUnresolvedReference
       dynamic "files" {
         for_each = lookup(local.file_sha1sums, each.key, {})
 
@@ -393,7 +392,6 @@ resource "google_app_engine_standard_app_version" "self" {
     for_each = lookup(each.value, "deployment", null) == null ? {deployment: {zip: {}}} : {deployment: each.value.deployment}
 
     content {
-      //noinspection HILUnresolvedReference
       dynamic "files" {
         for_each = lookup(local.file_sha1sums, each.key, {})
 
