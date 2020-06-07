@@ -49,7 +49,7 @@ resource "google_storage_bucket" "self" {
 
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket_object" "self" {
-  for_each = local.upload_manifest
+  for_each = values(local.upload_manifest)
 
   name   = each.value
   bucket = google_storage_bucket.self.name

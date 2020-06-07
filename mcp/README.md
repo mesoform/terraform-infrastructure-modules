@@ -248,3 +248,13 @@ components:
           secure: optional
         skip_files: app.yaml
 ```
+
+#### Troubleshooting Google App Engine
+#### Error: "deployment.0.files": one of `deployment.0.files,deployment.0.zip` must be specified 
+Receiving an error like below is likely cause by missing manifest files in the build directory
+```bash
+Error: "deployment.0.files": one of `deployment.0.files,deployment.0.zip` must be specified
+  on .terraform/modules/deployment/mcp/gcp_ae.tf line 375, in resource "google_app_engine_standard_app_version" "self":
+ 375: resource "google_app_engine_standard_app_version" "self" {
+
+```

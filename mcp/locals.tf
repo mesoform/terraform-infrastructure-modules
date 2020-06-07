@@ -76,6 +76,6 @@ locals {
   //noinspection HILUnresolvedReference
   upload_manifest = local.src_files == [] ? {} : {
     for src_file in local.src_files:
-        abspath(src_file) => filesha1(src_file)
+        src_file => filesha1(src_file)
   }
 }

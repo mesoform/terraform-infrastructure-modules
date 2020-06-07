@@ -5,5 +5,5 @@ components:
     default:
       name: app2
       root_dir: app2 # optional. Defaults to AS name
-      build_dir: /build  #  where build output files are located. It is also where mmcf-manifest.json needs to be
+      build_dir: build  #  where build output files are located. It is also where mmcf-manifest.json needs to be
 
