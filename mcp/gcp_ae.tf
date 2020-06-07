@@ -201,7 +201,7 @@ resource "google_app_engine_flexible_app_version" "self" {
     for_each = lookup(each.value, "entrypoint", null) == null ? {} : {entrypoint: {shell: each.value.entrypoint}}
 
     content {
-      shell = lookup(entrypoint, "shell", null)
+      shell = lookup(entrypoint.value, "shell", null)
     }
   }
 
@@ -409,7 +409,7 @@ resource "google_app_engine_standard_app_version" "self" {
     for_each = lookup(each.value, "entrypoint", null) == null ? {} : {entrypoint: {shell: each.value.entrypoint}}
 
     content {
-      shell = lookup(entrypoint, "shell", null)
+      shell = lookup(entrypoint.value, "shell", null)
     }
   }
 
