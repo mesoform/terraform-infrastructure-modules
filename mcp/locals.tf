@@ -30,7 +30,7 @@ locals {
       # level. See env_variables below
       as => merge(lookup(local.gae.components, "common", {}), config)
       if contains([
-        lookup(lookup(local.gae.components, as), "env", "standard"),
+        lookup(lookup(local.gae.components.specs, as), "env", "standard"),
         lookup(config, "env", "standard")
       ], "flex")
   }
@@ -39,7 +39,7 @@ locals {
     for as, config in local.gae.components.specs:
       as => merge(lookup(local.gae.components, "common", {}), config)
       if contains([
-        lookup(lookup(local.gae.components, as), "env", "standard"),
+        lookup(lookup(local.gae.components.specs, as), "env", "standard"),
         lookup(config, "env", "standard")
       ], "standard")
   }
