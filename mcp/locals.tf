@@ -29,19 +29,13 @@ locals {
       #This doesn't merge complex maps. Any nested map requirements need to handled at the property
       # level. See env_variables below
       as => merge(lookup(local.gae.components, "common", {}), config)
-      if contains([
-        lookup(lookup(local.gae.components.specs, as), "env", "standard"),
-        lookup(config, "env", "standard")
-      ], "flex")
+      if lookup(merge(lookup(local.gae.components, "common", {}), config), "env", "standard") == "flex"
   }
   //noinspection HILUnresolvedReference
   as_std_specs = {
     for as, config in local.gae.components.specs:
       as => merge(lookup(local.gae.components, "common", {}), config)
-      if contains([
-        lookup(lookup(local.gae.components.specs, as), "env", "standard"),
-        lookup(config, "env", "standard")
-      ], "standard")
+      if lookup(merge(lookup(local.gae.components, "common", {}), config), "env", "standard") == "standard"
   }
   //noinspection HILUnresolvedReference
   as_all_specs = {
