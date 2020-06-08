@@ -267,3 +267,21 @@ Error: "deployment.0.files": one of `deployment.0.files,deployment.0.zip` must b
  375: resource "google_app_engine_standard_app_version" "self" {
 
 ```
+#### Invalid function argument (`as => merge(lookup(local.gae.components, "common", {}), config))`)
+```bash
+Error: Invalid function argument
+
+  on locals.tf line 45, in locals:
+  45:       as => merge(lookup(local.gae.components, "common", {}), config)
+    |----------------
+    | local.gae.components is object with 2 attributes
+
+Invalid value for "maps" parameter: argument must not be null.
+
+```
+gcp_ae.yml probably has a `common:` key with no values. I.e.
+```yamlex
+components:
+  common:
+  specs:
+```
