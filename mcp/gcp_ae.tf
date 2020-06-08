@@ -116,16 +116,6 @@ resource "google_project_iam_member" "gae_api" {
 }
 
 
-resource "google_project_iam_member" "cloud_build" {
-  count = length(local.as_flex_specs) > 0 ? 1 : 0
-  # force dependency on the APIs being enabled
-  project = google_project_service.flex.0.project
-  role = "roles/compute.networkUser"
-  //noinspection HILUnresolvedReference
-  member = "serviceAccount:service-${lookup(local.gae, "create_google_project", false) ? google_project.self.0.number : data.google_project.self.0.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
-}
-
-
 //noinspection HILUnresolvedReference
 resource "google_app_engine_flexible_app_version" "self" {
   for_each = local.as_flex_specs

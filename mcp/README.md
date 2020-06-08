@@ -114,9 +114,9 @@ labels: &project_labels
  
 * As a minimum, the account performing the deployment will need some roles on the project being 
  deployed to. If you are creating the project from scratch, then these will come with roles/owner
-    * App Engine Deployer
+    * App Engine Admin
     * Cloud Build Service Account
-    * Service Usage Consumer
+    * Service Usage Admin
     * Storage Admin
 
 * Other roles when managing the whole project set-up are
