@@ -78,19 +78,12 @@ The following sections describe how to use MMCF for different target platforms. 
 
 ### project.yml
 
-* **mcf_version**: (string) version of MCF to use. _Defaults to 1.0_
-* **[REQUIRED] name**: (string) Name of the project. If you want to reference this in later configuration, it
- must meet the minimum requirements of the target platform(s) being deployed to. For example, 
- Google App Engine requires that many IDs/names must be 1-63 characters long, and comply with
- RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression 
- [a-z]\([-a-z0-9]*[a-z0-9])?. The first character must be a lowercase letter, and all following 
- characters (except for the last character) must be a dash, lowercase letter, or digit. The last 
- character must be a lowercase letter or digit.
-* **version**: (string) deployment version of your application/service. Version must contain only
- lowercase letters, numbers, dashes (-), underscores (_), and dots (.). Spaces are not allowed, and
- dashes, underscores and dots cannot be consecutive (e.g. "1..2" or "1.\_2") and cannot be at the 
- beginning or end (e.g. "-1.2" or "1.2\_")
-* **labels**: (map) a collection of keys and values to represent labels required for your deployment.
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `mcf_version` | string | false | version of MCF to use. | `1.0` |
+| `name` | string | true | Name of the project. If you want to reference this in later configuration, it must meet the minimum requirements of the target platform(s) being deployed to. For example, Google App Engine requires that many IDs/names must be 1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]\([-a-z0-9]*[a-z0-9])?. The first character must be a lowercase letter, and all following characters (except for the last character) must be a dash, lowercase letter, or digit. The last character must be a lowercase letter or digit. | none |
+| `version` | string | false | deployment version of your application/service. Version must contain only lowercase letters, numbers, dashes (-), underscores (_), and dots (.). Spaces are not allowed, and dashes, underscores and dots cannot be consecutive (e.g. "1..2" or "1.\_2") and cannot be at the beginning or end (e.g. "-1.2" or "1.2\_") | none |
+| `labels` | map | false | a collection of keys and values to represent labels required for your deployment. | none |
 
 Example:
 
@@ -118,6 +111,7 @@ labels: &project_labels
     * Cloud Build Service Account
     * Service Usage Admin
     * Storage Admin
+    * Project IAM Admin
 
 * Other roles when managing the whole project set-up are
     * roles/resourcemanager.folderViewer on the folder that you want to create the project in; or
@@ -137,54 +131,27 @@ labels: &project_labels
  
 #### Google App Engine basic configuration
 
-| key | type | description | default |
-|:---:|:----:|:-----------:|:-------:|
-| **create_google_project**| boolean | whether or not to create a new project with the details provided. implies the project will be deleted with the deployment when asked to delete.| false |
- 
- 
-* **[REQUIRED] project_id**: (string) The GCP project identifier. https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project
-* **project_name**: (string) more descriptive and human understandable identifier for the project. 
- Defaults to the `project_id`
-* **auto_create_network**: (boolean) automatically create a default network in the Google project
-* **[NOTICE] billing_account**: (string) The alphanumeric ID of the billing account this project belongs to.
- Required if creating a new project from scratch 
-* **[REQUIRED] location_id**: (string) The geographical location to serve the app from
-* **auth_domain**: (string) The domain to authenticate users with when using App Engine's User API
-* **serving_status**: (enum) The serving status of the app. Options are SERVING and STOPPED
-* **iap**: (map) Settings for enabling Cloud Identity Aware Proxy. If iap map exists, the 
-`oauth2_client_id` and `oauth2_client_secret` fields must be non-empty.
-    * **enabled**: (boolean) IAP enabled or not. _Default: false_
-    * **oauth2_client_id**: OAuth2 client ID to use for 
-    the authentication flow
-    * **oauth2_client_secret**: OAuth2 client secret to 
-    use for the authentication flow. The SHA-256 hash of the value is returned in the 
-    oauth2ClientSecretSha256 field
-* **feature_settings**: (map) of optional settings to configure specific App Engine features. If
-feature_settings map exists, `split_health_checks` must be non-empty
-    * **split_health_checks**: (boolean) Set to false to use the legacy health check instead of the 
-    readiness and liveness checks.
-
----- one of ----
-
-* **organization_name**: (string) The name of the organization this project belongs to. Only one of
- organization_name or folder_id may be specified. To specify an organization for the project to 
- be part of, the account performing the deployment 
-* **folder_id**: (string) The numeric ID of the folder this project should be created under. Only
- one of organization_name or folder_name may be specified. The folder ID can be found in the 
- [resource manager section of the GCP console](https://console.cloud.google.com/cloud-resource-manager)
- 
----- end ----
-
-* **components**: (map) of component (services) which make up the App Engine applications. The keys
- are unique IDs for each components where at least one must be named `default` and the value for 
- each key is another map of which the format depends on the App Engine version (Flexible or 
- standard) and is described below 
-
-
-#### Google App Engine Standard component configuration
-static_files:
-path: /static [REQUIRED IN CONTEXT]
-upload_path_regex: * [REQUIRED IN CONTEXT]
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `project_id` | string | true | The GCP project identifier. https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project | none | 
+| `project_name` | string | false | more descriptive and human understandable identifier for the project. | value of `project_id` |
+| `create_google_project` | boolean | false | whether or not to create a new project with the details provided. implies the project will be deleted with the deployment when asked to delete.| `false` |
+| `billing_account` | string | true if `create_google_project` is true | The alphanumeric ID of the billing account this project belongs to. | none |
+| `organization_name` | string | true if `create_google_project` is true | [MUTUALLY EXCLUSIVE WITH `folder_id`] The name of the organization this project belongs to. Only one of organization_name or folder_id may be specified. To specify an organization for the project to be part of, the account performing the deployment | none | 
+| `folder_id` | string | true if `create_google_project` is true | [MUTUALLY EXCLUSIVE WITH `organization_name`]The numeric ID of the folder this project should be created under. Only one of organization_name or folder_name may be specified. The folder ID can be found in the [resource manager section of the GCP console](https://console.cloud.google.com/cloud-resource-manager) | none |
+| `auto_create_network` | boolean | false | automatically create a default network in the Google project | none |
+| `location_id` | string | true | The geographical location to serve the app from | none |
+| `auth_domain` | string | false | The domain to authenticate users with when using App Engine's User API | none |
+| `serving_status` | enum | false | The serving status of the app. Options are SERVING and STOPPED | none |
+| `iap` | map | false | Settings for enabling Cloud Identity Aware Proxy. If iap map exists, the `oauth2_client_id` and `oauth2_client_secret` fields must be non-empty.  | none |
+| `iap.enabled` | boolean | true within IAP context only | IAP enabled or not. | `false` |
+| `iap.oauth2_client_id` | string | true within IAP context only | OAuth2 client ID to use for the authentication flow | none |
+| `iap.oauth2_client_secret` | string | true within IAP context only | OAuth2 client secret to use for the authentication flow. The SHA-256 hash of the value is returned in the oauth2ClientSecretSha256 field | none |
+| `feature_settings` | map | false | of optional settings to configure specific App Engine features. If feature_settings map exists, `split_health_checks` must be non-empty | none |
+| `feature_settings.split_health_checks` | boolean | false | Set to false to use the legacy health check instead of the readiness and liveness checks. | none |
+| `components` | map | true | map of app/service specifications and defaults for those specifications | none |
+| `components.spec` | map | true | a set of key:value pairs where the keys are unique IDs for each components and at least one must be named `default`. The value for each key is another map, of which the format depends on the App Engine version (Flexible or standard) and is described below. | none |
+| `components.common` | map | false | all attributes which can be specified for any service in components spec can be specified here as defaults which all services will use or chose to override | none |
 
 Example:
 ```yamlex
@@ -199,64 +166,47 @@ project_labels: &google_project_labels
 
 
 components:
-    common:
-      env_variables:
-        'env': dev
-      threadsafe: True
-    specs:
-      app1:
-        runtime: custom
-        env: flex
-        service: mesoform-admin
-        manual_scaling:
-          instances: 6
-        inbound_services:
-        - warmup
-        derived_file_type:
-        - java_precompiled
-        auto_id_policy: default
-        env_variables:
-          'IS_GAE': 'true'
-        api_version: 'user_defined'
-        liveness_check:
-          path: "/liveness_check"
-          check_interval_sec: 10
-          timeout_sec: 4
-          failure_threshold: 2
-          success_threshold: 2
-        deployment:
-          zip:
-            source_url: http://zip.com
-            files_count: 1
-          cloud_build_options:
-            app_yaml_path: /test_files
-            cloud_build_timeout_sec: 900
-      default:
-        runtime: java8
-        manual_scaling:
-          instances: 1
-        inbound_services:
-        - warmup
-        derived_file_type:
-        - java_precompiled
-        threadsafe: False
-        auto_id_policy: default
-        env_variables:
-          'IS_GAE': 'true'
-        api_version: 'user_defined'
-        handlers:
-        - url: (/.*)
-          static_files: __static__\1
-          upload: __NOT_USED__
-          require_matching_file: True
-          login: optional
-          secure: optional
-        - url: /.*
-          script: unused
-          login: optional
-          secure: optional
-        skip_files: app.yaml
+  common:
+    entrypoint: java -cp "WEB-INF/lib/*:WEB-INF/classes/." io.ktor.server.jetty.EngineMain
+    runtime: java11
+    env: flex
+    env_variables:
+      GCP_ENV: true
+      GCP_PROJECT_ID: *project_id
+    system_properties:
+      java.util.logging.config.file: WEB-INF/logging.properties
+  specs:
+    experiences-search-sync:
+      env: standard
+    experiences-search:
+      env: standard
+    experiences-sidecar:
+      env: standard
+    default:
+      root_dir: experiences-service
+      runtime: java8
 ```
+
+#### Google App Engine common attributes
+Below is a list of attributes which are available to both GAE standard and GAE flexible apps (this 
+ is not the same as components.common which is just a place to define defaults for all apps/services) 
+
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `env` | string | false | either `flex` or `standard` are the only values allowed here | `standard` |
+| `root_dir` | string | false | on-disk directory for the app/service. The value is relative to the project root where the `gcp_ae.yml` and `project.yml` files are located. If this is omitted, MMCF will expect files to be in a directory of the same name as the app. So, for the default app, you will either need a directory called `default` or set this value to the real name of the directory | spec key name (I.e. the name of the app/service) |
+| `runtime` | string | true | GAE available runtime. This differs between environment. Check the GAE docs for details | none |
+| `entrypoint` | string | true | command to run to start the app/service when deployed to GAE | none |
+
+#### Google App Engine Standard component configuration
+attributes specific to only GAE standard
+
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| static_files | string | false | | none |
+| static_files.path | string | true within static_files context only | | none |
+| upload_path_regex | string |  true within static_files context only | | none |
+
 
 #### Troubleshooting Google App Engine
 #### Error: "deployment.0.files": one of `deployment.0.files,deployment.0.zip` must be specified 
