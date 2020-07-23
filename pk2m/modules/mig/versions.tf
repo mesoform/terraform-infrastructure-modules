@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-output "self_link" {
-  description = "Self-link of instance template"
-  value       = google_compute_instance_template.tpl.self_link
-}
-
-output "name" {
-  description = "Name of instance template"
-  value       = google_compute_instance_template.tpl.name
-}
-
-output "tags" {
-  description = "Tags that will be associated with instance(s)"
-  value       = google_compute_instance_template.tpl.tags
+terraform {
+  required_version = "~> 0.12.6"
+  required_providers {
+    google      = ">= 2.7, <4.0"
+    google-beta = ">= 2.7, <4.0"
+  }
 }

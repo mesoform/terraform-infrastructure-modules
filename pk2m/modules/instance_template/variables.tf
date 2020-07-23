@@ -74,7 +74,7 @@ variable "source_image_family" {
 
 variable "source_image_project" {
   description = "Project where the source image comes from. The default project contains images that support Shielded VMs if desired"
-  default     = "gce-uefi-images"
+  default     = "debian-cloud"
 }
 
 variable "disk_size_gb" {

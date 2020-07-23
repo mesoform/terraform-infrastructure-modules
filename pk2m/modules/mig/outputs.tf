@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
+// This file was automatically generated from a template in ./autogen
+
 output "self_link" {
-  description = "Self-link of instance template"
-  value       = google_compute_instance_template.tpl.self_link
+  description = "Self-link of managed instance group"
+  value       = google_compute_region_instance_group_manager.mig.self_link
 }
 
-output "name" {
-  description = "Name of instance template"
-  value       = google_compute_instance_template.tpl.name
-}
-
-output "tags" {
-  description = "Tags that will be associated with instance(s)"
-  value       = google_compute_instance_template.tpl.tags
+output "instance_group" {
+  description = "Instance-group url of managed instance group"
+  value       = google_compute_region_instance_group_manager.mig.instance_group
 }
