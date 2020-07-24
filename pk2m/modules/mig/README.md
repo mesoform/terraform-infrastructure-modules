@@ -3,6 +3,21 @@
 This module is used to create a [google_compute_region_instance_group_manager](https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html),
 and optionally, an autoscaler and healthchecks.
 
+## Usage
+
+Basic usage of this submodule is as follows:
+
+```hcl
+module "mig" {
+  source            = "./modules/mig"
+  project_id        = "<PROJECT ID>"
+  region            = "europe-west2"
+  target_size       = 3
+  hostname          = "mig-simple"
+  instance_template = <INSTANCE TEMPLATE URL>
+}
+```
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 

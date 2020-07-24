@@ -27,8 +27,8 @@ variable "region" {
   default     = "europe-west2"
 }
 
-variable "subnetwork" {
-  description = "The subnetwork to host the compute instances in"
+variable "network_name" {
+  description = "The name of the network being created"
 }
 
 variable "target_size" {

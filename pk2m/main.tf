@@ -26,11 +26,38 @@ provider "google-beta" {
   version = "~> 3.0"
 }
 
+module "vpc" {
+    source  = "./modules/vpc"
+
+    project_id   = var.project_id
+    network_name = var.network_name
+
+    shared_vpc_host = false
+}
+
+module "subnet" {
+    source  = "./modules/subnets"
+
+    project_id   = var.project_id
+    network_name = module.vpc.network_name
+
+    subnets = [
+        {
+            subnet_name           = "${module.vpc.network_name}-subnet"
+            subnet_ip             = "10.154.0.0/20"
+            subnet_region         = "europe-west2"
+            subnet_private_access = "true"
+            subnet_flow_logs      = "true"
+            description           = "Docker Swarm subnet"
+        }
+    ]
+}
+
 module "instance_template" {
-  source             = "./modules/instance_template"
+  source            = "./modules/instance_template"
   project_id         = var.project_id
   service_account    = var.service_account
-  subnetwork         = var.subnetwork
+  subnetwork         = module.subnet.subnets["${var.region}/${module.vpc.network_name}-subnet"].name
   subnetwork_project = var.project_id
 }
 

@@ -4,6 +4,20 @@ This submodule allows you to create a `google_compute_instance_template`
 resource, which is used as the basis for the other instance, managed, and
 unmanaged instance groups submodules.
 
+## Usage
+
+Basic usage of this submodule is as follows:
+
+```hcl
+module "instance_template" {
+  source             = "./modules/instance_template"
+  project_id         = "<PROJECT ID>"
+  service_account    = { email = "service@project.iam.gserviceaccount.com", scopes = ["userinfo-email", "compute-ro", "storage-ro"] }
+  subnetwork         = default
+  subnetwork_project = "<PROJECT ID>"
+}
+```
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
