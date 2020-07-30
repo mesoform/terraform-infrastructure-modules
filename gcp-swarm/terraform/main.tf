@@ -54,11 +54,12 @@ module "subnet" {
 }
 
 module "instance_template" {
-  source            = "./modules/instance_template"
+  source             = "./modules/instance_template"
   project_id         = var.project_id
   service_account    = var.service_account
   subnetwork         = module.subnet.subnets["${var.region}/${module.vpc.network_name}-subnet"].name
   subnetwork_project = var.project_id
+  access_config      = [{ nat_ip = "", network_tier="STANDARD"}]
 }
 
 module "mig" {
@@ -68,4 +69,46 @@ module "mig" {
   target_size       = var.target_size
   hostname          = "mig-simple"
   instance_template = module.instance_template.self_link
+}
+
+data "google_compute_region_instance_group" "self_link" {
+  self_link = module.mig.instance_group
+
+  depends_on = [ module.mig.self_link ]
+}
+
+data "google_compute_instance" "instances" {
+  count = var.target_size
+
+  self_link = "${data.google_compute_region_instance_group.self_link.instances[count.index].instance}"
+
+  depends_on = [ module.mig ]
+}
+
+output "instances_internal_ips" {
+  value = "${data.google_compute_instance.instances.*.network_interface.0.network_ip}"
+}
+
+output "instances_external_ips" {
+  value = "${data.google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip}"
+}
+
+data "template_file" "inventory" {
+  template = "${file("templates/inventory.tpl")}"
+
+  depends_on = [ data.google_compute_instance.instances ]
+
+  vars = {
+    managers = "${join("\n", data.google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip)}"
+  }
+}
+
+resource "null_resource" "cmd" {
+  triggers = {
+    template_rendered = "${data.template_file.inventory.rendered}"
+  }
+
+  provisioner "local-exec" {
+    command = "echo '${data.template_file.inventory.rendered}' > ../ansible/inventory"
+  }
 }
