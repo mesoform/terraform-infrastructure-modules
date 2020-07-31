@@ -1,2 +1,2 @@
 [managers]
-{"${managers}"}
+${managers}
