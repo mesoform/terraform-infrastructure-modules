@@ -77,12 +77,21 @@ data "google_compute_region_instance_group" "self_link" {
   depends_on = [ module.mig.self_link ]
 }
 
+resource "null_resource" "wait" {
+
+  provisioner "local-exec" {
+    command = "while [ $(gcloud compute --project \"${var.project_id}\" instances list | wc -l) -lt ${var.target_size}+1 ]; do sleep 5; done"
+  }
+
+  depends_on = [ module.mig ]
+}
+
 data "google_compute_instance" "instances" {
   count = var.target_size
 
   self_link = "${data.google_compute_region_instance_group.self_link.instances[count.index].instance}"
 
-  depends_on = [ module.mig ]
+  depends_on = [ null_resource.wait ]
 }
 
 output "instances_internal_ips" {
