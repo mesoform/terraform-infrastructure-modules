@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-output "subnets" {
-  value       = google_compute_subnetwork.subnetwork
-  description = "The created subnet resources"
+terraform {
+  required_version = "~> 0.12.6"
+  required_providers {
+    google = "<4.0,>= 2.12"
+  }
 }

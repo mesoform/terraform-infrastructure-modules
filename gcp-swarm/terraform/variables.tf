@@ -43,3 +43,11 @@ variable "service_account" {
   })
   description = "Service account to attach to the instance. See https://www.terraform.io/docs/providers/google/r/compute_instance_template.html#service_account."
 }
+
+variable "secure_source_ip_cidr" {
+  description = "The range of IP addresses that can access the instances"
+}
+
+variable "gcp_ssh_user" {}
+
+variable "gcp_public_key_path" {}

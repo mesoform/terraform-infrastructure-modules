@@ -53,6 +53,57 @@ module "subnet" {
     ]
 }
 
+locals {
+  custom_rules = {
+    allow-ingress-ssh = {
+      description = "Allow secure_ip INGRESS to port 22"
+      direction = "INGRESS"
+      action = "allow"
+      ranges = [
+        "${var.secure_source_ip_cidr}"]
+      # source or destination ranges (depends on `direction`)
+      use_service_accounts = false
+      # if `true` targets/sources expect list of instances SA, if false - list of tags
+      targets = null
+      # target_service_accounts or target_tags depends on `use_service_accounts` value
+      sources = null
+      # source_service_accounts or source_tags depends on `use_service_accounts` value
+      rules = [
+        {
+          protocol = "tcp"
+          ports = [
+            "22"]
+        }
+      ]
+
+      extra_attributes = {
+        priority = 1000
+      }
+    }
+  }
+}
+
+module "firewall_rules" {
+  source                  = "./modules/fabric-net-firewall"
+  project_id              = var.project_id
+  network                 = module.vpc.network_name
+  internal_ranges_enabled = true
+  internal_ranges         = [ module.subnet.subnets["${var.region}/${module.vpc.network_name}-subnet"].ip_cidr_range ]
+
+  internal_allow = [
+    {
+      protocol = "icmp"
+    },
+    {
+      protocol = "tcp"
+    },
+    {
+      protocol = "udp"
+    }
+  ]
+  custom_rules = local.custom_rules
+}
+
 module "instance_template" {
   source             = "./modules/instance_template"
   project_id         = var.project_id
@@ -60,6 +111,7 @@ module "instance_template" {
   subnetwork         = module.subnet.subnets["${var.region}/${module.vpc.network_name}-subnet"].name
   subnetwork_project = var.project_id
   access_config      = [{ nat_ip = "", network_tier="STANDARD"}]
+  metadata           = { ssh-keys = "${var.gcp_ssh_user}:${file(var.gcp_public_key_path)}" }
 }
 
 module "mig" {
