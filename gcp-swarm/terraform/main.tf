@@ -80,7 +80,7 @@ data "google_compute_region_instance_group" "self_link" {
 resource "null_resource" "wait" {
 
   provisioner "local-exec" {
-    command = "while [ $(gcloud compute --project \"${var.project_id}\" instances list | wc -l) -lt ${var.target_size}+1 ]; do sleep 5; done"
+    command = "while [ $(gcloud compute --project \"${var.project_id}\" instances list | wc -l) -le ${var.target_size} ]; do sleep 5; done"
   }
 
   depends_on = [ module.mig ]
