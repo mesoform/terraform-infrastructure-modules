@@ -55,12 +55,39 @@ module "subnet" {
 
 locals {
   custom_rules = {
+    allow-swarm-instances = {
+      description          = "Allow swarm instances comms"
+      direction            = "INGRESS"
+      action               = "allow"
+      ranges               = [ "10.154.0.0/20" ]
+      use_service_accounts = false         # if `true` targets/sources expect list of instances SA, if false - list of tags
+      targets              = null          # target_service_accounts or target_tags depends on `use_service_accounts` value
+      sources              = null          # source_service_accounts or source_tags depends on `use_service_accounts` value
+      rules = [
+        {
+          protocol = "tcp"
+          ports    = ["22", "2377", "7946"]
+        },
+        {
+          protocol = "udp"
+          ports    = ["7946", "4789"]
+        },
+        {
+          protocol = "icmp"
+          ports    = []
+        },
+      ]
+
+      extra_attributes = {
+        priority = 1000
+      }
+    }
+
     allow-ingress-ssh = {
-      description = "Allow secure_ip INGRESS to port 22"
+      description = "Allow secure_source_ip INGRESS to port 22"
       direction = "INGRESS"
       action = "allow"
-      ranges = [
-        "${var.secure_source_ip_cidr}"]
+      ranges = [ "${var.secure_source_ip}/32" ]
       # source or destination ranges (depends on `direction`)
       use_service_accounts = false
       # if `true` targets/sources expect list of instances SA, if false - list of tags
