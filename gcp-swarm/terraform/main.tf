@@ -56,39 +56,10 @@ module "subnet" {
 locals {
   custom_rules = {
     allow-swarm-instances = {
-      description          = "Allow swarm instances comms"
-      direction            = "INGRESS"
-      action               = "allow"
-      ranges               = [ "10.154.0.0/20" ]
-      use_service_accounts = false         # if `true` targets/sources expect list of instances SA, if false - list of tags
-      targets              = null          # target_service_accounts or target_tags depends on `use_service_accounts` value
-      sources              = null          # source_service_accounts or source_tags depends on `use_service_accounts` value
-      rules = [
-        {
-          protocol = "tcp"
-          ports    = ["22", "2377", "7946"]
-        },
-        {
-          protocol = "udp"
-          ports    = ["7946", "4789"]
-        },
-        {
-          protocol = "icmp"
-          ports    = []
-        },
-      ]
-
-      extra_attributes = {
-        priority = 1000
-      }
-    }
-
-    allow-ingress-ssh = {
-      description = "Allow secure_source_ip INGRESS to port 22"
+      description = "Allow swarm instances comms and cluster management"
       direction = "INGRESS"
       action = "allow"
-      ranges = [ "${var.secure_source_ip}/32" ]
-      # source or destination ranges (depends on `direction`)
+      ranges = ["0.0.0.0/0"]
       use_service_accounts = false
       # if `true` targets/sources expect list of instances SA, if false - list of tags
       targets = null
@@ -99,8 +70,21 @@ locals {
         {
           protocol = "tcp"
           ports = [
-            "22"]
-        }
+            "22",
+            "2377",
+            "7946",
+            "8080"]
+        },
+        {
+          protocol = "udp"
+          ports = [
+            "7946",
+            "4789"]
+        },
+        {
+          protocol = "icmp"
+          ports = []
+        },
       ]
 
       extra_attributes = {
@@ -159,7 +143,7 @@ data "google_compute_region_instance_group" "self_link" {
 resource "null_resource" "wait" {
 
   provisioner "local-exec" {
-    command = "while [ $(gcloud compute --project \"${var.project_id}\" instances list | wc -l) -le ${var.target_size} ]; do sleep 5; done"
+    command = "while [ $(gcloud compute --project \"${var.project_id}\" instances list | grep \"RUNNING\" | wc -l) -lt ${var.target_size} ]; do sleep 5; done"
   }
 
   depends_on = [ module.mig ]

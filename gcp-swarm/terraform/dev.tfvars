@@ -5,4 +5,3 @@ region = "europe-west2"
 gcp_ssh_user = "debian"
 gcp_public_key_path = "~/.ssh/id_rsa.pub"
 target_size = 3
-secure_source_ip = "147.161.96.35"

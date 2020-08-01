@@ -22,3 +22,12 @@
   gather_facts: False
   roles:
     - swarm-init
+
+- name: Join Swarm cluster
+  hosts: managers
+  gather_facts: False
+  vars:
+      token: "{{ hostvars[groups['managers'][0]]['manager_token']['stdout'] }}"
+      manager: "{{ hostvars[groups['managers'][0]]['inventory_hostname'] }}"
+  roles:
+    - swarm-join
