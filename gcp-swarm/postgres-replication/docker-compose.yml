@@ -10,12 +10,18 @@ services:
       - POSTGRES_DB=testdb
       - PG_REP_USER=testrep
       - PG_REP_PASSWORD=123456
+      - HBA_ADDRESS=0.0.0.0/0
     ports:
       - "5432:5432"
     networks:
       default:
         aliases:
           - pg_cluster
+    deploy:
+      placement:
+        constraints:
+        - node.labels.type == primary
+        - node.role == manager
   pg_slave:
     image: pgslave
     environment:
@@ -24,11 +30,17 @@ services:
       - POSTGRES_DB=testdb
       - PG_REP_USER=testrep
       - PG_REP_PASSWORD=123456
-      - PG_MASTER_HOST=pg_master
+      - PG_MASTER_HOST=pg_master # This needs to be the swarm node private IP instead of the service IP
+      - HBA_ADDRESS=0.0.0.0/0
     networks:
       default:
         aliases:
           - pg_cluster
+    deploy:
+      placement:
+        constraints:
+        - node.labels.type != primary
+        - node.role == manager
 networks:
   default:
 

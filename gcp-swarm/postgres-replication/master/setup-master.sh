@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "host replication all 0.0.0.0/0 md5" >> "$PGDATA/pg_hba.conf"
+echo "host replication all ${HBA_ADDRESS} md5" >> "$PGDATA/pg_hba.conf"
 
 set -e
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL

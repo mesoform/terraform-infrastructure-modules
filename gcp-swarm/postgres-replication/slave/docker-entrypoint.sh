@@ -4,13 +4,13 @@ echo "*:*:*:$PG_REP_USER:$PG_REP_PASSWORD" > ~/.pgpass
 
 chmod 0600 ~/.pgpass
 
-until pg_basebackup -h 10.154.0.3 -D ${PGDATA} -U ${PG_REP_USER} -vP -W
+until pg_basebackup -h ${PG_MASTER_HOST} -D ${PGDATA} -U ${PG_REP_USER} -vP -W
     do
         echo "Waiting for master to connect..."
         sleep 1s
 done
 
-echo "host replication all 0.0.0.0/0 md5" >> "$PGDATA/pg_hba.conf"
+echo "host replication all ${HBA_ADDRESS} md5" >> "$PGDATA/pg_hba.conf"
 
 set -e
 
