@@ -20,6 +20,8 @@
 - name: Init Swarm cluster
   hosts: managers
   gather_facts: False
+  vars:
+      id: "{{ hostvars[groups['managers'][0]]['node_id']['stdout'] }}"
   roles:
     - swarm-init
 

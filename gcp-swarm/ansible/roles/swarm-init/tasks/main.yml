@@ -2,11 +2,24 @@
   command: sudo docker swarm init --advertise-addr {{ inventory_hostname }}
   run_once: true
 
+- name: Node ID
+  command: sudo docker node ls -q
+  register: node_id
+  run_once: true
+
+#- name: Show Manager ID
+#  debug: var=node_id.stdout
+#  run_once: true
+
+- name: Add primary label
+  command: sudo docker node update --label-add type=primary {{ id }}
+  run_once: true
+
 - name: Manager Token
   command: sudo docker swarm join-token manager -q
   register: manager_token
   run_once: true
 
-- name: Show Manger Token
-  debug: var=manager_token.stdout
-  run_once: true
+#- name: Show Manager Token
+#  debug: var=manager_token.stdout
+#  run_once: true
