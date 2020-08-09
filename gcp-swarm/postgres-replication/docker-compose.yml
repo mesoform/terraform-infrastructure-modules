@@ -1,7 +1,7 @@
 version: "3"
 services:
   pg_master:
-    image: pgmaster
+    image: mesoform/pg10master
     volumes:
       - pg_data:/var/lib/postgresql/data
     environment:
@@ -23,14 +23,14 @@ services:
         - node.labels.type == primary
         - node.role == manager
   pg_slave:
-    image: pgslave
+    image: mesoform/pg10slave
     environment:
       - POSTGRES_USER=testuser
       - POSTGRES_PASSWORD=123456
       - POSTGRES_DB=testdb
       - PG_REP_USER=testrep
       - PG_REP_PASSWORD=123456
-      - PG_MASTER_HOST=   # This needs to be the swarm node private IP instead of the service name (pg_master) which resolves to the service IP
+      - PG_MASTER_HOST=       # This needs to be the swarm node private IP instead of the service name (pg_master) which resolves to the service IP
       - HBA_ADDRESS=0.0.0.0/0
     networks:
       default:
