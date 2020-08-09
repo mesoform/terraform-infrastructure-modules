@@ -30,7 +30,7 @@ services:
       - POSTGRES_DB=testdb
       - PG_REP_USER=testrep
       - PG_REP_PASSWORD=123456
-      - PG_MASTER_HOST=pg_master # This needs to be the swarm node private IP instead of the service IP
+      - PG_MASTER_HOST=   # This needs to be the swarm node private IP instead of the service name (pg_master) which resolves to the service IP
       - HBA_ADDRESS=0.0.0.0/0
     networks:
       default:

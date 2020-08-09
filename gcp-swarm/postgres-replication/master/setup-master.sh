@@ -13,4 +13,5 @@ archive_command = 'cd .'
 max_wal_senders = 8
 wal_keep_segments = 8
 hot_standby = on
+synchronous_standby_names = '*'
 EOF
