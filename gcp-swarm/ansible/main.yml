@@ -1,0 +1,35 @@
+---
+- name: install wget, python and docker on all instances
+  hosts: managers
+  gather_facts: false
+  tasks:
+    - name: run apt-get update and install wget python docker
+      raw: "{{ item }}"
+      loop:
+        - sudo apt-get update
+        - sudo apt-get -y install wget python docker docker.io
+      become: true
+      ignore_errors: true
+
+- name: Install Python
+  hosts: managers
+  gather_facts: False
+  roles:
+    - python
+
+- name: Init Swarm cluster
+  hosts: managers
+  gather_facts: False
+  vars:
+      id: "{{ hostvars[groups['managers'][0]]['node_id']['stdout'] }}"
+  roles:
+    - swarm-init
+
+- name: Join Swarm cluster
+  hosts: managers
+  gather_facts: False
+  vars:
+      token: "{{ hostvars[groups['managers'][0]]['manager_token']['stdout'] }}"
+      manager: "{{ hostvars[groups['managers'][0]]['inventory_hostname'] }}"
+  roles:
+    - swarm-join
