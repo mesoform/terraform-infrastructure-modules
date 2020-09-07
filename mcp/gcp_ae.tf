@@ -36,7 +36,7 @@ resource "google_storage_bucket" "self" {
   name = local.project.name
   bucket_policy_only = true
   default_event_based_hold = false
-  labels = local.project.labels
+  labels = lookup(local.project, "labels", null)
   # ToDo handle region better between app engine and cloud storage
   location = "${local.gae.location_id}1"
   requester_pays = false
@@ -366,7 +366,7 @@ resource "google_app_engine_standard_app_version" "self" {
   for_each = local.as_std_specs
 
   project = google_project_service.std.0.project
-  version_id = lookup(each.value, "version_id", local.project.version)
+  version_id = lookup(each.value, "version_id", lookup(local.project, "version", "v1"))
   service = lookup(each.value, "service", each.key)
   runtime = lookup(each.value, "runtime", null)
   instance_class = lookup(each.value, "instance_class", null)
