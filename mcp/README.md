@@ -208,7 +208,9 @@ attributes specific to only GAE standard
 | upload_path_regex | string |  true within static_files context only | | none |
 
 #### Manifest Files
-Your AS directory should contain a manifest file: `mmcf-manifest.json`, which by default is located in the 'root_dir/build' directory.
+For GAE deployments with a deployment type of `files`, a `mmcf-manifest.json` manifest file should be included. 
+
+By default this file is located in the `<root_dir>/build` directory for the AS, and will contain the keys `artifactDir` and `contents`.
 
 Example:
 ```json
