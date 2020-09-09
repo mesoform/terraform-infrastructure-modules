@@ -207,10 +207,34 @@ attributes specific to only GAE standard
 | static_files.path | string | true within static_files context only | | none |
 | upload_path_regex | string |  true within static_files context only | | none |
 
+#### Manifest Files
+For GAE deployments with a deployment type of `files`, a `mmcf-manifest.json` manifest file should be included. 
+
+By default this file is located in the `<root_dir>/build` directory for the AS, and will contain the keys `artifactDir` and `contents`.
+
+Example:
+```json
+{
+  "artifactDir": "exploded-project-app",
+  "contents": [
+    "META-INF/MANIFEST.MF",
+    "WEB-INF/logging.properties",
+    "WEB-INF/classes/logback.xml",
+    "WEB-INF/classes/application.conf",
+    "WEB-INF/lib/annotations-4.1.1.4.jar",
+    "WEB-INF/lib/commons-logging-1.2.jar",
+    "WEB-INF/lib/gson-2.8.6.jar",
+    "WEB-INF/lib/api-common-1.9.0.jar",
+    "WEB-INF/lib/ktor-network-1.3.2.jar",
+    "WEB-INF/lib/ktor-utils-jvm-1.3.2.jar",
+    "WEB-INF/web.xml"
+  ]
+}
+```
 
 #### Troubleshooting Google App Engine
 #### Error: "deployment.0.files": one of `deployment.0.files,deployment.0.zip` must be specified 
-Receiving an error like below is likely cause by missing manifest files in the build directory
+Receiving an error like below is likely caused by missing manifest files in the build directory
 ```bash
 Error: "deployment.0.files": one of `deployment.0.files,deployment.0.zip` must be specified
   on .terraform/modules/deployment/mcp/gcp_ae.tf line 375, in resource "google_app_engine_standard_app_version" "self":
