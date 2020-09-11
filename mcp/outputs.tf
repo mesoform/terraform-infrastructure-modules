@@ -16,3 +16,8 @@ output "gae_std" {
 output "kubernetes" {
   value = local.k8s
 }
+
+ouput "crun" {
+  value = local.crun
+}
+

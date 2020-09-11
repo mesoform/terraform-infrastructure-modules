@@ -4,7 +4,8 @@
 [Structure](#Structure)     
 [MMCF](#MMCF)     
 [project.yml](#projectyml)      
-[gcp_ae.yml](#gcp_aeyml)
+[gcp_ae.yml](#gcp_aeyml)    
+[gcp_cp.yml](#gcp_cryml)
 
 ## Information
 Converter module for transforming MMCF (Mesoform Multi-Cloud Configuration Format) YAML into values
@@ -258,4 +259,37 @@ gcp_ae.yml probably has a `common:` key with no values. I.e.
 components:
   common:
   specs:
+```
+###GCP_CR.yml
+####Prerequisites
+* There must be an existing google project
+* Cloud run can only retrieve containers hosted in Container Registry, so your image must already be hosted. 
+  This can be done by running the command: 
+  `$ gcloud builds submit --tag gcr.io/[PROJECT-ID]/[IMAGE]` from the containers directory. 
+  `[PROJECT-ID]` is your Google Cloud Project id and `[IMAGE]` is the name you would like to name the image.
+  
+  Alternatively you can use docker to build and push to Container Registry
+#### Cloud run basic configuration
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `service_name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
+| `container` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
+
+#####Example
+```yamlex
+*project_id: &project_id id
+*location_id: "europe-west1"
+
+components:
+  specs:
+    *name: default
+    *image_name: image
+    *container: "gcr.io/project-ID/image"
+    traffic_percent
+    environment_vars:
+      'PATH'
+    iam:
+    domain_mapping    
+
+  
 ```
