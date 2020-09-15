@@ -7,7 +7,8 @@ locals {
   cloudrun = yamldecode(local.user_cloudrun_config_yml)
 
   as_cloudrun_specs = local.cloudrun.components.specs
-  iam_cloudrun = lookup(local.cloudrun.components.specs, "iam", null)
+  cloudrun_iam = lookup(local.cloudrun.components.specs, "iam", {})
+  cloudrun_iam_members = lookup(local.cloudrun_iam, "members", null)==null ? [] : [for user, tag in local.cloudrun_iam.members : "${tag}:${user}"]
 }
 
 //noinspection HILUnresolvedReference
@@ -61,20 +62,42 @@ data "google_iam_policy" "noauth" {
 data "google_iam_policy" "auth" {
   //noinspection HILUnresolvedReference
   binding {
-    role = local.iam_cloudrun == null ? "roles/viewer" : lookup(local.iam_cloudrun, "role", "" )
-    members = local.iam_cloudrun.members == null ? [] : [for tag, user in local.iam_cloudrun.members : "${tag}:${user}"]
+    role = "roles/${lookup(local.cloudrun_iam, "role", "" )}"
+    members = local.cloudrun_iam_members
   }
 }
 
+//noinspection HILUnresolvedReference
 resource "google_cloud_run_service_iam_policy" "policy" {
+  count       = lookup(local.cloudrun_iam, "replace_policy", true) ? 1 : 0
   location    = google_cloud_run_service.self.location
   project     = google_cloud_run_service.self.project
   service     = google_cloud_run_service.self.name
 
-  policy_data = local.iam_cloudrun == null ? data.google_iam_policy.noauth.policy_data : data.google_iam_policy.auth.policy_data
-
+  policy_data = local.as_cloudrun_specs.auth ? data.google_iam_policy.auth.policy_data : data.google_iam_policy.noauth.policy_data
 }
-#TODO: Other methods of setting iam policy
+
+//noinspection HILUnresolvedReference
+resource "google_cloud_run_service_iam_binding" "binding" {
+  count    = local.as_cloudrun_specs.auth ? (lookup(local.cloudrun_iam,"binding", false ) ? 1 : 0) : 0
+  project  = google_cloud_run_service.self.project
+  location = google_cloud_run_service.self.location
+  members  = local.cloudrun_iam_members
+  role     = "roles/${lookup(local.cloudrun_iam, "role", "" )}"
+
+  service  = google_cloud_run_service.self.name
+}
+
+//noinspection HILUnresolvedReference
+resource "google_cloud_run_service_iam_member" "member" {
+  count    = local.as_cloudrun_specs.auth ? (lookup(local.cloudrun_iam,"add_member", null ) == null ? 0 : 1) : 0
+  project  = google_cloud_run_service.self.project
+  location = google_cloud_run_service.self.location
+  member   = lookup(local.cloudrun_iam,"add_member", null ) == null ? "" : "${local.cloudrun_iam.add_member.member_type}${local.cloudrun_iam.add_member.member}"
+  role     = lookup(local.cloudrun_iam,"add_member", null ) == null ? "" : "roles/${local.cloudrun_iam.add_member.role}"
+
+  service = google_cloud_run_service.self.name
+}
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_domain_mapping" "default" {

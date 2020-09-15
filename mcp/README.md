@@ -277,9 +277,18 @@ so your image must already be hosted in your projects container registry.
 | `location_id` | string | true | Location ID of the project used| none | 
 | `name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
 | `image_name` | string | true | Name of the image stored in Google Cloud Container Repository| none | 
-| `iam` | map | false | If authentication is required to access the service, include the iam block| false | 
-| `iam.role` | string | false | The role the specified users will have for the service| `roles/viewer` | 
-| `iam.members` | map | true if using `iam` block | Members who will be assigned the role for the iam policy| none | 
+| `auth` | bool | true | Whether authentication is required to access service| none | 
+| `iam` | map | true if `auth = true` | If authentication is required to access the service, include the iam block| false | 
+| `iam.role` | string | true if replacing or binding iam policy | The role the specified users will have for the service| none | 
+| `iam.members` | map | ttrue if replacing or binding iam policy | Members who will be assigned the role for the iam policy| none | 
+| `iam.replace_policy` | bool | false | Sets IAM policy, replacing any existing policy attached| true | 
+| `iam.binding` | bool | false | Updates IAM policy to grand role to specified members| false | 
+| `iam.add_member` | map | false | Updates IAM policy to grand role to specified members| none | 
+| `domain_name` | map | false | Custom domain name for service, domain must already exist| none | 
+
+**NOTE**: Cannot have `binding` or `add_member` if using `replace_policy`, 
+but can have `binding` and `add_member` at the same time as long as they are not set for the same role.
+More information can be found in the terraform [documentation](https://www.terraform.io/docs/providers/google/r/cloud_run_service_iam.html).
 
 #####Example
 ```yaml
@@ -291,16 +300,28 @@ components:
     name: default
     image_name: image
     environment_vars:
-      'TEST': 'something'
-      'TEST2': 'something-else'
+      'EG': 'something'
+      'EG2': 'something-else'
     metadata:
       annotations:
-        'autoscaling.knative.dev/maxScale': '1000'
         "run.googleapis.com/client-name": "terraform"  
+    auth: true
     iam: 
-      role: 'roles/viewer'
+      replace_policy: false
+      binding: true
+      role: 'viewer'
       members:
-        'user' : 'member@example.com'
+        'member@example.com': 'user'
+      add_member:
+        role: 'admin'
+        member: 'admin@example.com'
+        member_type: 'user'
     domain_name: "domain.com"
 
 ```
+
+note for now:  
+auth = fals  no authentication required for access
+replace policy as false will mean `google_cloud_run_service_iam_policy` will be used
+when false (default) `google_cloud_run_service_iam_binding` will be used to grant roles to specified members 
+member type is either "user" or "group"

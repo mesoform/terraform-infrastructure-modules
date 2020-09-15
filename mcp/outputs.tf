@@ -17,7 +17,7 @@ output "kubernetes" {
   value = local.k8s
 }
 
-ouput "crun" {
-  value = local.crun
+ouput "cloudrun" {
+  value = local.cloudrun
 }
 
