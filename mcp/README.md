@@ -262,8 +262,9 @@ components:
 ```
 ###GCP_CR.yml
 ####Prerequisites
-* There must be an existing google project
-* Cloud run can only retrieve containers hosted in Container Registry, so your image must already be hosted. 
+* There must be an existing google project, with "Cloud Run" enabled with "Cloud Run Admin API" credentials
+* Cloud run can only retrieve containers hosted in Container Registry, 
+so your image must already be hosted in your projects container registry. 
   This can be done by running the command: 
   `$ gcloud builds submit --tag gcr.io/[PROJECT-ID]/[IMAGE]` from the containers directory. 
   `[PROJECT-ID]` is your Google Cloud Project id and `[IMAGE]` is the name you would like to name the image.
@@ -272,24 +273,26 @@ components:
 #### Cloud run basic configuration
 | Key | Type | Required | Description | Default |
 |:----|:----:|:--------:|:------------|:-------:|
-| `service_name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
-| `container` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
+| `project_id` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
+| `location_id` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
+| `name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
+| `image_name` | string | true | Name of the image stored in Google Cloud Container Repository| none | 
+| `auth` | bool | false | Whether authentication is required to access service| false | 
 
 #####Example
 ```yamlex
-*project_id: &project_id id
-*location_id: "europe-west1"
+project_id: &project_id id
+location_id: "europe-west1"
 
 components:
   specs:
-    *name: default
-    *image_name: image
-    *container: "gcr.io/project-ID/image"
-    traffic_percent
+    name: default
+    image_name: image
     environment_vars:
-      'PATH'
-    iam:
-    domain_mapping    
-
-  
+      'TEST': 'something'
+      'TEST2': 'something-else'
+    metadata:
+      annotations:
+        'autoscaling.knative.dev/maxScale': '1000'
+        "run.googleapis.com/client-name": "terraform"
 ```

@@ -38,5 +38,5 @@ variable gcp_ae_yml {
 variable gcp_crun_yml {
   description = "path to YAML file containing configuration for Cloud Run Applications/Services"
   type = string
-  default = "../gcp_cr.yml"
+  default = "../gcp_crun.yml"
 }

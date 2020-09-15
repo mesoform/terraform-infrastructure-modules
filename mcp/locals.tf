@@ -1,3 +1,4 @@
+//noinspection HILUnresolvedReference
 locals {
   default = {
     automatic_scaling = {
@@ -15,15 +16,7 @@ locals {
   project = yamldecode(local.user_project_config_yml)
   user_gae_config_yml = file(var.gcp_ae_yml)
   gae = yamldecode(local.user_gae_config_yml)
-  user_crun_config_yml = file(var.gcp_crun_yml)
-  crun = yamldecode(local.user_crun_config_yml)
 
-
-  //noinspection HILUnresolvedReference
-  as_crun_specs = {
-    for as, config in local.crun.components.specs:
-        as => merge(lookup(local.crun.components, "specs", {}),config)
-  }
   //noinspection HILUnresolvedReference
   as_all_map = {
     for as, config in local.gae.components.specs:
