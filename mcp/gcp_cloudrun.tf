@@ -76,7 +76,18 @@ resource "google_cloud_run_service_iam_policy" "policy" {
 }
 #TODO: Other methods of setting iam policy
 
-#TODO: Domain mapping
+//noinspection HILUnresolvedReference
+resource "google_cloud_run_domain_mapping" "default" {
+  count = lookup(local.as_cloudrun_specs, "domain", null) == null ? 0 : 1
+  location = google_cloud_run_service.self.location
+  name = lookup(local.as_cloudrun_specs, "domain", "")
+  metadata {
+    namespace = google_cloud_run_service.self.project
+  }
+  spec {
+    route_name = google_cloud_run_service.self.name
+  }
+}
 
 
 

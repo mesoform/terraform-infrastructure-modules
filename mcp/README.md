@@ -301,5 +301,6 @@ components:
       role: 'roles/viewer'
       members:
         'user' : 'member@example.com'
+    domain_name: "domain.com"
 
 ```
