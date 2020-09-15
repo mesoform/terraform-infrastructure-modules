@@ -260,7 +260,7 @@ components:
   common:
   specs:
 ```
-###GCP_CR.yml
+###GCP_CloudRun.yml
 ####Prerequisites
 * There must be an existing google project, with "Cloud Run" enabled with "Cloud Run Admin API" credentials
 * Cloud run can only retrieve containers hosted in Container Registry, 
@@ -273,14 +273,16 @@ so your image must already be hosted in your projects container registry.
 #### Cloud run basic configuration
 | Key | Type | Required | Description | Default |
 |:----|:----:|:--------:|:------------|:-------:|
-| `project_id` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
-| `location_id` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
+| `project_id` | string | true | The ID of the project to be used for the service | none | 
+| `location_id` | string | true | Location ID of the project used| none | 
 | `name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
 | `image_name` | string | true | Name of the image stored in Google Cloud Container Repository| none | 
-| `auth` | bool | false | Whether authentication is required to access service| false | 
+| `iam` | map | false | If authentication is required to access the service, include the iam block| false | 
+| `iam.role` | string | false | The role the specified users will have for the service| `roles/viewer` | 
+| `iam.members` | map | true if using `iam` block | Members who will be assigned the role for the iam policy| none | 
 
 #####Example
-```yamlex
+```yaml
 project_id: &project_id id
 location_id: "europe-west1"
 
@@ -294,5 +296,10 @@ components:
     metadata:
       annotations:
         'autoscaling.knative.dev/maxScale': '1000'
-        "run.googleapis.com/client-name": "terraform"
+        "run.googleapis.com/client-name": "terraform"  
+    iam: 
+      role: 'roles/viewer'
+      members:
+        'user' : 'member@example.com'
+
 ```
