@@ -1,0 +1,44 @@
+metadata:
+  annotations:
+    key1:
+    key2:
+  name: "tomcat-deploy-example"
+  namespace:
+  labels:
+    env: "test"
+  generate_name:
+spec:
+  min_ready_seconds:
+  paused:
+  progress_deadline_seconds:
+  replicas: 2
+  revision_history_limit:
+  strategy:
+    type: RollingUpdate
+    rolling_update:
+      max_surge:
+      max_unavailable:
+  selector:
+    match_labels:
+      app: "Tomcat"
+  template:
+    metadata:
+      labels:
+        app: "Tomcat"
+    spec:
+      automount_service_account_token:
+      container:
+        name: "tomcat-example"
+        image: "tomcat:8.5-jdk8-adoptopenjdk-openj9"
+        port:
+          container_port: 8080
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "50Mi"
+          initial_delay_seconds: 3
+          period_seconds: 3
+wait_for_rollout:
