@@ -89,7 +89,7 @@ resource "google_cloud_run_service_iam_member" "member" {
   count    = local.as_cloudrun_specs.auth ? (lookup(local.cloudrun_iam,"add_member", null ) == null ? 0 : 1) : 0
   project  = google_cloud_run_service.self[0].project
   location = google_cloud_run_service.self[0].location
-  member   = lookup(local.cloudrun_iam,"add_member", null ) == null ? "" : "${local.cloudrun_iam.add_member.member_type}${local.cloudrun_iam.add_member.member}"
+  member   = lookup(local.cloudrun_iam,"add_member", null ) == null ? "" : "${local.cloudrun_iam.add_member.member_type}:${local.cloudrun_iam.add_member.member}"
   role     = lookup(local.cloudrun_iam,"add_member", null ) == null ? "" : "roles/${local.cloudrun_iam.add_member.role}"
 
   service = google_cloud_run_service.self[0].name
