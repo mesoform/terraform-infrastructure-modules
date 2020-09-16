@@ -1,7 +1,7 @@
 
 //noinspection HILUnresolvedReference
 data "google_project" "self" {
-  count = lookup(local.gae, "create_google_project", false) ? 0 : 1
+  count = local.gae == {} ? 0 : lookup(local.gae, "create_google_project", false) ? 0 : 1
 
   project_id = lookup(local.gae, "project_id", null)
 }
@@ -31,6 +31,7 @@ resource "google_project" "self" {
 
 //noinspection HILUnresolvedReference
 resource "google_storage_bucket" "self" {
+  count = local.gae == {} ? 0 : 1
   force_destroy = true # code should be transient in GCS and maintained in version control
   project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   name = local.project.name
@@ -52,7 +53,7 @@ resource "google_storage_bucket_object" "self" {
   for_each = local.upload_manifest
 
   name   = each.value
-  bucket = google_storage_bucket.self.name
+  bucket = google_storage_bucket.self[0].name
   source = each.key
 }
 
@@ -77,6 +78,7 @@ resource "google_project_service" "std" {
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
+  count = local.gae == {} ? 0 : 1
   project = length(local.as_flex_specs) > 0 ? google_project_service.flex.0.project : google_project_service.std.0.project
   location_id = lookup(local.gae, "location_id", null)
   auth_domain = lookup(local.gae, "auth_domain", null)
@@ -134,8 +136,8 @@ resource "google_app_engine_flexible_app_version" "self" {
   runtime_main_executable_path = lookup(each.value, "runtime_main_executable_path", null)
   serving_status = lookup(each.value, "serving_status", null)
   env_variables = merge(
-    lookup(local.gae.components.common, "env_variables", {}),
-    lookup(each.value, "env_variables", {})
+  lookup(local.gae.components.common, "env_variables", {}),
+  lookup(each.value, "env_variables", {})
   )
 
   //noinspection HILUnresolvedReference
@@ -373,8 +375,8 @@ resource "google_app_engine_standard_app_version" "self" {
   runtime_api_version = lookup(each.value, "runtime_api_version", null)
   threadsafe = lookup(each.value, "threadsafe", null)
   env_variables = merge(
-    lookup(local.gae.components.common, "env_variables", {}),
-    lookup(each.value, "env_variables", {})
+  lookup(local.gae.components.common, "env_variables", {}),
+  lookup(each.value, "env_variables", {})
   )
 
   //noinspection HILUnresolvedReference
