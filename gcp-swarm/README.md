@@ -14,7 +14,7 @@ To create network and instances:
 ```bash
 $ cd terraform-infrastructure-modules/gcp-swarm/terraform
 $ terraform init
-$ terraform plan -var-file=dev.tfvars
+$ terraform plan -var-file=dev.tfvars -var project_id=my-project -var
 $ terraform apply -var-file=dev.tfvars
 ```
 

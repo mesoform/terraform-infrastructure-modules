@@ -17,13 +17,13 @@
 provider "google" {
 
   region  = var.region
-  version = "~> 3.0"
+  version = "~> 3.34"
 }
 
 provider "google-beta" {
 
   region  = var.region
-  version = "~> 3.0"
+  version = "~> 3.34"
 }
 
 module "vpc" {
@@ -164,7 +164,7 @@ output "instances_internal_ips" {
 }
 
 output "instances_external_ips" {
-  value = "${data.google_compute_instance.instances.*.network_interface.0.access_config.0.nat_ip}"
+  value = "${data.google_compute_instance.instances.*.network_interface.0.network_ip}"
 }
 
 data "template_file" "inventory" {

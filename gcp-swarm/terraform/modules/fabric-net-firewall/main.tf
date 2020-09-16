@@ -136,6 +136,7 @@ resource "google_compute_firewall" "custom" {
   dynamic "allow" {
     for_each = [for rule in each.value.rules : rule if each.value.action == "allow"]
     iterator = rule
+    //noinspection HILUnresolvedReference
     content {
       protocol = rule.value.protocol
       ports    = rule.value.ports
@@ -146,6 +147,7 @@ resource "google_compute_firewall" "custom" {
     for_each = [for rule in each.value.rules : rule if each.value.action == "deny"]
     iterator = rule
     content {
+      //noinspection HILUnresolvedReference
       protocol = rule.value.protocol
       ports    = rule.value.ports
     }
