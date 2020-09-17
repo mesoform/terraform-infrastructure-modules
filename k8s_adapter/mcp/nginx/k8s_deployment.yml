@@ -39,6 +39,7 @@ spec:
           requests:
             cpu: "250m"
             memory: "50Mi"
+        liveness_probe:
           initial_delay_seconds: 3
           period_seconds: 3
 wait_for_rollout:
