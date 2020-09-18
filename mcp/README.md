@@ -278,12 +278,13 @@ so your image must already be hosted in your projects container registry.
 | `name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
 | `image_name` | string | true | Name of the image stored in Google Cloud Container Repository| none | 
 | `auth` | bool | true | Whether authentication is required to access service| none | 
+| `environment_vars` | map | false | Any environment variables to include as for image. Key is the name of the variable and value is the string it represents| none | 
 | `iam` | map | true if `auth = true` | If authentication is required to access the service, include the iam block| false | 
 | `iam.role` | string | true if replacing or binding iam policy | The role the specified users will have for the service| none | 
 | `iam.members` | map | ttrue if replacing or binding iam policy | Members who will be assigned the role for the iam policy| none | 
 | `iam.replace_policy` | bool | false | Sets IAM policy, replacing any existing policy attached| true | 
 | `iam.binding` | bool | false | Updates IAM policy to grand role to specified members| false | 
-| `iam.add_member` | map | false | Updates IAM policy to grand role to specified members| none | 
+| `iam.add_member` | map | false | Adds a member who can can use a specified policy. If a binding policy exists the policy for `add_member` must be different. This must include the keys `role`, `member` and `member_type`| none | 
 | `domain_name` | map | false | Custom domain name for service, domain must already exist| none | 
 
 **NOTE**: Cannot have `binding` or `add_member` if using `replace_policy`, 
