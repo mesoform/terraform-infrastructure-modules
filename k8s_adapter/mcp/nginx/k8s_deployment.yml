@@ -42,4 +42,5 @@ spec:
         liveness_probe:
           initial_delay_seconds: 3
           period_seconds: 3
+          timeout_seconds: 4
 wait_for_rollout:
