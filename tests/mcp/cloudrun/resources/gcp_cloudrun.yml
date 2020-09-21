@@ -1,0 +1,30 @@
+project_id: &project_id cloud-run-test-1409-1
+location_id: "europe-west1"
+
+components:
+  specs:
+    name: "default"
+    image_name: helloworld
+    metadata:
+      annotations:
+        "run.googleapis.com/client-name": "terraform"
+    auth: true
+    iam:
+      replace_policy: false
+      binding: true
+      role: 'viewer'
+      members:
+        user@google.com: 'user'
+        user2@google.com: 'user'
+        group@google.com: 'group'
+
+      add_member:
+        role: 'admin'
+        member: 'alexdbailey98@gmail.com'
+        member_type: 'user'
+    traffic:
+      -
+        percent: 75
+      -
+        percent: 25
+        revision_name: 'old'

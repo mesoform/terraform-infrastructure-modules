@@ -288,6 +288,7 @@ so your image must already be hosted in your projects container registry.
 | `domain_name` | string | false | Custom domain name for service, domain must already exist| none | 
 | `traffic` | list | false | list of traffic allocation across revision| none | 
 | `traffic.-.percent` | map | true if `traffic.-` exists | The percentage of traffic for revision, if `revision_name` is not specified latest revision is used| none | 
+| `traffic.-.revision_name` | string | false | The name of the revision the traffic should be allocated to | 'latest_revision' is set to true by default | 
 
 **NOTE**: Cannot have `binding` or `add_member` if using `replace_policy`, 
 but can have `binding` and `add_member` at the same time as long as they are not set for the same role.
@@ -295,7 +296,7 @@ More information can be found in the terraform [documentation](https://www.terra
 
 #####Example
 ```yaml
-project_id: &project_id id
+project_id: <id>
 location_id: "europe-west1"
 
 components:
