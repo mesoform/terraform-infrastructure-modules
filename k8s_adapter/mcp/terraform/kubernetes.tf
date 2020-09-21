@@ -28,7 +28,7 @@ resource "kubernetes_deployment" "self" {
   wait_for_rollout = lookup(each.value.deployment, "wait_for_rollout", true)
   metadata {
     annotations   = lookup(each.value.deployment.metadata, "annotations", {})
-    generate_name = lookup(each.value.deployment.metadata, "name", null) == null ? lookup(each.value.deployment.metadata, "generate_name", {}) : null
+    generate_name = lookup(each.value.deployment.metadata, "name", null) == null ? lookup(each.value.deployment.metadata, "generate_name", null) : null
     name          = lookup(each.value.deployment.metadata, "name", null)
     labels        = lookup(each.value.deployment.metadata, "labels", {})
     namespace     = lookup(each.value.deployment.metadata, "namespace", null)
@@ -69,7 +69,353 @@ resource "kubernetes_deployment" "self" {
         dns_policy                      = lookup(each.value.deployment.spec.template.spec, "dns_policy", null)
         host_ipc                        = lookup(each.value.deployment.spec.template.spec, "host_ipc", null)
         host_network                    = lookup(each.value.deployment.spec.template.spec, "host_network", null)
+        host_pid                        = lookup(each.value.deployment.spec.template.spec, "host_pid", null)
+        hostname                        = lookup(each.value.deployment.spec.template.spec, "hostname", null)
+        node_name                       = lookup(each.value.deployment.spec.template.spec, "node_name", null)
+        node_selector                   = lookup(each.value.deployment.spec.template.spec, "node_selector", null)
+        priority_class_name             = lookup(each.value.deployment.spec.template.spec, "priority_class_name", null)
+        restart_policy                  = lookup(each.value.deployment.spec.template.spec, "restart_policy", null)
+        //security_context                = lookup(each.value.deployment.spec.template.spec, "security_context", null)
+        service_account_name             = lookup(each.value.deployment.spec.template.spec, "service_account_name", null)
+        share_process_namespace          = lookup(each.value.deployment.spec.template.spec, "share_process_namespace", null)
+        subdomain                        = lookup(each.value.deployment.spec.template.spec, "subdomain", null)
+        termination_grace_period_seconds = lookup(each.value.deployment.spec.template.spec, "termination_grace_period_seconds", null)
 
+        dynamic "volume" {
+          for_each = lookup(each.value.deployment.spec.template.spec, "volume", null) == null ? {} : { volume : each.value.deployment.spec.template.spec.volume }
+          content {
+            name = lookup(volume.value, "name", null)
+            dynamic "aws_elastic_block_store" {
+              for_each = lookup(volume.value, "aws_elastic_block_store", null) == null ? {} : { aws_elastic_block_store : volume.value.aws_elastic_block_store }
+              content {
+                fs_type   = lookup(aws_elastic_block_store.value, "fs_type", null)
+                partition = lookup(aws_elastic_block_store.value, "partition", null)
+                read_only = lookup(aws_elastic_block_store.value, "read_only", null)
+                volume_id = lookup(aws_elastic_block_store.value, "volume_id", null)
+              }
+            }
+            dynamic "azure_disk" {
+              for_each = lookup(volume.value, "azure_disk", null) == null ? {} : { azure_disk : volume.value.azure_disk }
+              content {
+                caching_mode  = lookup(azure_disk.value, "caching_mode", null)
+                data_disk_uri = lookup(azure_disk.value, "data_disk_uri", null)
+                disk_name     = lookup(azure_disk.value, "disk_name", null)
+                fs_type       = lookup(azure_disk.value, "fs_type", null)
+                read_only     = lookup(azure_disk.value, "read_only", null)
+              }
+            }
+            dynamic "azure_file" {
+              for_each = lookup(volume.value, "azure_file", null) == null ? {} : { azure_file : volume.value.azure_file }
+              content {
+                read_only   = lookup(azure_file.value, "read_only", null)
+                secret_name = lookup(azure_file.value, "secret_name", null)
+                share_name  = lookup(azure_file.value, "share_name", null)
+              }
+            }
+            dynamic "ceph_fs" {
+              for_each = lookup(volume.value, "ceph_fs", null) == null ? {} : { ceph_fs : volume.value.ceph_fs }
+              content {
+                monitors    = lookup(ceph_fs.value, "monitors", null)
+                path        = lookup(ceph_fs.value, "path", null)
+                read_only   = lookup(ceph_fs.value, "read_only", null)
+                secret_file = lookup(ceph_fs.value, "secret_file", null)
+                user        = lookup(ceph_fs.value, "user", null)
+                dynamic "secret_ref" {
+                  for_each = lookup(ceph_fs.value, "secret_ref", null) == null ? {} : { secret_ref : ceph_fs.value.secret_ref }
+                  content {
+                    name      = lookup(secret_ref.value, "name", null)
+                    namespace = lookup(secret_ref.value, "namespace", null)
+                  }
+                }
+              }
+            }
+            dynamic "cinder" {
+              for_each = lookup(volume.value, "cinder", null) == null ? {} : { cinder : volume.value.cinder }
+              content {
+                fs_type   = lookup(cinder.value, "fs_type", null)
+                read_only = lookup(cinder.value, "read_only", null)
+                volume_id = lookup(cinder.value, "volume_id", null)
+              }
+            }
+            dynamic "config_map" {
+              for_each = lookup(volume.value, "config_map", null) == null ? {} : { config_map : volume.value.config_map }
+              content {
+                default_mode = lookup(config_map.value, "default_mode", null)
+                optional     = lookup(config_map.value, "optional", null)
+                name         = lookup(config_map.value, "name", null)
+                dynamic "items" {
+                  for_each = lookup(config_map.value, "items", null) == null ? {} : { items : config_map.value.items }
+                  content {
+                    key  = lookup(items.value, "key", null)
+                    mode = lookup(items.value, "mode", null)
+                    path = lookup(items.value, "path", null)
+
+                  }
+                }
+              }
+            }
+            dynamic "downward_api" {
+              for_each = lookup(volume.value, "downward_api", null) == null ? {} : { downward_api : volume.value.downward_api }
+              content {
+                default_mode = lookup(downward_api.value, "default_mode", null)
+                //  dynamic "items" { // incorrect description in the documentation of 'items'
+                //  for_each = lookup(downward_api.value, "items", null) == null ? {} : { items : downward_api.value.items }
+                //  content {
+                //  dynamic "field_ref" {
+                //  for_each = lookup(items.value, "field_ref", null) == null ? {} : { field_ref : items.value.field_ref }
+                //  content {
+                //  api_version = lookup(field_ref.value, "api_version", null)
+                //  field_path  = lookup(field_ref.value, "field_path", null)
+                //  }
+                //  }
+                //    mode = lookup(items.value, "mode", null)
+                //  path = lookup(items.value, "path", null)
+
+                //  }
+                //}
+              }
+            }
+            dynamic "empty_dir" {
+              for_each = lookup(volume.value, "empty_dir", null) == null ? {} : { empty_dir : volume.value.empty_dir }
+              content {
+                medium     = lookup(empty_dir.value, "medium", null)
+                size_limit = lookup(empty_dir.value, "size_limit", null)
+              }
+            }
+            dynamic "fc" {
+              for_each = lookup(volume.value, "fc", null) == null ? {} : { fc : volume.value.fc }
+              content {
+                fs_type      = lookup(fc.value, "fs_type", null)
+                lun          = lookup(fc.value, "lun", null)
+                read_only    = lookup(fc.value, "read_only", null)
+                target_ww_ns = lookup(fc.value, "target_ww_ns", null)
+              }
+            }
+            dynamic "flex_volume" {
+              for_each = lookup(volume.value, "flex_volume", null) == null ? {} : { flex_volume : volume.value.flex_volume }
+              content {
+                driver    = lookup(flex_volume.value, "driver", null)
+                fs_type   = lookup(flex_volume.value, "fs_type", null)
+                options   = lookup(flex_volume.value, "options", null)
+                read_only = lookup(flex_volume.value, "read_only", null)
+                dynamic "secret_ref" {
+                  for_each = lookup(flex_volume.value, "secret_ref", null) == null ? {} : { secret_ref : flex_volume.value.secret_ref }
+                  content {
+                    name = lookup(secret_ref.value, "name", null)
+                    //optional = lookup(secret_ref.value, "optional", null) //described in documentation
+                  }
+                }
+              }
+            }
+            dynamic "flocker" {
+              for_each = lookup(volume.value, "flocker", null) == null ? {} : { flocker : volume.value.flocker }
+              content {
+                dataset_name = lookup(flocker.value, "dataset_name", null)
+                dataset_uuid = lookup(flocker.value, "dataset_uuid", null)
+              }
+            }
+            dynamic "gce_persistent_disk" {
+              for_each = lookup(volume.value, "gce_persistent_disk", null) == null ? {} : { gce_persistent_disk : volume.value.gce_persistent_disk }
+              content {
+                fs_type   = lookup(gce_persistent_disk.value, "fs_type", null)
+                partition = lookup(gce_persistent_disk.value, "partition", null)
+                pd_name   = lookup(gce_persistent_disk.value, "pd_name", null)
+                read_only = lookup(gce_persistent_disk.value, "read_only", null)
+              }
+            }
+            dynamic "git_repo" {
+              for_each = lookup(volume.value, "git_repo", null) == null ? {} : { git_repo : volume.value.git_repo }
+              content {
+                directory  = lookup(git_repo.value, "directory", null)
+                repository = lookup(git_repo.value, "repository", null)
+                revision   = lookup(git_repo.value, "revision", null)
+              }
+            }
+            dynamic "glusterfs" {
+              for_each = lookup(volume.value, "glusterfs", null) == null ? {} : { glusterfs : volume.value.glusterfs }
+              content {
+                endpoints_name = lookup(glusterfs.value, "endpoints_name", null)
+                path           = lookup(glusterfs.value, "path", null)
+                read_only      = lookup(glusterfs.value, "read_only", null)
+              }
+            }
+            dynamic "host_path" {
+              for_each = lookup(volume.value, "host_path", null) == null ? {} : { host_path : volume.value.host_path }
+              content {
+                path = lookup(host_path.value, "path", null)
+                type = lookup(host_path.value, "type", null)
+              }
+            }
+            dynamic "iscsi" {
+              for_each = lookup(volume.value, "iscsi", null) == null ? {} : { iscsi : volume.value.iscsi }
+              content {
+                fs_type         = lookup(iscsi.value, "fs_type", null)
+                iqn             = lookup(iscsi.value, "iqn", null)
+                iscsi_interface = lookup(iscsi.value, "iscsi_interface", null)
+                lun             = lookup(iscsi.value, "lun", null)
+                read_only       = lookup(iscsi.value, "read_only", null)
+                target_portal   = lookup(iscsi.value, "target_portal", null)
+              }
+            }
+            dynamic "nfs" {
+              for_each = lookup(volume.value, "nfs", null) == null ? {} : { nfs : volume.value.nfs }
+              content {
+                path      = lookup(nfs.value, "path", null)
+                read_only = lookup(nfs.value, "read_only", null)
+                server    = lookup(nfs.value, "server", null)
+              }
+            }
+            dynamic "persistent_volume_claim" {
+              for_each = lookup(volume.value, "persistent_volume_claim", null) == null ? {} : { persistent_volume_claim : volume.value.persistent_volume_claim }
+              content {
+                claim_name = lookup(persistent_volume_claim.value, "claim_name", null)
+                read_only  = lookup(persistent_volume_claim.value, "read_only", null)
+              }
+            }
+            dynamic "photon_persistent_disk" {
+              for_each = lookup(volume.value, "photon_persistent_disk", null) == null ? {} : { photon_persistent_disk : volume.value.photon_persistent_disk }
+              content {
+                fs_type = lookup(photon_persistent_disk.value, "fs_type", null)
+                pd_id   = lookup(photon_persistent_disk.value, "pd_id", null)
+              }
+            }
+            dynamic "projected" {
+              for_each = lookup(volume.value, "projected", null) == null ? {} : { projected : volume.value.projected }
+              content {
+                default_mode = lookup(projected.value, "default_mode", null)
+                dynamic "sources" {
+                  for_each = lookup(projected.value, "sources", null) == null ? {} : { sources : projected.value.sources }
+                  content {
+                    dynamic "config_map" {
+                      for_each = lookup(sources.value, "config_map", null) == null ? {} : { config_map : sources.value.config_map }
+                      content {
+                        //default_mode = lookup(config_map.value, "default_mode", null) //described in documentation
+                        optional = lookup(config_map.value, "optional", null)
+                        name     = lookup(config_map.value, "name", null)
+                        dynamic "items" {
+                          for_each = lookup(config_map.value, "items", null) == null ? {} : { items : config_map.value.items }
+                          content {
+                            key  = lookup(items.value, "key", null)
+                            mode = lookup(items.value, "mode", null)
+                            path = lookup(items.value, "path", null)
+                          }
+                        }
+                      }
+                    }
+
+                    dynamic "downward_api" {
+                      for_each = lookup(sources.value, "downward_api", null) == null ? {} : { downward_api : sources.value.downward_api }
+                      content {
+                        //default_mode = lookup(downward_api.value, "default_mode", null) //described in documentation
+                        dynamic "items" {
+                          for_each = lookup(downward_api.value, "items", null) == null ? {} : { items : downward_api.value.items }
+                          content {
+                            //key  = lookup(items.value, "key", null) //described in documentation
+                            mode = lookup(items.value, "mode", null)
+                            path = lookup(items.value, "path", null)
+                          }
+                        }
+                      }
+                    }
+                    dynamic "secret" {
+                      for_each = lookup(sources.value, "secret", null) == null ? {} : { secret : sources.value.secret }
+                      content {
+                        //default_mode = lookup(secret.value, "default_mode", null) //described in documentation
+                        optional = lookup(secret.value, "optional", null)
+                        //secret_name  = lookup(secret.value, "secret_name", null) //described in documentation
+                        dynamic "items" {
+                          for_each = lookup(secret.value, "items", null) == null ? {} : { items : secret.value.items }
+                          content {
+                            key  = lookup(items.value, "key", null)
+                            mode = lookup(items.value, "mode", null)
+                            path = lookup(items.value, "path", null)
+                          }
+                        }
+                      }
+                    }
+                    dynamic "service_account_token" {
+                      for_each = lookup(sources.value, "service_account_token", null) == null ? {} : { service_account_token : sources.value.service_account_token }
+                      content {
+                        audience           = lookup(service_account_token.value, "audience", null)
+                        expiration_seconds = lookup(service_account_token.value, "expiration_seconds", null)
+                        path               = lookup(service_account_token.value, "path", null)
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            dynamic "quobyte" {
+              for_each = lookup(volume.value, "quobyte", null) == null ? {} : { quobyte : volume.value.quobyte }
+              content {
+                group     = lookup(quobyte.value, "group", null)
+                read_only = lookup(quobyte.value, "read_only", null)
+                registry  = lookup(quobyte.value, "registry", null)
+                user      = lookup(quobyte.value, "user", null)
+                volume    = lookup(quobyte.value, "volume", null)
+              }
+            }
+            dynamic "rbd" {
+              for_each = lookup(volume.value, "rbd", null) == null ? {} : { rbd : volume.value.rbd }
+              content {
+                ceph_monitors = lookup(rbd.value, "ceph_monitors", null)
+                fs_type       = lookup(rbd.value, "fs_type", null)
+                keyring       = lookup(rbd.value, "keyring", null)
+                rados_user    = lookup(rbd.value, "rados_user", null)
+                rbd_image     = lookup(rbd.value, "rbd_image", null)
+                rbd_pool      = lookup(rbd.value, "rbd_pool", null)
+                read_only     = lookup(rbd.value, "read_only", null)
+                dynamic "secret_ref" {
+                  for_each = lookup(rbd.value, "secret_ref", null) == null ? {} : { secret_ref : rbd.value.secret_ref }
+                  content {
+                    name      = lookup(secret_ref.value, "name", null)
+                    namespace = lookup(secret_ref.value, "namespace", null) // not described in documentation
+                    //optional = lookup(secret_ref.value, "optional", null) //described in documentation
+                  }
+                }
+              }
+            }
+            dynamic "secret" {
+              for_each = lookup(volume.value, "secret", null) == null ? {} : { secret : volume.value.secret }
+              content {
+                default_mode = lookup(secret.value, "default_mode", null) //described in documentation
+                optional     = lookup(secret.value, "optional", null)
+                secret_name  = lookup(secret.value, "secret_name", null) //described in documentation
+                dynamic "items" {
+                  for_each = lookup(secret.value, "items", null) == null ? {} : { items : secret.value.items }
+                  content {
+                    key  = lookup(items.value, "key", null)
+                    mode = lookup(items.value, "mode", null)
+                    path = lookup(items.value, "path", null)
+                  }
+                }
+              }
+            }
+            dynamic "vsphere_volume" {
+              for_each = lookup(volume.value, "vsphere_volume", null) == null ? {} : { vsphere_volume : volume.value.vsphere_volume }
+              content {
+                fs_type     = lookup(vsphere_volume.value, "fs_type", null)
+                volume_path = lookup(vsphere_volume.value, "volume_path", null)
+              }
+            }
+          }
+        }
+        dynamic "toleration" {
+          for_each = lookup(each.value.deployment.spec.template.spec, "toleration", null) == null ? {} : { toleration : each.value.deployment.spec.template.spec.toleration }
+          content {
+            effect             = lookup(toleration.value, "effect", null)
+            key                = lookup(toleration.value, "key", null)
+            operator           = lookup(toleration.value, "operator", null)
+            toleration_seconds = lookup(toleration.value, "toleration_seconds", null)
+            value              = lookup(toleration.value, "value", null)
+          }
+        }
+        dynamic "image_pull_secrets" {
+          for_each = lookup(each.value.deployment.spec.template.spec, "image_pull_secrets", null) == null ? {} : { image_pull_secrets : each.value.deployment.spec.template.spec.image_pull_secrets }
+          content {
+            name = lookup(image_pull_secrets.value, "name", null)
+          }
+        }
         dynamic "dns_config" {
           for_each = lookup(each.value.deployment.spec.template.spec, "dns_config", null) == null ? {} : { dns_config : each.value.deployment.spec.template.spec.dns_config }
           content {
@@ -397,16 +743,27 @@ resource "kubernetes_service" "self" {
     namespace     = lookup(each.value.service.metadata, "namespace", null)
   }
   spec {
-    cluster_ip   = lookup(each.value.service.spec, "cluster_ip", null)
-    external_ips = lookup(each.value.service.spec, "external_ips", null)
-    selector     = lookup(each.value.service.spec, "selector", {})
-    port {
-      name        = lookup(each.value.service.spec.port, "name", null)
-      node_port   = lookup(each.value.service.spec.port, "node_port", null)
-      port        = each.value.service.spec.port.port
-      protocol    = lookup(each.value.service.spec.port, "protocol", null)
-      target_port = lookup(each.value.service.spec.port, "target_port", null)
+    cluster_ip                  = lookup(each.value.service.spec, "cluster_ip", null)
+    external_ips                = lookup(each.value.service.spec, "external_ips", null)
+    external_name               = lookup(each.value.service.spec, "external_name", null)
+    external_traffic_policy     = lookup(each.value.service.spec, "external_traffic_policy", null)
+    load_balancer_ip            = lookup(each.value.service.spec, "load_balancer_ip", null)
+    load_balancer_source_ranges = lookup(each.value.service.spec, "load_balancer_source_ranges", null)
+    publish_not_ready_addresses = lookup(each.value.service.spec, "publish_not_ready_addresses", null)
+    selector                    = lookup(each.value.service.spec, "selector", null)
+    session_affinity            = lookup(each.value.service.spec, "session_affinity", null)
+    type                        = lookup(each.value.service.spec, "type", null)
+    health_check_node_port      = lookup(each.value.service.spec, "health_check_node_port", null)
+
+    dynamic "port" {
+      for_each = lookup(each.value.service.spec, "port", null) == null ? {} : { port : each.value.service.spec.port }
+      content {
+        name        = lookup(port.value, "name", null)
+        node_port   = lookup(port.value, "node_port", null)
+        port        = lookup(port.value, "port", null)
+        protocol    = lookup(port.value, "protocol", null)
+        target_port = lookup(port.value, "target_port", null)
+      }
     }
-    type = lookup(each.value.service.spec, "type", null)
   }
 }
