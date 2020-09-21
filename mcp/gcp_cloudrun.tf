@@ -42,7 +42,7 @@ resource "google_cloud_run_service" "self" {
     content{
       percent = lookup(traffic.value, "percent", null)
       revision_name = lookup(traffic.value, "revision_name", null)
-      latest_revision = lookup(traffic.value, "revision_name", null) == null ? true : false
+      latest_revision = lookup(traffic.value, "latest_revision", null)
     }
   }
 
