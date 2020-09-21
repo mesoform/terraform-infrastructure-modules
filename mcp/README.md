@@ -284,7 +284,7 @@ so your image must already be hosted in your projects container registry.
 | `iam.members` | map | ttrue if replacing or binding iam policy | Members who will be assigned the role for the iam policy| none | 
 | `iam.replace_policy` | bool | false | Sets IAM policy, replacing any existing policy attached| true | 
 | `iam.binding` | bool | false | Updates IAM policy to grand role to specified members| false | 
-| `iam.add_member` | map | false | Adds a member who can can use a specified policy. If a binding policy exists the policy for `add_member` must be different. This must include the keys `role`, `member` and `member_type`| none | 
+| `iam.add_member` | map | false | Adds a member who can can use a specified policy. If a binding policy exists the policy for `add_member` must be different. This must include the keys `role`, `member` and `member_type`, with `member_type` being either `"user"` or `"group"`| none | 
 | `domain_name` | string | false | Custom domain name for service, domain must already exist| none | 
 | `traffic` | list | false | list of traffic allocation across revision| none | 
 | `traffic.-.percent` | map | true if `traffic.-` exists | The percentage of traffic for revision, if `revision_name` is not specified latest revision is used| none | 
@@ -320,6 +320,7 @@ components:
         member: 'admin@example.com'
         member_type: 'user'
     domain_name: "domain.com"
+    #Divide traffic blocks as follows, in order to make it a list of configurations rather than map
     traffic:
       -
         percent: 25
@@ -329,9 +330,3 @@ components:
       
 
 ```
-
-note for now:  
-auth = fals  no authentication required for access
-replace policy as false will mean `google_cloud_run_service_iam_policy` will be used
-when false (default) `google_cloud_run_service_iam_binding` will be used to grant roles to specified members 
-member type is either "user" or "group"
