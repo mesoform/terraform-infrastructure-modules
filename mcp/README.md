@@ -277,7 +277,7 @@ so your image must already be hosted in your projects container registry.
 | `location_id` | string | true | Location ID of the project used| none | 
 | `name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
 | `image_name` | string | true | Name of the image stored in Google Cloud Container Repository| none | 
-| `auth` | bool | true | Whether authentication is required to access service| none | 
+| `auth` | bool | true | Whether authentication is required to access service| false | 
 | `environment_vars` | map | false | Any environment variables to include as for image. Key is the name of the variable and value is the string it represents| none | 
 | `iam` | map | true if `auth = true` | If authentication is required to access the service, include the iam block| false | 
 | `iam.role` | string | true if replacing or binding iam policy | The role the specified users will have for the service| none | 
@@ -285,7 +285,9 @@ so your image must already be hosted in your projects container registry.
 | `iam.replace_policy` | bool | false | Sets IAM policy, replacing any existing policy attached| true | 
 | `iam.binding` | bool | false | Updates IAM policy to grand role to specified members| false | 
 | `iam.add_member` | map | false | Adds a member who can can use a specified policy. If a binding policy exists the policy for `add_member` must be different. This must include the keys `role`, `member` and `member_type`| none | 
-| `domain_name` | map | false | Custom domain name for service, domain must already exist| none | 
+| `domain_name` | string | false | Custom domain name for service, domain must already exist| none | 
+| `traffic` | list | false | list of traffic allocation across revision| none | 
+| `traffic.-.percent` | map | true if `traffic.-` exists | The percentage of traffic for revision, if `revision_name` is not specified latest revision is used| none | 
 
 **NOTE**: Cannot have `binding` or `add_member` if using `replace_policy`, 
 but can have `binding` and `add_member` at the same time as long as they are not set for the same role.
@@ -318,6 +320,13 @@ components:
         member: 'admin@example.com'
         member_type: 'user'
     domain_name: "domain.com"
+    traffic:
+      -
+        percent: 25
+      -
+        percent: 75
+        revision_name: "revision"
+      
 
 ```
 
