@@ -6,6 +6,7 @@ try:
 except Exception as e:
     print(e, file=stderr)
 
+@python_validator
 def test_traffic_config(query):
     """
     checks that the data given to the test function is in the correct format
@@ -19,31 +20,24 @@ def test_traffic_config(query):
     traffic:
       -
         percent: 75
-      -
-        percent: 25
-        revision_name: "revision"
 
     needs to be configured in google_cloud_run_service to match:
     traffic{
       percent = 75
       latest_revision = true
     }
-    traffic{
-      percent = 25
-      revision_name = "revision"
-      latest_revision = false
-    }
-
-
     """
+
     expected_data = {
-        {"latest_revision": True, "percent": 75},
-        {"latest_revision": False, "percent": 25, "revision_name": "revision"}
+        "latest_revision": "true",
+        "percent": "75"
     }
+
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail \nexpected data = {} \nrecieved data = {}".format(expected_data, query)}
+        return {"result" : "fail \nexpected data = {} \nreceived data = {}".format(expected_data, query)}
 
-if __name__ == 'main':
+
+if __name__ == '__main__':
     test_traffic_config()

@@ -321,7 +321,7 @@ components:
         member: 'admin@example.com'
         member_type: 'user'
     domain_name: "domain.com"
-    #Divide traffic blocks as follows, in order to make it a list of configurations rather than map
+    #Use hypens to separate traffic configurations, making a list of configurations
     traffic:
       -
         percent: 25
