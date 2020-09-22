@@ -259,3 +259,10 @@ components:
   common:
   specs:
 ```
+## Contributing
+
+Please read [CONTRIBUTING.md](https://github.com/mesoform/terraform-infrastructure-modules/blob/master/CONTRIBUTING.md) for the process for submitting pull requests.
+
+## License
+
+This project is licensed under the [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/FAQ/)
