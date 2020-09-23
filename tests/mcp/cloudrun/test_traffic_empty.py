@@ -7,7 +7,7 @@ except Exception as e:
     print(e, file=stderr)
 
 @python_validator
-def test_traffic_with_revision(query):
+def test_traffic_config(query):
     """
     checks that the data given to the test function is in the correct format
     for the google_cloud_run_service.traffic setting.
@@ -16,25 +16,16 @@ def test_traffic_with_revision(query):
     and should be transformed into a list of maps, which should have the configuration
     for each traffic setting.
 
+    This test ensures that there is no error if the traffic block has no settings as seen
+    below:
+
     E.g.
     traffic:
-      -
-        percent: 25
-        revision_name: "old"
 
-    needs to be configured in google_cloud_run_service to match:
-    traffic{
-      percent = 25
-      latest_revision = false
-      revision_name = "old"
-    }
+
     """
 
-    expected_data = {
-        "latest_revision": "false",
-        "percent": "25",
-        "revision_name": "old"
-    }
+    expected_data = {}
 
     if query == expected_data:
         return {"result": "pass"}
@@ -43,4 +34,4 @@ def test_traffic_with_revision(query):
 
 
 if __name__ == '__main__':
-    test_traffic_with_revision()
+    test_traffic_config()

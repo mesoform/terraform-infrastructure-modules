@@ -6,7 +6,8 @@ locals {
   cloudrun_specs = local.cloudrun.components.specs
   cloudrun_iam = lookup(local.cloudrun.components.specs, "iam", {})
   cloudrun_iam_members = lookup(local.cloudrun_iam, "members", null)==null ? [] : [for user, tag in local.cloudrun_iam.members : "${tag}:${user}"]
-  cloudrun_traffic = [ for setting in lookup(local.cloudrun_specs, "traffic", {}) :
-    merge(setting, {latest_revision = lookup(setting, "revision_name", null) == null ? true: false}) if lookup(setting, "percent", null) !=  null
+  cloudrun_traffic = lookup(local.cloudrun_specs, "traffic", {}) == null ? [] : [
+    for setting in lookup(local.cloudrun_specs, "traffic", {}) :
+      merge(setting, {latest_revision = lookup(setting, "revision_name", null) == null ? true: false})
   ]
 }

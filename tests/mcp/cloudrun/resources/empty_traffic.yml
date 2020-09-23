@@ -23,8 +23,3 @@ components:
         member: 'user@gmail.com'
         member_type: 'user'
     traffic:
-      -
-        percent: 75
-      -
-        percent: 25
-        revision_name: 'old'
