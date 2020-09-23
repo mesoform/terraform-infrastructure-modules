@@ -5,7 +5,9 @@
 [MMCF](#MMCF)     
 [project.yml](#projectyml)      
 [gcp_ae.yml](#gcp_aeyml)    
-[gcp_cp.yml](#gcp_cryml)
+[gcp_cp.yml](#gcp_cryml)  
+[Contributing](#Contributing)  
+[License](#License)
 
 ## Information
 Converter module for transforming MMCF (Mesoform Multi-Cloud Configuration Format) YAML into values
@@ -260,8 +262,8 @@ components:
   common:
   specs:
 ```
-###GCP_CloudRun.yml
-####Prerequisites
+### GCP_CloudRun.yml
+#### Prerequisites
 * There must be an existing google project, with "Cloud Run" enabled with "Cloud Run Admin API" credentials
 * Cloud run can only retrieve containers hosted in Container Registry, 
 so your image must already be hosted in your projects container registry. 
@@ -294,7 +296,7 @@ so your image must already be hosted in your projects container registry.
 but can have `binding` and `add_member` at the same time as long as they are not set for the same role.
 More information can be found in the terraform [documentation](https://www.terraform.io/docs/providers/google/r/cloud_run_service_iam.html).
 
-#####Example
+##### Example
 ```yaml
 project_id: <id>
 location_id: "europe-west1"
@@ -331,3 +333,10 @@ components:
       
 
 ```
+## Contributing
+
+Please read [CONTRIBUTING.md](https://github.com/mesoform/terraform-infrastructure-modules/blob/master/CONTRIBUTING.md) for the process for submitting pull requests.
+
+## License
+
+This project is licensed under the [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/FAQ/)
