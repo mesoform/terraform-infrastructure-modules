@@ -1,16 +1,10 @@
 locals {
-  k8s_services_files = fileset(path.root, "../**/k8s_service.y{a,}ml")
-  k8s_services = {
-    for kube_file in local.k8s_services_files :
-    basename(dirname(kube_file)) => { service : yamldecode(file(kube_file)) }
-    if ! contains(split("/", kube_file), "terraform")
-  }
 
   k8s_deployments_files = fileset(path.root, "../**/k8s_deployment.y{a,}ml")
   k8s_deployments = {
     for kube_file in local.k8s_deployments_files :
     basename(dirname(kube_file)) => { deployment : yamldecode(file(kube_file)) }
-    if ! contains(split("/", kube_file), "terraform")
+    if ! contains(split("/", kube_file), "mcp")
   }
 
   k8s = {
@@ -82,7 +76,32 @@ resource "kubernetes_deployment" "self" {
         termination_grace_period_seconds = lookup(each.value.deployment.spec.template.spec, "termination_grace_period_seconds", null)
 
         dynamic "volume" {
-          for_each = lookup(each.value.deployment.spec.template.spec, "volume", null) == null ? {} : { volume : each.value.deployment.spec.template.spec.volume }
+          for_each = lookup(each.value.deployment.spec.template.spec, "volume", null) == null ? [] : [for volume in lookup(each.value.deployment.spec.template.spec, "volume", null) : {
+            name                    = lookup(volume, "name", null)
+            azure_disk              = lookup(volume, "azure_disk", null)
+            azure_file              = lookup(volume, "azure_file", null)
+            ceph_fs                 = lookup(volume, "ceph_fs", null)
+            cinder                  = lookup(volume, "cinder", null)
+            config_map              = lookup(volume, "config_map", null)
+            downward_api            = lookup(volume, "downward_api", null)
+            empty_dir               = lookup(volume, "empty_dir", null)
+            fc                      = lookup(volume, "fc", null)
+            flex_volume             = lookup(volume, "flex_volume", null)
+            flocker                 = lookup(volume, "flocker", null)
+            gce_persistent_disk     = lookup(volume, "gce_persistent_disk", null)
+            git_repo                = lookup(volume, "git_repo", null)
+            glusterfs               = lookup(volume, "glusterfs", null)
+            host_path               = lookup(volume, "host_path", null)
+            iscsi                   = lookup(volume, "iscsi", null)
+            nfs                     = lookup(volume, "nfs", null)
+            persistent_volume_claim = lookup(volume, "persistent_volume_claim", null)
+            photon_persistent_disk  = lookup(volume, "photon_persistent_disk", null)
+            projected               = lookup(volume, "projected", null)
+            quobyte                 = lookup(volume, "quobyte", null)
+            rbd                     = lookup(volume, "rbd", null)
+            secret                  = lookup(volume, "secret", null)
+            vsphere_volume          = lookup(volume, "vsphere_volume", null)
+          }]
           content {
             name = lookup(volume.value, "name", null)
             dynamic "aws_elastic_block_store" {
@@ -462,7 +481,30 @@ resource "kubernetes_deployment" "self" {
           }
         }
         dynamic "container" {
-          for_each = lookup(each.value.deployment.spec.template.spec, "container", null) == null ? {} : { container : each.value.deployment.spec.template.spec.container }
+          //for_each = lookup(each.value.deployment.spec.template.spec, "container", null) == null ? {} : { container : each.value.deployment.spec.template.spec.container }
+          for_each = lookup(each.value.deployment.spec.template.spec, "container", null) == null ? [] : [for container in lookup(each.value.deployment.spec.template.spec, "container", null) : {
+            image             = lookup(container, "image", null)
+            name              = lookup(container, "name", null)
+            args              = lookup(container, "args", null)
+            command           = lookup(container, "command", null)
+            image_pull_policy = lookup(container, "image_pull_policy", null)
+            //security_context  = lookup(container, "security_context", null)
+            //startup_probe = lookup(container, "startup_probe", null)
+            stdin                    = lookup(container, "stdin", null)
+            stdin_once               = lookup(container, "stdin_once", null)
+            termination_message_path = lookup(container, "termination_message_path", null)
+            tty                      = lookup(container, "tty", null)
+            working_dir              = lookup(container, "working_dir", null)
+            env                      = lookup(container, "env", null)
+            env_from                 = lookup(container, "env_from", null)
+            lifecycle                = lookup(container, "lifecycle", null)
+            port                     = lookup(container, "port", null)
+            resources                = lookup(container, "resources", null)
+            liveness_probe           = lookup(container, "liveness_probe", null)
+            readiness_probe          = lookup(container, "readiness_probe", null)
+            volume_mount             = lookup(container, "volume_mount", null)
+
+          }]
           content {
             image             = lookup(container.value, "image", null)
             name              = lookup(container.value, "name", null)
@@ -716,7 +758,13 @@ resource "kubernetes_deployment" "self" {
               }
             }
             dynamic "volume_mount" {
-              for_each = lookup(container.value, "volume_mount", null) == null ? {} : { volume_mount : container.value.volume_mount }
+              for_each = lookup(container.value, "volume_mount", null) == null ? [] : [for volume_mount in lookup(container.value, "volume_mount", null) : {
+                mount_path        = lookup(volume_mount, "mount_path", null)
+                name              = lookup(volume_mount, "name", null)
+                read_only         = lookup(volume_mount, "read_only", null)
+                sub_path          = lookup(volume_mount, "sub_path", null)
+                mount_propagation = lookup(volume_mount, "mount_propagation", null)
+              }]
               content {
                 mount_path        = lookup(volume_mount.value, "mount_path", null)
                 name              = lookup(volume_mount.value, "name", null)
@@ -728,41 +776,6 @@ resource "kubernetes_deployment" "self" {
             }
           }
         }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "self" {
-  for_each = local.k8s_services
-  metadata {
-    annotations   = lookup(each.value.service.metadata, "annotations", {})
-    generate_name = lookup(each.value.service.metadata, "name", null) == null ? lookup(each.value.service.metadata, "generate_name", null) : null
-    name          = lookup(each.value.service.metadata, "name", null)
-    labels        = lookup(each.value.service.metadata, "labels", {})
-    namespace     = lookup(each.value.service.metadata, "namespace", null)
-  }
-  spec {
-    cluster_ip                  = lookup(each.value.service.spec, "cluster_ip", null)
-    external_ips                = lookup(each.value.service.spec, "external_ips", null)
-    external_name               = lookup(each.value.service.spec, "external_name", null)
-    external_traffic_policy     = lookup(each.value.service.spec, "external_traffic_policy", null)
-    load_balancer_ip            = lookup(each.value.service.spec, "load_balancer_ip", null)
-    load_balancer_source_ranges = lookup(each.value.service.spec, "load_balancer_source_ranges", null)
-    publish_not_ready_addresses = lookup(each.value.service.spec, "publish_not_ready_addresses", null)
-    selector                    = lookup(each.value.service.spec, "selector", null)
-    session_affinity            = lookup(each.value.service.spec, "session_affinity", null)
-    type                        = lookup(each.value.service.spec, "type", null)
-    health_check_node_port      = lookup(each.value.service.spec, "health_check_node_port", null)
-
-    dynamic "port" {
-      for_each = lookup(each.value.service.spec, "port", null) == null ? {} : { port : each.value.service.spec.port }
-      content {
-        name        = lookup(port.value, "name", null)
-        node_port   = lookup(port.value, "node_port", null)
-        port        = lookup(port.value, "port", null)
-        protocol    = lookup(port.value, "protocol", null)
-        target_port = lookup(port.value, "target_port", null)
       }
     }
   }

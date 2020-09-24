@@ -3,7 +3,7 @@ locals {
   k8s_config_map = {
     for kube_file in local.k8s_config_map_files :
     basename(dirname(kube_file)) => { config_map : yamldecode(file(kube_file)) }
-    if ! contains(split("/", kube_file), "config_map")
+    if ! contains(split("/", kube_file), "terraform")
   }
 }
 
@@ -11,9 +11,9 @@ locals {
 //  load_config_file = true
 //}
 
-/*
 resource "kubernetes_config_map" "self" {
   for_each = local.k8s_config_map
+
   metadata {
     annotations   = lookup(each.value.config_map.metadata, "annotations", {})
     generate_name = lookup(each.value.config_map.metadata, "name", null) == null ? lookup(each.value.config_map.metadata, "generate_name", null) : null
@@ -22,14 +22,20 @@ resource "kubernetes_config_map" "self" {
     namespace     = lookup(each.value.config_map.metadata, "namespace", null)
   }
 
-}
-*/
-resource "kubernetes_config_map" "self" {
-  metadata {
-    name = "mosquito-config-file"
-  }
-
-  data = {
-    "mosquitto.conf" = file("../mosquitto/mosquitto.conf")
-  }
+  data = merge({
+    for key, value in lookup(each.value.config_map, "data", {}) :
+    key => value
+    },
+    {
+      for value in lookup(each.value.config_map, "data_file", {}) :
+      basename(value) => file(value)
+  })
+  binary_data = merge({
+    for key, value in lookup(each.value.config_map, "binary_data", {}) :
+    key => value
+    },
+    {
+      for value in lookup(each.value.config_map, "binary_file", {}) :
+      basename(value) => filebase64(value)
+  })
 }

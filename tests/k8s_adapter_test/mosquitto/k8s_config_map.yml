@@ -1,0 +1,6 @@
+metadata:
+  name: "mosquitto-config-file"
+  labels:
+    env: "test"
+data_file:
+  - ../mosquitto/mosquitto.conf
