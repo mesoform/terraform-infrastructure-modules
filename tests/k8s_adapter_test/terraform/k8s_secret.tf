@@ -1,12 +1,3 @@
-locals {
-  k8s_secret_files = fileset(path.root, "../**/k8s_secret.y{a,}ml")
-  k8s_secret = {
-    for kube_file in local.k8s_secret_files :
-    basename(dirname(kube_file)) => { secret : yamldecode(file(kube_file)) }
-    if ! contains(split("/", kube_file), "terraform")
-  }
-}
-
 resource "kubernetes_secret" "self" {
   for_each = local.k8s_secret
 

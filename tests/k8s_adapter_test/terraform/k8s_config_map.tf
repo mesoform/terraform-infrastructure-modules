@@ -1,15 +1,3 @@
-locals {
-  k8s_config_map_files = fileset(path.root, "../**/k8s_config_map.y{a,}ml")
-  k8s_config_map = {
-    for kube_file in local.k8s_config_map_files :
-    basename(dirname(kube_file)) => { config_map : yamldecode(file(kube_file)) }
-    if ! contains(split("/", kube_file), "terraform")
-  }
-}
-
-//provider "kubernetes" {
-//  load_config_file = true
-//}
 
 resource "kubernetes_config_map" "self" {
   for_each = local.k8s_config_map

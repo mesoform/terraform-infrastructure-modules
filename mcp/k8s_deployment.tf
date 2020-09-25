@@ -1,18 +1,3 @@
-locals {
-
-  k8s_deployments_files = fileset(path.root, "../**/k8s_deployment.y{a,}ml")
-  k8s_deployments = {
-    for kube_file in local.k8s_deployments_files :
-    basename(dirname(kube_file)) => { deployment : yamldecode(file(kube_file)) }
-    if ! contains(split("/", kube_file), "mcp")
-  }
-
-  k8s = {
-    for app, config in local.k8s_services :
-    app => merge(config, lookup(local.k8s_deployments, app, {}))
-  }
-}
-
 provider "kubernetes" {
   load_config_file = true
 }
@@ -76,7 +61,12 @@ resource "kubernetes_deployment" "self" {
         termination_grace_period_seconds = lookup(each.value.deployment.spec.template.spec, "termination_grace_period_seconds", null)
 
         dynamic "volume" {
-          for_each = lookup(each.value.deployment.spec.template.spec, "volume", null) == null ? [] : [for volume in lookup(each.value.deployment.spec.template.spec, "volume", null) : {
+          //for_each = lookup(each.value.deployment.spec.template.spec, "volume", null) == null ? [] : [for volume in lookup(each.value.deployment.spec.template.spec, "volume", null) : {
+          // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
+          // This message occurs when values of different types are described in the content block.
+          // If all the values of the content block are of the same type, no error occurs.
+          for_each = [for volume in lookup(each.value.deployment.spec.template.spec, "volume", null) : {
             name                    = lookup(volume, "name", null)
             azure_disk              = lookup(volume, "azure_disk", null)
             azure_file              = lookup(volume, "azure_file", null)
@@ -482,7 +472,11 @@ resource "kubernetes_deployment" "self" {
         }
         dynamic "container" {
           //for_each = lookup(each.value.deployment.spec.template.spec, "container", null) == null ? {} : { container : each.value.deployment.spec.template.spec.container }
-          for_each = lookup(each.value.deployment.spec.template.spec, "container", null) == null ? [] : [for container in lookup(each.value.deployment.spec.template.spec, "container", null) : {
+          // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
+          // This message occurs when values of different types are described in the content block.
+          // If all the values of the content block are of the same type, no error occurs.
+          for_each = [for container in lookup(each.value.deployment.spec.template.spec, "container", null) : {
             image             = lookup(container, "image", null)
             name              = lookup(container, "name", null)
             args              = lookup(container, "args", null)
@@ -759,6 +753,10 @@ resource "kubernetes_deployment" "self" {
             }
             dynamic "volume_mount" {
               for_each = lookup(container.value, "volume_mount", null) == null ? [] : [for volume_mount in lookup(container.value, "volume_mount", null) : {
+                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
+                // This message occurs when values of different types are described in the content block.
+                // If all the values of the content block are of the same type, no error occurs.
                 mount_path        = lookup(volume_mount, "mount_path", null)
                 name              = lookup(volume_mount, "name", null)
                 read_only         = lookup(volume_mount, "read_only", null)

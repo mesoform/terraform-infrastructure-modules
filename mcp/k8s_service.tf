@@ -1,13 +1,3 @@
-locals {
-  k8s_services_files = fileset(path.root, "../**/k8s_service.y{a,}ml")
-  k8s_services = {
-    for kube_file in local.k8s_services_files :
-    basename(dirname(kube_file)) => { service : yamldecode(file(kube_file)) }
-    if ! contains(split("/", kube_file), "mcp")
-  }
-}
-
-
 resource "kubernetes_service" "self" {
   for_each = local.k8s_services
   metadata {
@@ -31,8 +21,11 @@ resource "kubernetes_service" "self" {
     health_check_node_port      = lookup(each.value.service.spec, "health_check_node_port", null)
 
     dynamic "port" {
-      //for_each = lookup(each.value.service.spec, "port", null) == null ? [] : [for port in lookup(each.value.service.spec, "port") : {
-      for_each = [for port in lookup(each.value.service.spec, "port") : {
+      for_each = lookup(each.value.service.spec, "port", null) == null ? [] : [for port in lookup(each.value.service.spec, "port") : {
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
+        // This message occurs when values of different types are described in the content block.
+        // If all the values of the content block are of the same type, no error occurs.
         name        = lookup(port, "name", null)
         node_port   = lookup(port, "node_port", null)
         port        = lookup(port, "port", null)
