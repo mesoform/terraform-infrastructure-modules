@@ -471,7 +471,7 @@ resource "kubernetes_deployment" "self" {
           }
         }
         dynamic "container" {
-          //for_each = lookup(each.value.deployment.spec.template.spec, "container", null) == null ? {} : { container : each.value.deployment.spec.template.spec.container }
+          // for_each = lookup (each.value.deployment.spec.template.spec, "container", null) == null ? [] :  [for container in lookup(each.value.deployment.spec.template.spec, "container", null) : {
           // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
           // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
           // This message occurs when values of different types are described in the content block.
