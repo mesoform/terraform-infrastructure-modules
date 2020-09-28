@@ -12,22 +12,22 @@ locals {
   }
 
   user_project_config_yml = file(var.user_project_config_yml)
-  project = yamldecode(local.user_project_config_yml)
-  user_gae_config_yml = fileexists(var.gcp_ae_yml)? file(var.gcp_ae_yml) : ""
-  gae = local.user_gae_config_yml == "" ? {} : yamldecode(local.user_gae_config_yml)
-  gae_components = lookup(local.gae, "components", {})
-  gae_map = lookup(local.gae_components, "specs", {})
+  project                 = yamldecode(local.user_project_config_yml)
+  user_gae_config_yml     = fileexists(var.gcp_ae_yml)? file(var.gcp_ae_yml) : null
+  gae                     = local.user_gae_config_yml == null ? {} : yamldecode(local.user_gae_config_yml)
+  gae_components          = lookup(local.gae, "components", {})
+  gae_components_specs    = lookup(local.gae_components, "specs", {})
 
   //noinspection HILUnresolvedReference
   as_all_map = {
-    for as, config in local.gae_map:
+    for as, config in local.gae_components_specs:
       #This doesn't merge complex maps. Any nested map requirements need to handled at the property
       # level. See env_variables below
       as => merge(lookup(local.gae_components, "common", {}), config)
   }
   //noinspection HILUnresolvedReference
   as_flex_specs = {
-    for as, config in local.gae_map:
+    for as, config in local.gae_components_specs:
       #This doesn't merge complex maps. Any nested map requirements need to handled at the property
       # level. See env_variables below
       as => merge(lookup(local.gae_components, "common", {}), config)
@@ -35,13 +35,13 @@ locals {
   }
   //noinspection HILUnresolvedReference
   as_std_specs = {
-    for as, config in local.gae_map:
+    for as, config in local.gae_components_specs:
       as => merge(lookup(local.gae_components, "common", {}), config)
       if lookup(merge(lookup(local.gae_components, "common", {}), config), "env", "standard") == "standard"
   }
   //noinspection HILUnresolvedReference
   as_all_specs = {
-    for as, config in local.gae_map:
+    for as, config in local.gae_components_specs:
       #This doesn't merge complex maps. Any nested map requirements need to handled at the property
       # level. See env_variables below
       as => merge(lookup(local.gae_components, "common", {}), config)
