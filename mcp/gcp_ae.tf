@@ -1,7 +1,7 @@
 
 //noinspection HILUnresolvedReference
 data "google_project" "self" {
-  count = local.gae == {} ? 0 : lookup(local.gae, "create_google_project", false) ? 0 : 1
+  count = local.gae == {} || lookup(local.gae, "create_google_project", false) ? 0 : 1
 
   project_id = lookup(local.gae, "project_id", null)
 }

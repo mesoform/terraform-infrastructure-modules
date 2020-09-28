@@ -5,7 +5,7 @@
 [MMCF](#MMCF)     
 [project.yml](#projectyml)      
 [gcp_ae.yml](#gcp_aeyml)    
-[gcp_cp.yml](#gcp_cryml)  
+[gcp_cloudrun.yml](#gcp_cloudrunyml)  
 [Contributing](#Contributing)  
 [License](#License)
 
@@ -262,7 +262,7 @@ components:
   common:
   specs:
 ```
-### GCP_CloudRun.yml
+### gcp_cloudrun.yml
 #### Prerequisites
 * There must be an existing google project, with "Cloud Run" enabled with "Cloud Run Admin API" credentials
 * Cloud run can only retrieve containers hosted in Container Registry, 
@@ -277,18 +277,18 @@ so your image must already be hosted in your projects container registry.
 |:----|:----:|:--------:|:------------|:-------:|
 | `project_id` | string | true | The ID of the project to be used for the service | none | 
 | `location_id` | string | true | Location ID of the project used| none | 
-| `name` | string | true | Name for Cloud Run Service, uniques within cloud run region and cannot be updated | none | 
-| `image_name` | string | true | Name of the image stored in Google Cloud Container Repository| none | 
+| `name` | string | true | Name for Cloud Run Service, unique within cloud run region and cannot be updated | none | 
+| `image_name` | string | true | Name of the image stored in Google Cloud Container Repository or | none | 
 | `auth` | bool | true | Whether authentication is required to access service| false | 
 | `environment_vars` | map | false | Any environment variables to include as for image. Key is the name of the variable and value is the string it represents| none | 
 | `iam` | map | true if `auth = true` | If authentication is required to access the service, include the iam block| false | 
 | `iam.role` | string | true if replacing or binding iam policy | The role the specified users will have for the service| none | 
 | `iam.members` | map | ttrue if replacing or binding iam policy | Members who will be assigned the role for the iam policy| none | 
 | `iam.replace_policy` | bool | false | Sets IAM policy, replacing any existing policy attached| true | 
-| `iam.binding` | bool | false | Updates IAM policy to grand role to specified members| false | 
+| `iam.binding` | bool | false | Updates IAM policy to grant role to specified members| false | 
 | `iam.add_member` | map | false | Adds a member who can can use a specified policy. If a binding policy exists the policy for `add_member` must be different. This must include the keys `role`, `member` and `member_type`, with `member_type` being either `"user"` or `"group"`| none | 
 | `domain_name` | string | false | Custom domain name for service, domain must already exist| none | 
-| `traffic` | list | false | list of traffic allocation across revision| none | 
+| `traffic` | list | false | list of traffic allocation configs across revisions| none | 
 | `traffic.-.percent` | map | true if `traffic.-` exists | The percentage of traffic for revision, if `revision_name` is not specified latest revision is used| none | 
 | `traffic.-.revision_name` | string | false | The name of the revision the traffic should be allocated to | 'latest_revision' is set to true by default | 
 
@@ -300,10 +300,17 @@ More information can be found in the terraform [documentation](https://www.terra
 ```yaml
 project_id: <id>
 location_id: "europe-west1"
+create_google_project: true
+create_artifact_registry: true
 
 components:
+  common:
+    
+    
   specs:
     name: default
+#    image_location: container/artifact
+#    image_project: default to same project
     image_name: image
     environment_vars:
       'EG': 'something'
@@ -323,7 +330,7 @@ components:
         member: 'admin@example.com'
         member_type: 'user'
     domain_name: "domain.com"
-    #Use hypens to separate traffic configurations, making a list of configurations
+    #Use hyphens to separate traffic configurations, making a list of configurations
     traffic:
       -
         percent: 25

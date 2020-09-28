@@ -41,10 +41,10 @@ locals {
   }
   //noinspection HILUnresolvedReference
   as_all_specs = {
-  for as, config in local.gae_map:
-  #This doesn't merge complex maps. Any nested map requirements need to handled at the property
-  # level. See env_variables below
-  as => merge(lookup(local.gae_components, "common", {}), config)
+    for as, config in local.gae_map:
+      #This doesn't merge complex maps. Any nested map requirements need to handled at the property
+      # level. See env_variables below
+      as => merge(lookup(local.gae_components, "common", {}), config)
   }
   //noinspection HILUnresolvedReference
   as_paths = {
