@@ -264,21 +264,21 @@ components:
 ```
 ### gcp_cloudrun.yml
 #### Prerequisites
-* There must be an existing google project, with "Cloud Run" enabled with "Cloud Run Admin API" credentials
-* Cloud run can only retrieve containers hosted in Container Registry, 
-so your image must already be hosted in your projects container registry. 
-  This can be done by running the command: 
-  `$ gcloud builds submit --tag gcr.io/[PROJECT-ID]/[IMAGE]` from the containers directory. 
-  `[PROJECT-ID]` is your Google Cloud Project id and `[IMAGE]` is the name you would like to name the image.
+* Cloud run retrieves images hosted in Container Registry or Artifact Registry.  
+If creating a project, there must be an existing image that you have access to (public/global), 
+which is specified with the `image_uri` value in `gcp_clourun.yml`.
+If using an existing project you can use an image hosted within the projects Container Registry or Artifact Registy, 
+provided you have the correct IAM permissions to access it.  
   
-  Alternatively you can use docker to build and push to Container Registry
-#### Cloud run basic configuration
+#### Cloud run specs
 | Key | Type | Required | Description | Default |
 |:----|:----:|:--------:|:------------|:-------:|
 | `project_id` | string | true | The ID of the project to be used for the service | none | 
 | `location_id` | string | true | Location ID of the project used| none | 
+| `create_google_project` | bool | false | Whether to create a new project for services| false | 
+| `create_artiface_registry` | bool | false | whether to create an artifact registry repository| false | 
 | `name` | string | true | Name for Cloud Run Service, unique within cloud run region and cannot be updated | none | 
-| `image_name` | string | true | Name of the image stored in Google Cloud Container Repository or | none | 
+| `image_uri` | string | true | URI of where the image to be hosted is contained | none | 
 | `auth` | bool | true | Whether authentication is required to access service| false | 
 | `environment_vars` | map | false | Any environment variables to include as for image. Key is the name of the variable and value is the string it represents| none | 
 | `iam` | map | true if `auth = true` | If authentication is required to access the service, include the iam block| false | 
@@ -304,14 +304,12 @@ create_google_project: true
 create_artifact_registry: true
 
 components:
-  common:
-    
-    
+
   specs:
     name: default
 #    image_location: container/artifact
 #    image_project: default to same project
-    image_name: image
+    image_url: image
     environment_vars:
       'EG': 'something'
       'EG2': 'something-else'

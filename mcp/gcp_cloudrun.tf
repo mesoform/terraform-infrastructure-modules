@@ -4,16 +4,15 @@ data "google_project" "default" {
   project_id = lookup(local.cloudrun, "project_id", "")
 }
 
-data "google_container_registry_image" "default"{
-  for_each = local.cloudrun_specs
-  name = lookup(local.cloudrun_specs[each.key], "image_name", "")
-  project = data.google_project.default.project_id
-}
-
 //noinspection HILUnresolvedReference
-data "google_organization" "self" {
+data "google_organization" "default" {
   count = lookup(local.cloudrun, "organization_name", null) != null ? 1 : 0
   domain = lookup(local.cloudrun, "organization_name", null)
+}
+
+resource "google_project_service" "artifact_reg" {
+  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default[0].project_id: data.google_project.default.project_id
+  service = "artifactregistry.googleapis.com"
 }
 
 //noinspection HILUnresolvedReference
@@ -21,17 +20,17 @@ resource "google_project" "default" {
   count = lookup(local.cloudrun, "create_google_project", false) ? 1: 0
   name = lookup(local.cloudrun, "project_name", local.cloudrun.project_id)
   project_id = lookup(local.cloudrun,"project_id", null)
-  org_id = lookup(local.cloudrun, "organization_name", null) == null ? null : data.google_organization.self.0.org_id
+  org_id = lookup(local.cloudrun, "organization_name", null) == null ? null : data.google_organization.self[0].org_id
   folder_id = lookup(local.cloudrun, "folder_id", null) == null ? null : local.gae.folder_id
   labels = merge(lookup(local.project, "labels", {}), lookup(local.gae, "project_labels", {}))
   auto_create_network = lookup(local.cloudrun, "auto_create_network", true)
 }
 
 //noinspection HILUnresolvedReference
-resource "google_artifact_registry_repository" "my-repo" {
+resource "google_artifact_registry_repository" "default" {
   count = lookup(local.cloudrun, "create_artifact_registry", false) ? 1: 0
   provider = google-beta
-  project =  lookup(local.cloudrun, "create_google_project", false) ? google_project.default.project_id: data.google_project.default.project_id
+  project = google_project_service.artifact_reg.project
   location = local.cloudrun.location_id
   format = "DOCKER"
   repository_id = lookup(local.cloudrun, "repository_id", "cloudrun-repo")
@@ -42,12 +41,12 @@ resource "google_cloud_run_service" "self" {
   for_each = local.cloudrun_specs
   location = local.cloudrun.location_id
   name     = each.value.name
-  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default.project_id: data.google_project.default.project_id
+  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default[0].project_id: data.google_project.default.project_id
   template {
     spec{
       //noinspection HILUnresolvedReference
       containers {
-        image = data.google_container_registry_image.default[each.key].image_url
+        image = local.cloudrun_specs[each.key].image_uri
         //noinspection HILUnresolvedReference
         dynamic "env"{
           for_each = lookup(each.value, "environment_vars", {})
@@ -94,7 +93,6 @@ data "google_iam_policy" "auth" {
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_service_iam_policy" "policy" {
-//  count       = lookup(local.cloudrun_iam, "replace_policy", true) ? 1 : 0
   for_each    = {
     for key, specs in local.cloudrun_specs: key => specs
       if lookup(local.cloudrun_iam[key], "replace_policy", true)
@@ -108,7 +106,6 @@ resource "google_cloud_run_service_iam_policy" "policy" {
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_service_iam_binding" "binding" {
-//  count    = local.cloudrun_specs.auth ? (lookup(local.cloudrun_iam,"binding", false ) ? 1 : 0) : 0
   for_each = {
     for key, specs in local.cloudrun_specs: key => specs
       if local.cloudrun_specs[key].auth && lookup(local.cloudrun_iam[key], "binding", false)
@@ -123,7 +120,6 @@ resource "google_cloud_run_service_iam_binding" "binding" {
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_service_iam_member" "member" {
-//  count    = local.cloudrun_specs.auth ? (lookup(local.cloudrun_iam,"add_member", null ) == null ? 0 : 1) : 0
   for_each = {
     for key, specs in local.cloudrun_specs: key => specs
       if local.cloudrun_specs[key].auth && lookup(local.cloudrun_iam[key], "add_member", false) == true
@@ -138,7 +134,6 @@ resource "google_cloud_run_service_iam_member" "member" {
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_domain_mapping" "default" {
-//  count = lookup(local.cloudrun_specs, "domain", null) == null ? 0 : 1
   for_each =  {
     for key, specs in local.cloudrun_specs: key => specs
       if lookup(local.cloudrun_specs[key] , "domain", null) != null
