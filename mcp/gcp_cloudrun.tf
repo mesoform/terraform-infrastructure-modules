@@ -1,6 +1,7 @@
 
 //noinspection HILUnresolvedReference
 data "google_project" "default" {
+  count = lookup(local.cloudrun, "create_google_project", false) ? 0: 1
   project_id = lookup(local.cloudrun, "project_id", "")
 }
 
@@ -10,9 +11,18 @@ data "google_organization" "default" {
   domain = lookup(local.cloudrun, "organization_name", null)
 }
 
+resource "google_project_service" "iam" {
+  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default[0].project_id: data.google_project.default[0].project_id
+  service = "iam.googleapis.com"
+}
+
 resource "google_project_service" "artifact_reg" {
-  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default[0].project_id: data.google_project.default.project_id
+  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default[0].project_id: data.google_project.default[0].project_id
   service = "artifactregistry.googleapis.com"
+}
+resource "google_project_service" "cloudrun" {
+  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default[0].project_id: data.google_project.default[0].project_id
+  service = "run.googleapis.com"
 }
 
 //noinspection HILUnresolvedReference
@@ -23,7 +33,7 @@ resource "google_project" "default" {
   org_id = lookup(local.cloudrun, "organization_name", null) == null ? null : data.google_organization.self[0].org_id
   folder_id = lookup(local.cloudrun, "folder_id", null) == null ? null : local.gae.folder_id
   labels = merge(lookup(local.project, "labels", {}), lookup(local.gae, "project_labels", {}))
-  auto_create_network = lookup(local.cloudrun, "auto_create_network", true)
+  billing_account = lookup(local.cloudrun,"billing_account", null)
 }
 
 //noinspection HILUnresolvedReference
@@ -41,7 +51,7 @@ resource "google_cloud_run_service" "self" {
   for_each = local.cloudrun_specs
   location = local.cloudrun.location_id
   name     = each.value.name
-  project  = lookup(local.cloudrun, "create_google_project", false) ? google_project.default[0].project_id: data.google_project.default.project_id
+  project  = google_project_service.cloudrun.project
   template {
     spec{
       //noinspection HILUnresolvedReference

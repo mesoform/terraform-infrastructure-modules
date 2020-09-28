@@ -264,6 +264,7 @@ components:
 ```
 ### gcp_cloudrun.yml
 #### Prerequisites
+* If creating a new project your must have an existing billing account ID to specify in the `billing_account` setting
 * Cloud run retrieves images hosted in Container Registry or Artifact Registry.  
 If creating a project, there must be an existing image that you have access to (public/global), 
 which is specified with the `image_uri` value in `gcp_clourun.yml`.
@@ -276,6 +277,7 @@ provided you have the correct IAM permissions to access it.
 | `project_id` | string | true | The ID of the project to be used for the service | none | 
 | `location_id` | string | true | Location ID of the project used| none | 
 | `create_google_project` | bool | false | Whether to create a new project for services| false | 
+| `billing_account` | string | true if `create_google_project` is true | The alphanumeric ID of the billing account this project belongs to. | none |
 | `create_artiface_registry` | bool | false | whether to create an artifact registry repository| false | 
 | `name` | string | true | Name for Cloud Run Service, unique within cloud run region and cannot be updated | none | 
 | `image_uri` | string | true | URI of where the image to be hosted is contained | none | 
