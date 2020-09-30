@@ -285,7 +285,7 @@ provided you have the correct IAM permissions to access it.
 | `environment_vars` | map | false | Any environment variables to include as for image. Key is the name of the variable and value is the string it represents| none | 
 | `iam` | map | true if `auth = true` | If authentication is required to access the service, include the iam block| false | 
 | `iam.role` | string | true if replacing or binding iam policy | The role the specified users will have for the service| none | 
-| `iam.members` | map | ttrue if replacing or binding iam policy | Members who will be assigned the role for the iam policy| none | 
+| `iam.members` | map | true if replacing or binding iam policy | Members who will be assigned the role for the iam policy| none | 
 | `iam.replace_policy` | bool | false | Sets IAM policy, replacing any existing policy attached| true | 
 | `iam.binding` | bool | false | Updates IAM policy to grant role to specified members| false | 
 | `iam.add_member` | map | false | Adds a member who can can use a specified policy. If a binding policy exists the policy for `add_member` must be different. This must include the keys `role`, `member` and `member_type`, with `member_type` being either `"user"` or `"group"`| none | 
@@ -295,7 +295,11 @@ provided you have the correct IAM permissions to access it.
 | `traffic.-.revision_name` | string | false | The name of the revision the traffic should be allocated to | 'latest_revision' is set to true by default | 
 
 **NOTE**: Cannot have `binding` or `add_member` if using `replace_policy`, 
-but can have `binding` and `add_member` at the same time as long as they are not set for the same role.
+but can have `binding` and `add_member` at the same time as long as they are not set for the same role.  
+* `replace_policy` will replace any existing iam policy for the service
+* `binding` will update policy whilst preserving previously set policies 
+* `add_member` updates the policy with permissions for a new member whilst maintaining roles for other members.
+
 More information can be found in the terraform [documentation](https://www.terraform.io/docs/providers/google/r/cloud_run_service_iam.html).
 
 ##### Example
@@ -309,8 +313,6 @@ components:
 
   specs:
     name: default
-#    image_location: container/artifact
-#    image_project: default to same project
     image_url: image
     environment_vars:
       'EG': 'something'

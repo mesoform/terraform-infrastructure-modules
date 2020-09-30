@@ -1,14 +1,8 @@
 
 //noinspection HILUnresolvedReference
 data "google_project" "default" {
-  count      = lookup(local.cloudrun, "create_google_project", false) ? 0: 1
+  count      = lookup(local.cloudrun, "create_google_project", false) ? 0 : 1
   project_id = lookup(local.cloudrun, "project_id", "")
-}
-
-//noinspection HILUnresolvedReference
-data "google_organization" "default" {
-  count  = lookup(local.cloudrun, "organization_name", null) != null ? 1 : 0
-  domain = lookup(local.cloudrun, "organization_name", null)
 }
 
 resource "google_project_service" "iam" {
@@ -27,18 +21,18 @@ resource "google_project_service" "cloudrun" {
 
 //noinspection HILUnresolvedReference
 resource "google_project" "default" {
-  count           = lookup(local.cloudrun, "create_google_project", false) ? 1: 0
+  count           = lookup(local.cloudrun, "create_google_project", false) ? 1 : 0
   name            = lookup(local.cloudrun, "project_name", local.cloudrun.project_id)
   project_id      = lookup(local.cloudrun,"project_id", null)
-  org_id          = lookup(local.cloudrun, "organization_name", null) == null ? null : data.google_organization.self[0].org_id
+  org_id          = lookup(local.cloudrun, "organization_name", null)
   folder_id       = lookup(local.cloudrun, "folder_id", null) == null ? null : local.gae.folder_id
   labels          = merge(lookup(local.project, "labels", {}), lookup(local.gae, "project_labels", {}))
   billing_account = lookup(local.cloudrun,"billing_account", null)
 }
 
 //noinspection HILUnresolvedReference
-resource "google_artifact_registry_repository" "default" {
-  count         = lookup(local.cloudrun, "create_artifact_registry", false) ? 1: 0
+resource "google_artifact_registry_repository" "self" {
+  count         = lookup(local.cloudrun, "create_artifact_registry", false) ? 1 : 0
   provider      = google-beta
   project       = google_project_service.artifact_reg.project
   location      = local.cloudrun.location_id
@@ -102,7 +96,7 @@ data "google_iam_policy" "auth" {
 }
 
 //noinspection HILUnresolvedReference
-resource "google_cloud_run_service_iam_policy" "policy" {
+resource "google_cloud_run_service_iam_policy" "self" {
   for_each    = {
     for key, specs in local.cloudrun_specs: key => specs
       if lookup(local.cloudrun_iam[key], "replace_policy", true)
@@ -115,7 +109,7 @@ resource "google_cloud_run_service_iam_policy" "policy" {
 }
 
 //noinspection HILUnresolvedReference
-resource "google_cloud_run_service_iam_binding" "binding" {
+resource "google_cloud_run_service_iam_binding" "self" {
   for_each = {
     for key, specs in local.cloudrun_specs: key => specs
       if local.cloudrun_specs[key].auth && lookup(local.cloudrun_iam[key], "binding", false)
@@ -129,7 +123,7 @@ resource "google_cloud_run_service_iam_binding" "binding" {
 }
 
 //noinspection HILUnresolvedReference
-resource "google_cloud_run_service_iam_member" "member" {
+resource "google_cloud_run_service_iam_member" "self" {
   for_each = {
     for key, specs in local.cloudrun_specs: key => specs
       if local.cloudrun_specs[key].auth && lookup(local.cloudrun_iam[key], "add_member", false) == true
@@ -143,7 +137,7 @@ resource "google_cloud_run_service_iam_member" "member" {
 }
 
 //noinspection HILUnresolvedReference
-resource "google_cloud_run_domain_mapping" "default" {
+resource "google_cloud_run_domain_mapping" "self" {
   for_each =  {
     for key, specs in local.cloudrun_specs: key => specs
       if lookup(local.cloudrun_specs[key] , "domain", null) != null
