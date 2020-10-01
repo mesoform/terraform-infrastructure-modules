@@ -19,7 +19,7 @@ takes a single key, `enforced` which is a string representation of `true` or `fa
 takes a single key, `restore_default` which is a string representation of `true` or `false`
 
 ### Organization level additional keys
-Organization level takes no additional keys. The organization_id should be set as a first-class 
+Organization level takes no additional keys. The `organization_id` should be set as a first-class 
 variable in the module block
 
 ### Folder level additional keys
