@@ -21,11 +21,7 @@ resource "kubernetes_service" "self" {
     health_check_node_port      = lookup(each.value.service.spec, "health_check_node_port", null)
 
     dynamic "port" {
-      for_each = lookup(each.value.service.spec, "port", null) == null ? [] : [for port in lookup(each.value.service.spec, "port") : {
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
-        // This message occurs when values of different types are described in the content block.
-        // If all the values of the content block are of the same type, no error occurs.
+      for_each = lookup(each.value.service.spec, "port", []) == [] ? [] : [for port in each.value.service.spec.port : {
         name        = lookup(port, "name", null)
         node_port   = lookup(port, "node_port", null)
         port        = lookup(port, "port", null)

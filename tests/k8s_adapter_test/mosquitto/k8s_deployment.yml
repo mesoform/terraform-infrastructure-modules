@@ -17,7 +17,7 @@ spec:
         - name: "mosquitto"
           image: "eclipse-mosquitto:1.6.2"
           port:
-            container_port: 1883
+            - container_port: 1883
           resources:
             limits:
               cpu: "0.5"
@@ -33,7 +33,7 @@ spec:
         - name: "tomcat-example"
           image: "tomcat:8.5-jdk8-adoptopenjdk-openj9"
           port:
-            container_port: 8080
+            - container_port: 8080
           resources:
             limits:
               cpu: "0.5"

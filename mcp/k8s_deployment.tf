@@ -6,10 +6,10 @@ resource "kubernetes_deployment" "self" {
   for_each         = local.k8s_deployments
   wait_for_rollout = lookup(each.value.deployment, "wait_for_rollout", true)
   metadata {
-    annotations   = lookup(each.value.deployment.metadata, "annotations", {})
+    annotations   = lookup(each.value.deployment.metadata, "annotations", null)
     generate_name = lookup(each.value.deployment.metadata, "name", null) == null ? lookup(each.value.deployment.metadata, "generate_name", null) : null
     name          = lookup(each.value.deployment.metadata, "name", null)
-    labels        = lookup(each.value.deployment.metadata, "labels", {})
+    labels        = lookup(each.value.deployment.metadata, "labels", null)
     namespace     = lookup(each.value.deployment.metadata, "namespace", null)
   }
   spec {
@@ -37,10 +37,9 @@ resource "kubernetes_deployment" "self" {
         match_labels = lookup(selector.value, "match_labels", null)
       }
     }
-
     template {
       metadata {
-        labels = lookup(each.value.deployment.spec.template.metadata, "labels", {})
+        labels = lookup(each.value.deployment.spec.template.metadata, "labels", null)
       }
       spec {
         active_deadline_seconds         = lookup(each.value.deployment.spec.template.spec, "active_deadline_seconds", null)
@@ -66,8 +65,10 @@ resource "kubernetes_deployment" "self" {
           // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
           // This message occurs when values of different types are described in the content block.
           // If all the values of the content block are of the same type, no error occurs.
-          for_each = [for volume in lookup(each.value.deployment.spec.template.spec, "volume", null) : {
+          //for_each = lookup(each.value.deployment.spec.template.spec, "volume", []) == [] ? [] : [for volume in each.value.deployment.spec.template.spec.volume : {
+          for_each = [for volume in lookup(each.value.deployment.spec.template.spec, "volume", []) : {
             name                    = lookup(volume, "name", null)
+            aws_elastic_block_store = lookup(volume, "aws_elastic_block_store", null)
             azure_disk              = lookup(volume, "azure_disk", null)
             azure_file              = lookup(volume, "azure_file", null)
             ceph_fs                 = lookup(volume, "ceph_fs", null)
@@ -91,7 +92,8 @@ resource "kubernetes_deployment" "self" {
             rbd                     = lookup(volume, "rbd", null)
             secret                  = lookup(volume, "secret", null)
             vsphere_volume          = lookup(volume, "vsphere_volume", null)
-          }]
+            }
+          if lookup(each.value.deployment.spec.template.spec, "volume", []) != []]
           content {
             name = lookup(volume.value, "name", null)
             dynamic "aws_elastic_block_store" {
@@ -167,21 +169,20 @@ resource "kubernetes_deployment" "self" {
               for_each = lookup(volume.value, "downward_api", null) == null ? {} : { downward_api : volume.value.downward_api }
               content {
                 default_mode = lookup(downward_api.value, "default_mode", null)
-                //  dynamic "items" { // incorrect description in the documentation of 'items'
-                //  for_each = lookup(downward_api.value, "items", null) == null ? {} : { items : downward_api.value.items }
-                //  content {
-                //  dynamic "field_ref" {
-                //  for_each = lookup(items.value, "field_ref", null) == null ? {} : { field_ref : items.value.field_ref }
-                //  content {
-                //  api_version = lookup(field_ref.value, "api_version", null)
-                //  field_path  = lookup(field_ref.value, "field_path", null)
-                //  }
-                //  }
-                //    mode = lookup(items.value, "mode", null)
-                //  path = lookup(items.value, "path", null)
-
-                //  }
-                //}
+                dynamic "items" { // incorrect description in the documentation of 'items'
+                  for_each = lookup(downward_api.value, "items", null) == null ? {} : { items : downward_api.value.items }
+                  content {
+                    dynamic "field_ref" {
+                      for_each = lookup(items.value, "field_ref", null) == null ? {} : { field_ref : items.value.field_ref }
+                      content {
+                        api_version = lookup(field_ref.value, "api_version", null)
+                        field_path  = lookup(field_ref.value, "field_path", null)
+                      }
+                    }
+                    mode = lookup(items.value, "mode", null)
+                    path = lookup(items.value, "path", null)
+                  }
+                }
               }
             }
             dynamic "empty_dir" {
@@ -431,9 +432,12 @@ resource "kubernetes_deployment" "self" {
             nameservers = lookup(dns_config.value, "nameservers", null)
             searches    = lookup(dns_config.value, "searches", null)
             dynamic "option" {
-              for_each = lookup(dns_config.value, "option", null) == null ? {} : { option : dns_config.value.option }
+              for_each = lookup(dns_config.value, "option", []) == [] ? [] : [for option in dns_config.value.option : {
+                name  = lookup(option, "name", null)
+                value = lookup(option, "value", null)
+              }]
               content {
-                name  = option.value.name
+                name  = lookup(option.value, "name", null)
                 value = lookup(option.value, "value", null)
               }
             }
@@ -447,7 +451,11 @@ resource "kubernetes_deployment" "self" {
           }
         }
         dynamic "init_container" {
-          for_each = lookup(each.value.deployment.spec.template.spec, "init_container", null) == null ? {} : { init_container : each.value.deployment.spec.template.spec.init_container }
+          for_each = lookup(each.value.deployment.spec.template.spec, "init_container", []) == [] ? [] : [for init_container in each.value.deployment.spec.template.spec.init_container : {
+            name    = lookup(init_container, "name", null)
+            image   = lookup(init_container, "image", null)
+            command = lookup(init_container, "command", null)
+          }]
           content {
             name    = lookup(init_container.value, "name", null)
             image   = lookup(init_container.value, "image", null)
@@ -457,13 +465,146 @@ resource "kubernetes_deployment" "self" {
         dynamic "affinity" {
           for_each = lookup(each.value.deployment.spec.template.spec, "affinity", null) == null ? {} : { affinity : each.value.deployment.spec.template.spec.affinity }
           content {
-            node_affinity {
-              required_during_scheduling_ignored_during_execution {
-                node_selector_term {
-                  match_expressions {
-                    key      = affinity.value.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_term.match_expressions.key
-                    operator = affinity.value.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_term.match_expressions.operator
-                    values   = lookup(affinity.value.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_term.match_expressions, "values", null)
+            dynamic "node_affinity" {
+              for_each = lookup(affinity.value, "node_affinity", null) == null ? {} : { node_affinity : affinity.value.node_affinity }
+              content {
+                dynamic "required_during_scheduling_ignored_during_execution" {
+                  for_each = lookup(node_affinity.value, "required_during_scheduling_ignored_during_execution", null) == null ? {} : { required_during_scheduling_ignored_during_execution : node_affinity.value.required_during_scheduling_ignored_during_execution }
+                  content {
+                    dynamic "node_selector_term" {
+                      for_each = lookup(required_during_scheduling_ignored_during_execution.value, "node_selector_term", {}) == null ? {} : { node_selector_term : required_during_scheduling_ignored_during_execution.value.node_selector_term }
+                      content {
+                        dynamic "match_expressions" {
+                          for_each = lookup(node_selector_term.value, "match_expressions", null) == null ? {} : { match_expressions : node_selector_term.value.match_expressions }
+                          content {
+                            key      = lookup(match_expressions.value, "key", null)
+                            operator = lookup(match_expressions.value, "operator", null)
+                            values   = lookup(match_expressions.value, "values", null)
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                dynamic "preferred_during_scheduling_ignored_during_execution" {
+                  for_each = lookup(node_affinity.value, "preferred_during_scheduling_ignored_during_execution", null) == null ? {} : { preferred_during_scheduling_ignored_during_execution : node_affinity.value.preferred_during_scheduling_ignored_during_execution }
+                  content {
+                    weight = lookup(preferred_during_scheduling_ignored_during_execution.value, "weight", null)
+                    dynamic "preference" {
+                      for_each = lookup(preferred_during_scheduling_ignored_during_execution.value, "preference", {}) == null ? {} : { preference : preferred_during_scheduling_ignored_during_execution.value.preference }
+                      content {
+                        dynamic "match_expressions" {
+                          for_each = lookup(preference.value, "match_expressions", null) == null ? {} : { match_expressions : preference.value.match_expressions }
+                          content {
+                            key      = lookup(match_expressions.value, "key", null)
+                            operator = lookup(match_expressions.value, "operator", null)
+                            values   = lookup(match_expressions.value, "values", null)
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            dynamic "pod_affinity" {
+              for_each = lookup(affinity.value, "pod_affinity", null) == null ? {} : { pod_affinity : affinity.value.pod_affinity }
+              content {
+                dynamic "required_during_scheduling_ignored_during_execution" {
+                  for_each = lookup(pod_affinity.value, "required_during_scheduling_ignored_during_execution", null) == null ? {} : { required_during_scheduling_ignored_during_execution : pod_affinity.value.required_during_scheduling_ignored_during_execution }
+                  content {
+                    namespaces   = lookup(required_during_scheduling_ignored_during_execution.value, "namespaces", null)
+                    topology_key = lookup(required_during_scheduling_ignored_during_execution.value, "topology_key", null)
+                    dynamic "label_selector" {
+                      for_each = lookup(required_during_scheduling_ignored_during_execution.value, "label_selector", {}) == null ? {} : { label_selector : required_during_scheduling_ignored_during_execution.value.label_selector }
+                      content {
+                        dynamic "match_expressions" {
+                          for_each = lookup(label_selector.value, "match_expressions", null) == null ? {} : { match_expressions : label_selector.value.match_expressions }
+                          content {
+                            key      = lookup(match_expressions.value, "key", null)
+                            operator = lookup(match_expressions.value, "operator", null)
+                            values   = lookup(match_expressions.value, "values", null)
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                dynamic "preferred_during_scheduling_ignored_during_execution" {
+                  for_each = lookup(pod_affinity.value, "preferred_during_scheduling_ignored_during_execution", null) == null ? {} : { preferred_during_scheduling_ignored_during_execution : pod_affinity.value.preferred_during_scheduling_ignored_during_execution }
+                  content {
+                    weight = lookup(preferred_during_scheduling_ignored_during_execution.value, "weight", null)
+                    dynamic "pod_affinity_term" {
+                      for_each = lookup(preferred_during_scheduling_ignored_during_execution.value, "pod_affinity_term", {}) == null ? {} : { pod_affinity_term : preferred_during_scheduling_ignored_during_execution.value.pod_affinity_term }
+                      content {
+                        namespaces   = lookup(pod_affinity_term.value, "namespaces", null)
+                        topology_key = lookup(pod_affinity_term.value, "topology_key", null)
+                        dynamic "label_selector" {
+                          for_each = lookup(pod_affinity_term.value, "label_selector", {}) == null ? {} : { label_selector : pod_affinity_term.value.label_selector }
+                          content {
+                            dynamic "match_expressions" {
+                              for_each = lookup(label_selector.value, "match_expressions", null) == null ? {} : { match_expressions : label_selector.value.match_expressions }
+                              content {
+                                key      = lookup(match_expressions.value, "key", null)
+                                operator = lookup(match_expressions.value, "operator", null)
+                                values   = lookup(match_expressions.value, "values", null)
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            dynamic "pod_anti_affinity" {
+              for_each = lookup(affinity.value, "pod_anti_affinity", null) == null ? {} : { pod_anti_affinity : affinity.value.pod_anti_affinity }
+              content {
+                dynamic "required_during_scheduling_ignored_during_execution" {
+                  for_each = lookup(pod_anti_affinity.value, "required_during_scheduling_ignored_during_execution", null) == null ? {} : { required_during_scheduling_ignored_during_execution : pod_anti_affinity.value.required_during_scheduling_ignored_during_execution }
+                  content {
+                    namespaces   = lookup(required_during_scheduling_ignored_during_execution.value, "namespaces", null)
+                    topology_key = lookup(required_during_scheduling_ignored_during_execution.value, "topology_key", null)
+                    dynamic "label_selector" {
+                      for_each = lookup(required_during_scheduling_ignored_during_execution.value, "label_selector", {}) == null ? {} : { label_selector : required_during_scheduling_ignored_during_execution.value.label_selector }
+                      content {
+                        dynamic "match_expressions" {
+                          for_each = lookup(label_selector.value, "match_expressions", null) == null ? {} : { match_expressions : label_selector.value.match_expressions }
+                          content {
+                            key      = lookup(match_expressions.value, "key", null)
+                            operator = lookup(match_expressions.value, "operator", null)
+                            values   = lookup(match_expressions.value, "values", null)
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                dynamic "preferred_during_scheduling_ignored_during_execution" {
+                  for_each = lookup(pod_anti_affinity.value, "preferred_during_scheduling_ignored_during_execution", null) == null ? {} : { preferred_during_scheduling_ignored_during_execution : pod_anti_affinity.value.preferred_during_scheduling_ignored_during_execution }
+                  content {
+                    weight = lookup(preferred_during_scheduling_ignored_during_execution.value, "weight", null)
+                    dynamic "pod_affinity_term" {
+                      for_each = lookup(preferred_during_scheduling_ignored_during_execution.value, "pod_affinity_term", {}) == null ? {} : { pod_affinity_term : preferred_during_scheduling_ignored_during_execution.value.pod_affinity_term }
+                      content {
+                        namespaces   = lookup(pod_affinity_term.value, "namespaces", null)
+                        topology_key = lookup(pod_affinity_term.value, "topology_key", null)
+                        dynamic "label_selector" {
+                          for_each = lookup(pod_affinity_term.value, "label_selector", {}) == null ? {} : { label_selector : pod_affinity_term.value.label_selector }
+                          content {
+                            dynamic "match_expressions" {
+                              for_each = lookup(label_selector.value, "match_expressions", null) == null ? {} : { match_expressions : label_selector.value.match_expressions }
+                              content {
+                                key      = lookup(match_expressions.value, "key", null)
+                                operator = lookup(match_expressions.value, "operator", null)
+                                values   = lookup(match_expressions.value, "values", null)
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -471,12 +612,9 @@ resource "kubernetes_deployment" "self" {
           }
         }
         dynamic "container" {
-          // for_each = lookup (each.value.deployment.spec.template.spec, "container", null) == null ? [] :  [for container in lookup(each.value.deployment.spec.template.spec, "container", null) : {
-          // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-          // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
-          // This message occurs when values of different types are described in the content block.
-          // If all the values of the content block are of the same type, no error occurs.
-          for_each = [for container in lookup(each.value.deployment.spec.template.spec, "container", null) : {
+          for_each = [for container in lookup(each.value.deployment.spec.template.spec, "container", []) : {
+            //for_each = lookup(each.value.deployment.spec.template.spec, "container", null) == null ? [] : [for container in lookup(each.value.deployment.spec.template.spec, "container", null) : {
+            //for_each = lookup(each.value.deployment.spec.template.spec, "container", []) == [] ? [] : [for container in each.value.deployment.spec.template.spec.container : {
             image             = lookup(container, "image", null)
             name              = lookup(container, "name", null)
             args              = lookup(container, "args", null)
@@ -492,13 +630,13 @@ resource "kubernetes_deployment" "self" {
             env                      = lookup(container, "env", null)
             env_from                 = lookup(container, "env_from", null)
             lifecycle                = lookup(container, "lifecycle", null)
-            port                     = lookup(container, "port", null)
+            port                     = lookup(container, "port", [])
             resources                = lookup(container, "resources", null)
             liveness_probe           = lookup(container, "liveness_probe", null)
             readiness_probe          = lookup(container, "readiness_probe", null)
-            volume_mount             = lookup(container, "volume_mount", null)
-
-          }]
+            volume_mount             = lookup(container, "volume_mount", [])
+            }
+          if lookup(each.value.deployment.spec.template.spec, "container", []) != []]
           content {
             image             = lookup(container.value, "image", null)
             name              = lookup(container.value, "name", null)
@@ -537,7 +675,7 @@ resource "kubernetes_deployment" "self" {
                       }
                     }
                     dynamic "resource_field_ref" {
-                      for_each = lookup(value_from.value, "resource_fielf_ref", null) == null ? {} : { resource_field_ref : value_from.value.resource_field_ref }
+                      for_each = lookup(value_from.value, "resource_field_ref", null) == null ? {} : { resource_field_ref : value_from.value.resource_field_ref }
                       content {
                         container_name = lookup(resource_field_ref.value, "container_name", null)
                         resource       = lookup(resource_field_ref.value, "resource", null)
@@ -647,9 +785,15 @@ resource "kubernetes_deployment" "self" {
               }
             }
             dynamic "port" {
-              for_each = lookup(container.value, "port", null) == null ? {} : { port : container.value.port }
+              for_each = lookup(container.value, "port", []) == [] ? [] : [for port in container.value.port : {
+                container_port = lookup(port, "container_port", null)
+                host_ip        = lookup(port, "host_ip", null)
+                host_port      = lookup(port, "host_port", null)
+                name           = lookup(port, "name", null)
+                protocol       = lookup(port, "protocol", null)
+              }]
               content {
-                container_port = port.value.container_port
+                container_port = lookup(port.value, "container_port", null)
                 host_ip        = lookup(port.value, "host_ip", null)
                 host_port      = lookup(port.value, "host_port", null)
                 name           = lookup(port.value, "name", null)
@@ -752,11 +896,7 @@ resource "kubernetes_deployment" "self" {
               }
             }
             dynamic "volume_mount" {
-              for_each = lookup(container.value, "volume_mount", null) == null ? [] : [for volume_mount in lookup(container.value, "volume_mount", null) : {
-                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                // If you use this expression to test for the existence of a given field, terraform issues the TERRAFORM CRASH
-                // This message occurs when values of different types are described in the content block.
-                // If all the values of the content block are of the same type, no error occurs.
+              for_each = lookup(container.value, "volume_mount", []) == [] ? [] : [for volume_mount in container.value.volume_mount : {
                 mount_path        = lookup(volume_mount, "mount_path", null)
                 name              = lookup(volume_mount, "name", null)
                 read_only         = lookup(volume_mount, "read_only", null)
