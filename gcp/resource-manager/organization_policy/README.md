@@ -1,9 +1,42 @@
 # Google Cloud Organization Policy
-https://cloud.google.com/resource-manager/docs/organization-policy/overview
+
+## Summary
+Module created to separate out the creation and configuration of the policies from deployments code.
+ In that, to add a new policy a user can simply add a new configuration to a map of strings. The 
+ examples below show a static Terraform deployment configuration which only needs to update the JSON
+ file to update or add new policies.
+ 
+## Configuration
+There are 3 levels of policy assignment, Organization, Folder and Project
+
+### Common keys for each level
+### list constraints
+list constraints take one of `allow` or `deny` keys. Where the value is a string and the string is a
+space separated list. `in:` and `is:`, as per the documentation for list constraints are allowed.
+### boolean constraints
+takes a single key, `enforced` which is a string representation of `true` or `false`
+## restore default override
+takes a single key, `restore_default` which is a string representation of `true` or `false`
+
+### Organization level additional keys
+Organization level takes no additional keys. The organization_id should be set as a first-class 
+variable in the module block
+
+### Folder level additional keys
+Takes `project_id`, which is a string representation of the unique Google project ID. Also
+`inherit_from_parent`, which is a string representation of `true` or `false`
+
+### Project level additional keys
+Takes `folder_number`, which is a string representation of the unique Google folder number. Also
+`inherit_from_parent`, which is a string representation of `true` or `false`      
 
 ## How to use this module
 
-Create a deployment module as follows but pointing the source to this repository and directory
+Create a deployment module as follows but pointing the source to this repository and directory. If a
+policy already exists on the platform, the deployment will overwrite the policy with the 
+configuration defined in this module. *There is no platform 409 error about the policy already 
+existing.*
+
 ```hcl-terraform
 variable organization_policies {
   type = map(map(string))
@@ -42,6 +75,9 @@ Pass in values in a format like below
 ```json
 {
   "organization_policies": {
+    "gcp.resourceLocations": {
+      "allow": "in:europe-west1-locations in:europe-west2-locations"
+    },
     "iam.disableServiceAccountKeyUpload": {
       "enforced": "true"
     },
