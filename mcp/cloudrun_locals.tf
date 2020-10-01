@@ -6,17 +6,15 @@ locals {
   cloudrun_components_specs = lookup(local.cloudrun_components, "specs", {})
   cloudrun_specs = {
     for key, specs in local.cloudrun_components_specs:
-        key => merge(lookup(local.cloudrun_components, "common", {}), specs)
+      key => merge(lookup(local.cloudrun_components, "common", {}), specs)
   }
   cloudrun_iam = {
     for key, specs in local.cloudrun_specs:
       key => lookup(local.cloudrun_specs[key], "iam", {})
   }
-  cloudrun_iam_members = {
+  cloudrun_iam_bindings = {
     for key, specs in local.cloudrun_iam:
-      key => lookup(local.cloudrun_iam[key],"members", null) == null ? []: [
-        for user, tag in local.cloudrun_iam[key].members : "${tag}:${user}"
-      ]
+      key => lookup(local.cloudrun_iam[key], "bindings", {})
   }
   cloudrun_traffic = {
     for key, specs in local.cloudrun_specs:

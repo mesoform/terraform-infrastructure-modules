@@ -1,11 +1,21 @@
 //noinspection HILUnresolvedReference
 
-data external test_iam_members{
-  query = local.cloudrun_iam["default"].members
-  program = ["python", "${path.module}/test_iam_members.py"]
+data external test_policy_members{
+  query = merge(flatten([
+    for role, members in local.cloudrun_iam_bindings["default"] : {
+      for member in lookup(members, "members", []):
+        member => role
+    }
+  ])...)
+
+  program = ["python", "${path.module}/test_policy_members.py"]
 }
-output test_iam_members {
-  value = data.external.test_iam_members.result
+output test_policy_members {
+  value = data.external.test_policy_members.result
+}
+
+output bindings{
+  value = local.cloudrun_iam_bindings["default"]["viewer"]
 }
 
 //tests traffic block without revision

@@ -89,17 +89,20 @@ data "google_iam_policy" "noauth" {
 data "google_iam_policy" "auth" {
   //noinspection HILUnresolvedReference
   for_each = local.cloudrun_specs
-  binding {
-    role    = "roles/${lookup(local.cloudrun_iam[each.key], "role", "" )}"
-    members = local.cloudrun_iam_members[each.key]
+  dynamic "binding"{
+    for_each = local.cloudrun_iam_bindings[each.key]
+    content{
+      role    = "roles/${binding.key}"
+      members = lookup(binding.value, "members", [])
+    }
   }
 }
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_service_iam_policy" "self" {
   for_each    = {
-    for key, specs in local.cloudrun_specs: key => specs
-      if lookup(local.cloudrun_iam[key], "replace_policy", true)
+  for key, specs in local.cloudrun_specs: key => specs
+  if lookup(local.cloudrun_iam[key], "replace_policy", true)
   }
   location    = google_cloud_run_service.self[each.key].location
   project     = google_cloud_run_service.self[each.key].project
@@ -111,36 +114,34 @@ resource "google_cloud_run_service_iam_policy" "self" {
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_service_iam_binding" "self" {
   for_each = {
-    for key, specs in local.cloudrun_specs: key => specs
-      if local.cloudrun_specs[key].auth && lookup(local.cloudrun_iam[key], "binding", false)
+  for key, bindings in local.cloudrun_iam_bindings: key => bindings
+  if local.cloudrun_specs[key].auth && !lookup(local.cloudrun_iam[key], "replace_policy", true)
   }
   project  = google_cloud_run_service.self[each.key].project
   location = google_cloud_run_service.self[each.key].location
-  members  = local.cloudrun_iam_members[each.key]
-  role     = "roles/${lookup(local.cloudrun_iam[each.key], "role", "" )}"
-
+  members  = lookup(each.value[keys(each.value)[0]], "members", [])
+  role     = "roles/${keys(each.value)[0]}"
   service  = google_cloud_run_service.self[each.key].name
 }
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_service_iam_member" "self" {
   for_each = {
-    for key, specs in local.cloudrun_specs: key => specs
-      if local.cloudrun_specs[key].auth && lookup(local.cloudrun_iam[key], "add_member", false) == true
+  for key, specs in local.cloudrun_iam: key => specs
+  if local.cloudrun_specs[key].auth && lookup(local.cloudrun_iam[key], "add_member", {}) != {}
   }
   project  = google_cloud_run_service.self[each.key].project
   location = google_cloud_run_service.self[each.key].location
-  member   = lookup(local.cloudrun_iam[each.key],"add_member", null ) == null ? "" : "${local.cloudrun_iam[each.key].add_member.member_type}:${local.cloudrun_iam[each.key].add_member.member}"
-  role     = lookup(local.cloudrun_iam[each.key],"add_member", null ) == null ? "" : "roles/${local.cloudrun_iam[each.key].add_member.role}"
-
+  member   = lookup(each.value.add_member,"member", "")
+  role     = "roles/${lookup(each.value.add_member,"role", "")}"
   service = google_cloud_run_service.self[each.key].name
 }
 
 //noinspection HILUnresolvedReference
 resource "google_cloud_run_domain_mapping" "self" {
   for_each =  {
-    for key, specs in local.cloudrun_specs: key => specs
-      if lookup(local.cloudrun_specs[key] , "domain", null) != null
+  for key, specs in local.cloudrun_specs: key => specs
+  if lookup(local.cloudrun_specs[key] , "domain", null) != null
   }
   location = google_cloud_run_service.self[each.key].location
   name     = lookup(local.cloudrun_specs[each.key], "domain", "")

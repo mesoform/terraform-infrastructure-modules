@@ -12,17 +12,17 @@ components:
       auth: true
       iam:
         replace_policy: false
-        binding: true
-        role: 'viewer'
-        members:
-          user@google.com: 'user'
-          user2@google.com: 'user'
-          group@google.com: 'group'
-
+        bindings:
+          'viewer':
+            members:
+              - 'user:user@gmail.com'
+              - 'group:user@gmail.com'
+          'admin':
+            members:
+              - 'domain:domain.com'
         add_member:
           role: 'admin'
-          member: 'user@gmail.com'
-          member_type: 'user'
+          member: 'user:user@gmail.com'
       traffic:
         -
           percent: 75

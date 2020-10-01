@@ -7,21 +7,26 @@ except Exception as e:
     print(e, file=stderr)
 
 @python_validator
-def test_iam_members(query):
+def test_policy_members(query):
     """
-    Checks that iam members are retrieved from the iam block in the config file.
-    The iam members are used in data.google_iam_policy and google_cloudrun_service_iam_binding
+    Tests that members and their roles are accessible. the result shows the members
+    and which role they are mapped to.
+    Roles and members are defined like:
 
-    Members are defined in gcp_cloudrun.yml as a map of members to their type:
-    member:
-      <member> : <type of member>
+    role:
+      members:
+        -{type}:{member}
+        -{type}:{member}
+    role2:
+      members:
+        -{type}
 
     """
 
     expected_data = {
-        'user@google.com': 'user',
-        'user2@google.com': 'user',
-        'group@google.com': 'group'
+        'user:user@gmail.com' : 'viewer',
+        'group:user@gmail.com' : 'viewer',
+        'domain:domain.com' : 'admin'
     }
 
 
@@ -32,4 +37,4 @@ def test_iam_members(query):
         return {"result" : "fail, expected data = {}, received data = {}".format(expected_data, query)}
 
 if __name__ == '__main__':
-    test_iam_members()
+    test_policy_members()
