@@ -2,7 +2,7 @@ output "project" {
   value = local.project
 }
 output "gae" {
-  value = local.gae == {} ? {None: "No App Engine config as no gcp_ae.yml file"} : local.gae
+  value = local.gae
 }
 
 output "gae_flex" {

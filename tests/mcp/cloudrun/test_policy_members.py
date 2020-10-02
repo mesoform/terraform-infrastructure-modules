@@ -9,8 +9,8 @@ except Exception as e:
 @python_validator
 def test_policy_members(query):
     """
-    Tests that members and their roles are accessible. the result shows the members
-    and which role they are mapped to.
+    Tests that members and their roles are accessible.
+    The result shows the roles and how many members are assigned to that role.
     Roles and members are defined like:
 
     role:
@@ -24,9 +24,8 @@ def test_policy_members(query):
     """
 
     expected_data = {
-        'user:user@gmail.com' : 'viewer',
-        'group:user@gmail.com' : 'viewer',
-        'domain:domain.com' : 'admin'
+        'viewer' : '2',
+        'admin' : '1'
     }
 
 

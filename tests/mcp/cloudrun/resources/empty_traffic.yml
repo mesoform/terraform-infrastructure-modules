@@ -3,23 +3,24 @@ location_id: "europe-west1"
 
 components:
   specs:
-    name: "default"
-    image_name: helloworld
-    metadata:
-      annotations:
-        "run.googleapis.com/client-name": "terraform"
-    auth: true
-    iam:
-      replace_policy: false
-      binding: true
-      role: 'viewer'
-      members:
-        user@google.com: 'user'
-        user2@google.com: 'user'
-        group@google.com: 'group'
-
-      add_member:
-        role: 'admin'
-        member: 'user@gmail.com'
-        member_type: 'user'
-    traffic:
+    default:
+      name: "default"
+      image_name: helloworld
+      metadata:
+        annotations:
+          "run.googleapis.com/client-name": "terraform"
+      auth: true
+      iam:
+        replace_policy: false
+        bindings:
+          'viewer':
+            members:
+              - 'user:user@gmail.com'
+              - 'group:user@gmail.com'
+          'admin':
+            members:
+              - 'domain:domain.com'
+        add_member:
+          role: 'admin'
+          member: 'user:user@gmail.com'
+      traffic:
