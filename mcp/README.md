@@ -325,7 +325,7 @@ components:
   specs:
     default: 
       name: default
-      image_url: image
+      image_uri: image
       environment_vars:
         'EG': 'something'
         'EG2': 'something-else'
