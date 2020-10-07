@@ -1,3 +1,4 @@
+wait_for_load_balancer: true
 metadata:
   name: "example-ingress"
 spec:

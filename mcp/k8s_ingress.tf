@@ -1,13 +1,13 @@
 //noinspection HILUnresolvedReference
 resource "kubernetes_ingress" "self" {
   for_each = local.k8s_ingress
-  wait_for_load_balancer = false
+  wait_for_load_balancer = lookup(each.value.ingress, "wait_for_load_balancer", false)
   //noinspection HILUnresolvedReference
   metadata {
     name          = lookup(each.value.ingress.metadata, "name", null)
-    namespace     = lookup(each.value.ingress.metadata, "name", null) == null ? lookup(each.value.service.metadata, "generate_name", null) : null
+    generate_name = lookup(each.value.ingress.metadata, "name", null) == null ? lookup(each.value.service.metadata, "generate_name", null) : null
     labels        = lookup(each.value.ingress.metadata, "labels", {})
-    generate_name = lookup(each.value.ingress.metadata, "namespace", null)
+    namespace = lookup(each.value.ingress.metadata, "namespace", null)
     annotations   = lookup(each.value.ingress.metadata, "annotations", {})
   }
   spec {

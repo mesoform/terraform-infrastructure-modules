@@ -235,3 +235,45 @@ components:
   common:
   specs:
 ```
+
+## Kubernetes
+#### k8s_ingress.yml
+This adapter defines the rules for inbound connections for reaching a specified backend [(Terraform Docs).](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress)  
+Configuration is as follows:
+
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `metadata` | map | true | Standard ingress's metadata | none |
+| `spec`| map | true | Definition of ingress's behaviour | none |
+| `wait_for_load_balancer` | bool | false | Whether terraform will wait for load balancer to have an endpoint before considering that resource | false |
+| `spec.backend`| map | true | Defines the service endpoint traffic will be forwarded to | none |
+| `spec.rule`| map | true | Host rules to configure ingress | If not specified traffic sent to default backend| 
+| `spec.rule.http`| map | true if `rule` block specified | List of http selectors pointing to backend | none |
+| `..http.path.path`| string | true if `http` block specified | String or POSIX regular expression matched against path of incoming request|  Sends traffic to backend |
+| `..http.path.backend`| map | true if `http` block specified | Defines the service endpoint traffic will be forwarded to | none |
+| `spec.tls`| map | false | TLS configuration for port 443 | none |
+
+Example:
+```yaml
+wait_for_load_balancer : false
+metadata:
+  name: "example-ingress"
+spec:
+  backend:
+    service_name: "service"
+    service_port: 8080
+  rule:
+    host:
+    http:
+      paths:
+        - path: "/"
+          backend:
+            service_port: 8080
+            service_name: "service"
+        - path: "/"
+          backend:
+            service_port: 8080
+            service_name: "service2"
+  tls:
+    secret_name: "tls-secret"
+```
