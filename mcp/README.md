@@ -29,8 +29,8 @@ The following Kubernetes adapter modules are currently available:
 [deployment](#deployment)  
 [service](#service)     
 [pod](#pod)
-[secret](#secret)
-[config_map](#config_map)     
+[secret](#secret)  
+[config_map](#config_map)  
 
 ## deployment
 
@@ -168,7 +168,7 @@ The resource will by default create a secret which is available to any pod in th
 The K8S_secret.tf module allows you to create a secret resource for its subsequent connection to the running container as volume.
 The parameters of the created secret are described in the k8s_secret.yml file, which includes the required metadata parameter.
 If necessary, transfer data from a file to the container, the file name and path to it are specified in the data_file section.
-An example of the k8s_secret.yml file describing secret for the K8S_secret.tf module:\
+An example of the k8s_secret.yml file describing secret for the K8S_secret.tf module:
 
 ```yamlex
 metadata:
