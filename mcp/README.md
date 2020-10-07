@@ -46,7 +46,7 @@ spec:
                 value: Awesome
             initial_delay_seconds: 3
             period_seconds: 3
-
+```
 
 ## service
 A Service is an abstraction which defines a logical set of pods and a policy by which to access them - sometimes called a micro-service.
@@ -73,7 +73,7 @@ spec:
       target_port: 80
   type: LoadBalancer
 
-
+```
 
 ## pod
 A pod is a group of one or more containers, the shared storage for those containers, and options about how to run the containers.
@@ -120,3 +120,4 @@ spec:
             value: Awesome
         initial_delay_seconds: 3
         period_seconds: 3
+```
