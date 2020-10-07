@@ -1,4 +1,8 @@
 locals {
+  k8s = {
+    for app, config in local.k8s_services:
+      app => merge(config, lookup(local.k8s_deployments, app, {}))
+  }
   k8s_config_map_files = fileset(path.root, "../**/k8s_config_map.y{a,}ml")
   k8s_config_map = {
     for kube_file in local.k8s_config_map_files :
@@ -32,5 +36,12 @@ locals {
     for kube_file in local.k8s_pod_files :
     basename(dirname(kube_file)) => { pod : yamldecode(file(kube_file)) }
     if ! contains(split("/", kube_file), "terraform")
+  }
+
+  k8s_ingress_files = fileset(path.root, "../**/k8s_ingress.y{a,}ml")
+  k8s_ingress = {
+    for kube_file in local.k8s_ingress_files :
+      basename(dirname(kube_file)) => {ingress: yamldecode(file(kube_file))}
+        if ! contains(split("/", kube_file), "terraform")
   }
 }

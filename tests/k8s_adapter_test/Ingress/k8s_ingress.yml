@@ -1,0 +1,20 @@
+metadata:
+  name: "example-ingress"
+spec:
+  backend:
+    service_name: "service"
+    service_port: 8080
+  rule:
+    host:
+    http:
+      paths:
+        - path: "/"
+          backend:
+            service_port: 8080
+            service_name: "service"
+        - path: "/"
+          backend:
+            service_port: 8080
+            service_name: "service2"
+  tls:
+    secret_name: "tls-secret"
