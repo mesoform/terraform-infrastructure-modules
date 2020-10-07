@@ -28,7 +28,7 @@ The following Kubernetes adapter modules are currently available:
 
 [deployment](#deployment)  
 [service](#service)     
-[pod](#pod)
+[pod](#pod)     
 [secret](#secret)  
 [config_map](#config_map)  
 
