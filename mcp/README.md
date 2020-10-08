@@ -2,8 +2,8 @@
 ## Information
 
 Kubernetes adapter for MMCF is designed to create Kubernetes resources in existing cubernetes clusters.
-YAML is used to describe the configuration of Kubernetes resources. Files describing the configuration of the
-required resources are located in directories as shown below:
+YAML is used to describe the configuration of Kubernetes resources.
+These configuration files are located in directories as shown below:
 ```yamlex
 app_1/
    L k8s_deployment.yml
@@ -37,8 +37,8 @@ The following Kubernetes adapter modules are currently available:
 The K8S_deployment.tf module is designed to create a deployment resource in an existing Kubrenetes cluster.
 The parameters for the created deployment are described in the k8s_deployment.yml file, which includes
 the required metadata and spec parameters.
-The structure of the deployment description for the K8S_deployment.tf module is most closely approximated
-to the structure of the deployment description that is used when working with the kubectl utility.
+The structure of the deployment description for the K8S_deployment.tf module is very similar to the structure
+of the deployment description that is used when working with the kubectl utility.
 This allows existing deployment descriptions to be used when working with the Multi-Cloud Platform Module with minimal adaptation.
 An example of a k8s_deployment.yml file describing the deployment for the K8S_deployment.tf module:
 
@@ -84,8 +84,8 @@ A Service is an abstraction which defines a logical set of pods and a policy by 
 
 The K8S_service.tf module is designed to create a service resource for a specified deployment or pod in an existing Kubrenetes cluster.
 The parameters of the created service are described in the k8s_service.yml file, which includes the required metadata and spec parameters.
-The service description structure for the K8S_service.tf module is closest to the service description
-structure that is used when working with the kubectl utility.
+The structure of the service description for the K8S_deployment.tf module is very similar to the structure
+of the service description that is used when working with the kubectl utility.
 This allows existing service descriptions to be used when working with the
 Multi-Cloud Platform Module with minimal adaptation.
 An example of a k8s_service.yml file describing service for the K8S_service.tf module:
@@ -116,8 +116,8 @@ Pods are always co-located and co-scheduled, and run in a shared context.
 The K8S_pod.tf module is designed to create a pod resource in an existing Kubrenetes cluster.
 The parameters for the generated pod are described in the k8s_pod.yml file, which includes
 the required metadata and spec parameters.
-The pod description structure for the K8S_pod.tf module is most closely approximated
-to the pod description structure that is used when working with the kubectl utility.
+The structure of the pod description for the K8S_deployment.tf module is very similar to the structure
+of the pod description that is used when working with the kubectl utility.
 This allows existing pod definitions to be used when working with the Multi-Cloud Platform Module with minimal adaptation.
 An example of a k8s_pod.yml file describing a pod for the K8S_pod.tf module:
 
