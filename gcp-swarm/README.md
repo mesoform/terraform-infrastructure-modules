@@ -1,14 +1,13 @@
-Auth with service account:  beekeeper@swarm-testing.iam.gserviceaccount.com
+Auth with service account:  beekeeper@swarm-testing.iam.gserviceaccount.com by setting `credentials = file("account.json")`
+to the path for to a token file in the provider, or set GCLOUD_KEYFILE_JSON to the path.
 
+If you are running outside of Google Cloud and don't want to use a key you can set the application
+default credentials to an identity which has the correct roles
 ```
-$ gcloud auth list
-                  Credentialed Accounts
-ACTIVE  ACCOUNT
-*       beekeeper@swarm-testing.iam.gserviceaccount.com
-To set the active account, run:
-    $ gcloud config set account `ACCOUNT`
+gcloud auth application-default login
 ```
-
+This opens a browser to request access for an identity like your own user account. Provided that it
+has suitable permissions for the task, Terraform will read the file generated from this process
 
 To create network and instances:
 ```bash

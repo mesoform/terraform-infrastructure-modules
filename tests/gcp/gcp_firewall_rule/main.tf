@@ -5,7 +5,7 @@ provider "google" {
 }
 
 module "allow_ingress_fw_rule_icmp" {
-  source = "../../gcp/firewall_rule_ingress"
+  source = "../../../gcp/compute_engine/firewall_rule_ingress"
   directive = "allow"
   protocol = "icmp"
   type = "tags"
@@ -15,7 +15,7 @@ module "allow_ingress_fw_rule_icmp" {
 }
 
 module "allow_ingress_fw_rule_tcp" {
-  source = "../../gcp/firewall_rule_ingress"
+  source = "../../../gcp/compute_engine/firewall_rule_ingress"
   directive = "allow"
   protocol = "tcp"
   ports = ["53", "25"]
@@ -26,7 +26,7 @@ module "allow_ingress_fw_rule_tcp" {
 }
 
 module "deny_ingress_fw_rule_ips" {
-  source = "../../gcp/firewall_rule_ingress"
+  source = "../../../gcp/compute_engine/firewall_rule_ingress"
   directive = "deny"
   protocol = "tcp"
   ports = ["53", "25"]

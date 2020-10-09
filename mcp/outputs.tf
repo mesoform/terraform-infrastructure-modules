@@ -16,3 +16,8 @@ output "gae_std" {
 output "kubernetes" {
   value = local.k8s
 }
+
+output "cloudrun" {
+  value = local.cloudrun
+}
+
