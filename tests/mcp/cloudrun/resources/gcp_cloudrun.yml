@@ -1,0 +1,31 @@
+project_id: &project_id cloud-run-test-1409-1
+location_id: "europe-west1"
+
+components:
+  specs:
+    default:
+      name: "default"
+      image_uri: gcr.io/cloud-run-test-1409-1/image
+      metadata:
+        annotations:
+          "run.googleapis.com/client-name": "terraform"
+      auth: true
+      iam:
+        replace_policy: false
+        bindings:
+          'viewer':
+            members:
+              - 'user:user@gmail.com'
+              - 'group:user@gmail.com'
+          'admin':
+            members:
+              - 'domain:domain.com'
+        add_member:
+          role: 'admin'
+          member: 'user:user@gmail.com'
+      traffic:
+        -
+          percent: 75
+        -
+          percent: 25
+          revision_name: 'old'

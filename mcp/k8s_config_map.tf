@@ -10,20 +10,6 @@ resource "kubernetes_config_map" "self" {
     namespace     = lookup(each.value.config_map.metadata, "namespace", null)
   }
 
-  data = merge({
-    for key, value in lookup(each.value.config_map, "data", {}) :
-    key => value
-    },
-    {
-      for value in lookup(each.value.config_map, "data_file", {}) :
-      basename(value) => file(value)
-  })
-  binary_data = merge({
-    for key, value in lookup(each.value.config_map, "binary_data", {}) :
-    key => value
-    },
-    {
-      for value in lookup(each.value.config_map, "binary_file", {}) :
-      basename(value) => filebase64(value)
-  })
+  data = lookup(local.k8s_config_map_data, each.key, {})
+  binary_data = lookup(local.k8s_config_map_binary_data, each.key, {})
 }

@@ -9,14 +9,7 @@ resource "kubernetes_secret" "self" {
     namespace     = lookup(each.value.secret.metadata, "namespace", null)
   }
 
-  data = merge({
-    for key, value in lookup(each.value.secret, "data", {}) :
-    key => value
-    },
-    {
-      for value in lookup(each.value.secret, "data_file", {}) :
-      basename(value) => file(value)
-  })
+  data = lookup(local.k8s_secret_data, each.key, {})
   type = lookup(each.value.secret, "type", null)
 
 }

@@ -1,0 +1,12 @@
+metadata:
+  name: "mosquitto-config-file"
+  labels:
+    env: "test"
+data:
+  'test': 'test'
+data_file:
+  - ../resources/mosquitto.conf
+binary_data:
+  bar: L3Jvb3QvMTAw
+binary_file:
+  - ../resources/binary.bin
