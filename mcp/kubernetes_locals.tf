@@ -72,4 +72,12 @@ locals {
       basename(dirname(kube_file)) => {ingress: yamldecode(file(kube_file))}
         if ! contains(split("/", kube_file), "terraform")
   }
+
+  k8s_stateful_set_files = fileset(path.root, "../**/k8s_stateful_set.y{a,}ml")
+  k8s_stateful_set = {
+    for kube_file in local.k8s_stateful_set_files :
+      basename(dirname(kube_file)) => {stateful_set: yamldecode(file(kube_file))}
+        if ! contains(split("/", kube_file), "terraform")
+  }
+
 }
