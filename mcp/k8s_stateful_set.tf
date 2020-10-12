@@ -940,8 +940,15 @@ resource "kubernetes_stateful_set" "self" {
           dynamic "selector" {
             for_each =  lookup(volume_claim_template.value.spec, "selector",null ) == null ? {} : {selector: volume_claim_template.value.spec.selector}
             content {
-              //TODO config match_expressions
-              match_expressions {}
+              //noinspection HILUnresolvedReference
+              dynamic "match_expressions" {
+                for_each = lookup(selector.value.spec, "match_expressions", null) == null ? {} : {match_expressions: selector.value.spec.match_expressions}
+                content {
+                  key = lookup(match_expressions.value, "key", null )
+                  operator = lookup(match_expressions.value, "operator", null)
+                  values = lookup(match_expressions.value, "values", null )
+                }
+              }
               match_labels = lookup(selector.value,"match_labels", null )
             }
         }
