@@ -1,0 +1,1 @@
+/Users/dmitrogavrichuk/DEVOPS/Mesoform/doc_test/terraform/k8s_job.tf
