@@ -6,7 +6,7 @@
 [project.yml](#projectyml)      
 [gcp_ae.yml](#gcp_aeyml)    
 [gcp_cloudrun.yml](#gcp_cloudrunyml)  
-[Kubernetes](#MMCF Kubernetes adapter)
+[Kubernetes](docs/KUBERNETES.md)
 [Contributing](#Contributing)  
 [License](#License)
 
