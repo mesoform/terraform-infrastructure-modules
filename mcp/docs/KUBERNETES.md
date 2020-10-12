@@ -1,4 +1,4 @@
-## Kubernetes
+## MMCF Kubernetes adapter
 ### Information
 
 Kubernetes adapter for MMCF is designed to create Kubernetes resources in existing cubernetes clusters.
