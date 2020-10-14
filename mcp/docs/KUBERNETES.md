@@ -32,6 +32,9 @@ The following Kubernetes adapter modules are currently available:
 [secret](#secret)  
 [config_map](#config_map)  
 [ingress](#ingress)
+[stateful_set](#stateful_set)  
+[persistent_volume](#persistent_volume)  
+[persistent_volume_claim](#persistent_volume_claim)  
 
 ### deployment
 
@@ -217,3 +220,109 @@ Configuration is as follows:
 | `..http.path.path`| string | true if `http` block specified | String or POSIX regular expression matched against path of incoming request|  Sends traffic to backend |
 | `..http.path.backend`| map | true if `http` block specified | Defines the service endpoint traffic will be forwarded to | none |
 | `spec.tls`| map | false | TLS configuration for port 443 | none |
+
+### stateful_set
+Similarly to Deployment, StatefulSet manages Pods based on a container spec, but unlike Deployment, a statefulset maintains an identity for each pod.
+Each pod has a persistent identifier that persists through rescheduling, and can claim a persistent_volume.
+
+k8s_stateful_set.yml file is used to configure the a deploymlent of a StatefulSet resource. 
+**NOTE**: A template of a pod may be specified in `spec.template.spec`, which would be configured in the same way that [k8s_pod.yml](#pod) spec was.
+Similarly `spec.volume_claim_template` is configured the same as [k8s_persistent_volume_claim.yml](#persitent_volume_claim)  
+Attributes configuration:  
+
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `metadata` | map | true | Standard kubernetes object metadata | none |
+| `spec`| map | true | Definition of StatefulSet's behaviour | none |
+| `wait_for_rollout` | bool | false | Whether terraform will wait for lStatefulSet to finish rolling out | false |
+| `spec.selector.match_labels`| list | true | **(Must match pods template labels)** Label query over pods ht should match replica count | none |
+| `spec.service_name`| string | true | Name of the service that governs StatefulSet **(Must exist before the StatfulSet)** | none |
+| `spec.template`| map | true | Describes the pod that will be created | none |
+| `spec.template.metadata`| map | true | Standard objects metadata | none |
+| `spec.template.spec`| map | false | Pod spec template (see spec section of [k8s_pod.yml](#pod))  | none |
+| `spec.replicas`| int | false | Desired number of replicas of the given template | 1 |
+| `spec.pod_mangement_policy`| sting | false | Controls how pods are created during scaling or replacing pods on nodes. Either `"OrderedReady"` or `"Parallel"` | `"OrderedReady"` |
+| `spec.revision_history_limit`| int | false | Maximum number of revisions maintained in the revision history | none |
+| `spec.volume_claim_template`| map | false | list of volume claims that pods can reference (see [k8s_persistent_volume_claim.yml](#persitent_volume_claim)) | none |
+| `spec.update_strategy`| map | false | Update strategy to update pods when revision is made to template| none |
+| `spec.update_strategy.type`| string | false | Type of update strategy, either `"RollingUpdate"` or `"OnDelete"`| `"RollingUpdate"` |
+| `spec.update_strategy.rolling_update`| int | false | Ordinal at which the StatefulSet should be partitioned| 0 |
+
+An example of a k8s_stateful_set.yml file configuration:
+```yaml
+metadata:
+  name: "something"
+spec:
+  selector:
+    match_labels:
+      "k8s-app": "prometheus"
+  template:
+    metadata:
+      namespace: 
+    //This section is the configured the same as k8s_pod.yml spec block
+    spec:
+      ...
+  volume_claim_template:
+     ...
+```
+
+### persistent_volume
+Persistent volumes are a piece of storage in the cluster, which have a lifecucle independent of any individual pod that uses it.
+Configuration for a persistent_volume is done with k8s_persistent_volume.yml.
+Attributes configuration:  
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `metadata` | map | true | Standard kubernetes object metadata | none |
+| `spec`| map | true | spec of the persistent volume owned by the cluster | none |
+| `spec.access_modes`| list | true | All ways the volume can be mounted. Can be: `"ReadWriteOnce"`, `"ReadOnlyMany"`,`"ReadWriteMany"` | none |
+| `spec.capacity`| map | true | description of persistent volumes resources and capacity | none |
+| `spec.persistent_volume_source`| map | true | The specs of persistent volume, see [types](https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes) and [terraform implmentation](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/persistent_volume#persistent_volume_source) | none |
+| `spec.persistent_volume_reclaim_policy`| string | false | What happens to a persisten volume when it released from its claim. Options: `"Retain"`, `"Delete"`, `"Recycle"` | `"Retain"` |
+| `spec.storage_class_name`| string | false | Name of the persistent volumes storage class | none |
+| `spec.mount_options`| list | false | Addition mount options | none |
+| `spec.node_affinity`| map | false | Constraints that limit what noes the volume can be accessed from | none |
+| `spec.node_affinity.required.node_selector_term`| map | true if `spec.node_affinity` | node selector term with `match_expressions` and `match_fields` attributes ORed | none |
+
+
+An example of a k8s_persistent_volume.yml file configuration:
+```yaml
+metadata:
+  name: "something"
+spec:
+  capacity:
+    "storage": "10Gi"
+  access_modes:
+    - "ReadWriteMany"
+  persistent_volume_source:
+    vsphere_volume:
+      volume_path: "/path"
+```
+
+### persistent_volume_claim
+This adapter can request for persistent volume and claim it.
+Configuration for a persistent_volume is done with k8s_persistent_volume.yml file. 
+
+Attributes configuration:  
+| Key | Type | Required | Description | Default |
+|:----|:----:|:--------:|:------------|:-------:|
+| `metadata` | map | true | Standard kubernetes object metadata | none |
+| `spec`| map | true | spec of the persistent volume owned by the cluster | none |
+| `spec.access_modes`| list | true | All ways the volume can be mounted. Can be: `"ReadWriteOnce"`, `"ReadOnlyMany"`,`"ReadWriteMany"` | none |
+| `spec.resources`| map | true | list of the minimum resources the volume should have with `limits` or `requests` maps defined | none |
+| `spec.persistent_volume_source`| map | true | The specs of persistent volume, see [types](https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes) and [terraform implmentation](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/persistent_volume#persistent_volume_source) | none |
+| `spec.storage_class_name`| string | false | Name of the claims storage class | none |
+| `spec.selector`| map | false | Label query over volumes for the binding | none |
+
+
+An example of a k8s_persistent_volume_claim.yml file configuration:
+```yaml
+metadata:
+  name: "something"
+spec:
+  access_modes:
+    - "ReadWriteMany"
+  resources:
+    requests: 
+      storage: "5Gi"      
+  volume_name: "volume"
+```
