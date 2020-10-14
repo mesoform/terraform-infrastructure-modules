@@ -17,7 +17,7 @@ resource "kubernetes_stateful_set" "self" {
     replicas               = lookup(each.value.stateful_set.spec, "replicas", null )
     revision_history_limit = lookup(each.value.stateful_set.spec, "revision_history_limit", null )
     selector{
-      match_labels = lookup(each.value.stateful_set.spec, "selector", null) == null ? {} : lookup(each.value.stateful_set.spec.selector, "match_values", {})
+      match_labels = lookup(each.value.stateful_set.spec, "selector", null) == null ? {} : lookup(each.value.stateful_set.spec.selector, "match_labels", {})
     }
     template {
       metadata {
