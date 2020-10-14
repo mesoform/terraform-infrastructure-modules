@@ -4,7 +4,7 @@
 * [Structure](#Structure)     
 * [MMCF](#MMCF)  
 * [project.yml](#projectyml)      
-* [Google Cloud Platform Adapters](#Google Cloud Platform)
+* [Google Cloud Platform Adapters](#google-cloud-platform)
     * [App Engine](docs/GCP_APP_ENGINE.md)
     * [Cloud Run](docs/GCP_CLOUDRUN.md)
 * [Kubernetes adapter](docs/KUBERNETES.md)  
