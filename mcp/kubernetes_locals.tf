@@ -73,9 +73,9 @@ locals {
         if ! contains(split("/", kube_file), "terraform")
   }
 
-  k8s_persistent_volume_files = fileset(path.root, "../**/k8s_persistent_volume_claim.y{a,}ml")
+  k8s_persistent_volume_files = fileset(path.root, "../**/k8s_persistent_volume.y{a,}ml")
   k8s_persistent_volume = {
-    for kube_file in local.k8s_persistent_volume_claim :
+    for kube_file in local.k8s_persistent_volume_files :
       basename(dirname(kube_file)) => {persistent_volume: yamldecode(file(kube_file))}
         if ! contains(split("/", kube_file), "terraform")
   }
@@ -83,7 +83,7 @@ locals {
   k8s_persistent_volume_claim_files = fileset(path.root, "../**/k8s_persistent_volume_claim.y{a,}ml")
   k8s_persistent_volume_claim = {
     for kube_file in local.k8s_persistent_volume_claim_files :
-      basename(dirname(kube_file)) => {persistent_volume_claim: yamldecode(file(kube_file))}
+      basename(dirname(kube_file)) => { persistent_volume_claim : yamldecode(file(kube_file))}
         if ! contains(split("/", kube_file), "terraform")
   }
 }

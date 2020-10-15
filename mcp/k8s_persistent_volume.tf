@@ -204,7 +204,6 @@ resource "kubernetes_persistent_volume" "self" {
           fs_type       = lookup(rbd.value, "fs_type", null)
           keyring       = lookup(rbd.value, "keyring", null)
           rados_user    = lookup(rbd.value, "rados_user", null)
-          rados_image   = lookup(rbd.value, "rados_image", null)
           rbd_pool      = lookup(rbd.value, "rbd_pool", null)
           read_only     = lookup(rbd.value, "read_only", null)
           dynamic secret_ref {
@@ -229,14 +228,14 @@ resource "kubernetes_persistent_volume" "self" {
     }
 
     dynamic node_affinity {
-      for_each = lookup(each.value.spec, "node_affinity", null) == null ? {} : {node_affinity: each.value.spec.node_affinity}
+      for_each = lookup(each.value.persistent_volume.spec, "node_affinity", null) == null ? {} : {node_affinity: each.value.persistent_volume.spec.node_affinity}
       content {
         dynamic required {
           for_each = lookup(node_affinity.value, "required", null) == null ? {} : {required: node_affinity.value.required}
           content {
             node_selector_term {
               dynamic match_fields {
-                for_each = lookup(required.value.node_selector_term, "match_fields", null) == null ? {} : {match_fields: required.value.nodes_selector_term.match_fields}
+                for_each = lookup(required.value.node_selector_term, "match_fields", null) == null ? {} : {match_fields: required.value.node_selector_term.match_fields}
                 content{
                   key      = match_fields.value.key
                   operator = match_fields.value.operator
@@ -244,7 +243,7 @@ resource "kubernetes_persistent_volume" "self" {
                 }
               }
               dynamic match_expressions {
-                for_each = lookup(required.value.node_selector_term, "match_expressions", null) == null ? {} : {match_expressions: required.value.nodes_selector_term.match_expressions}
+                for_each = lookup(required.value.node_selector_term, "match_expressions", null) == null ? {} : {match_expressions: required.value.node_selector_term.match_expressions}
                 content{
                   key      = match_expressions.value.key
                   operator = match_expressions.value.operator

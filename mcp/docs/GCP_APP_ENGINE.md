@@ -1,4 +1,4 @@
-#Google App Engine
+# Google App Engine  
 App Engine allows for building scalable applications on serverless platforms [(Documentation)](https://cloud.google.com/appengine)
 ### gcp_ae.yml
 #### Prerequisites
@@ -117,7 +117,7 @@ By default this file is located in the `<root_dir>/build` directory for the AS, 
 
 Example:
 ```json
-{
+{ 
   "artifactDir": "exploded-project-app",
   "contents": [
     "META-INF/MANIFEST.MF",

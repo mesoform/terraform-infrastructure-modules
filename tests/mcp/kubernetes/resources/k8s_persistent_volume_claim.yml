@@ -1,0 +1,9 @@
+metadata:
+  name:
+spec:
+  access_modes:
+    - "ReadWriteMany"
+  resources:
+    requests: 
+      storage: "5Gi"      
+  volume_name: "persistent_volume"

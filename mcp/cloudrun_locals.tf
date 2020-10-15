@@ -1,7 +1,7 @@
 //noinspection HILUnresolvedReference
 locals {
   user_cloudrun_config_yml  = fileexists(var.gcp_cloudrun_yml) ? file(var.gcp_cloudrun_yml) : null
-  cloudrun                  = yamldecode(local.user_cloudrun_config_yml)
+  cloudrun                  = local.user_cloudrun_config_yml == null ? {} : yamldecode(local.user_cloudrun_config_yml)
   cloudrun_components       = lookup(local.cloudrun, "components", {})
   cloudrun_components_specs = lookup(local.cloudrun_components, "specs", {})
   cloudrun_specs = {

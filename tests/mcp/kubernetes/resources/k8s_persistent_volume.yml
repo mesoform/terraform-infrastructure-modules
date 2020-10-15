@@ -1,0 +1,10 @@
+metadata:
+  name:
+spec:
+  capacity:
+    "storage": "10Gi"
+  access_modes:
+    - "ReadWriteMany"
+  persistent_volume_source:
+    vsphere_volume:
+      volume_path: "/path"
