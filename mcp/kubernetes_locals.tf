@@ -86,4 +86,11 @@ locals {
     basename(dirname(kube_file)) => { job : yamldecode(file(kube_file)) }
     if ! contains(split("/", kube_file), "terraform")
   }
+
+  k8s_cron_job_files = fileset(path.root, "../**/k8s_cron_job.y{a,}ml")
+  k8s_cron_job = {
+    for kube_file in local.k8s_cron_job_files :
+    basename(dirname(kube_file)) => { cron_job : yamldecode(file(kube_file)) }
+    if ! contains(split("/", kube_file), "terraform")
+  }
 }
