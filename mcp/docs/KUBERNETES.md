@@ -268,8 +268,9 @@ spec:
 
 ### persistent_volume
 Persistent volumes are a piece of storage in the cluster, which have a lifecucle independent of any individual pod that uses it.
-Configuration for a persistent_volume is done with k8s_persistent_volume.yml.
+Configuration for a persistent_volume is done with k8s_persistent_volume.yml.  
 Attributes configuration:  
+
 | Key | Type | Required | Description | Default |
 |:----|:----:|:--------:|:------------|:-------:|
 | `metadata` | map | true | Standard kubernetes object metadata | none |
@@ -278,11 +279,11 @@ Attributes configuration:
 | `spec.capacity`| map | true | description of persistent volumes resources and capacity | none |
 | `spec.persistent_volume_source`| map | true | The specs of persistent volume, see [types](https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes) and [terraform implmentation](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/persistent_volume#persistent_volume_source) | none |
 | `spec.persistent_volume_reclaim_policy`| string | false | What happens to a persisten volume when it released from its claim. Options: `"Retain"`, `"Delete"`, `"Recycle"` | `"Retain"` |
-| `spec.storage_class_name`| string | false | Name of the persistent volumes storage class | none |
+| `spec.storage_class_name`| string | false | Name of the persistent volumes storage class | "Standard" |
 | `spec.mount_options`| list | false | Addition mount options | none |
 | `spec.node_affinity`| map | false | Constraints that limit what noes the volume can be accessed from | none |
 | `spec.node_affinity.required.node_selector_term`| map | true if `spec.node_affinity` | node selector term with `match_expressions` and `match_fields` attributes ORed | none |
-
+| `match_expressions` or `match_fields`| map |false | Expression or field to map with attributes: `key`, `operator` (`"In"`, `"NotIn"`, `"Exists"`, `"DoesNotExist"`) and `values`([details](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/persistent_volume_claim#values)) | none |  
 
 An example of a k8s_persistent_volume.yml file configuration:
 ```yaml
@@ -303,6 +304,7 @@ This adapter can request for persistent volume and claim it.
 Configuration for a persistent_volume is done with k8s_persistent_volume.yml file. 
 
 Attributes configuration:  
+
 | Key | Type | Required | Description | Default |
 |:----|:----:|:--------:|:------------|:-------:|
 | `metadata` | map | true | Standard kubernetes object metadata | none |

@@ -1,10 +1,18 @@
 metadata:
-  name:
+  name: perisistent-volume
 spec:
   capacity:
     "storage": "10Gi"
   access_modes:
-    - "ReadWriteMany"
+    - "ReadWriteOnce"
   persistent_volume_source:
-    vsphere_volume:
-      volume_path: "/path"
+    local:
+      path: "./"
+  node_affinity:
+    required:
+      node_selector_term:
+        match_expressions:
+          - key: "nginx-example"
+            operator: "In"
+            values:
+              - "minikube"

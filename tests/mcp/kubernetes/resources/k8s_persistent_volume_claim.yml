@@ -1,9 +1,15 @@
 metadata:
-  name:
+  name: perisistent-volume-claim
 spec:
   access_modes:
-    - "ReadWriteMany"
+    - "ReadWriteOnce"
   resources:
-    requests: 
-      storage: "5Gi"      
-  volume_name: "persistent_volume"
+    requests:
+      storage: "5Gi"
+  volume_name: "persistent-volume"
+  selector:
+    match_expressions:
+      - key: "nginx-example"
+        operator: "In"
+        values:
+          - "minikube"
