@@ -942,7 +942,10 @@ resource "kubernetes_stateful_set" "self" {
             content {
               //noinspection HILUnresolvedReference
               dynamic "match_expressions" {
-                for_each = lookup(selector.value.spec, "match_expressions", null) == null ? {} : {match_expressions: selector.value.spec.match_expressions}
+                for_each = lookup(selector.value, "match_expressions", null) == null ? {}: {
+                  for match_expression in selector.value.match_expressions:
+                    match_expression.key => match_expression
+                }
                 content {
                   key = lookup(match_expressions.value, "key", null )
                   operator = lookup(match_expressions.value, "operator", null)
