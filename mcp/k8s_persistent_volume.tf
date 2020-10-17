@@ -9,7 +9,7 @@ resource "kubernetes_persistent_volume" "self" {
     access_modes                     = lookup(each.value.persistent_volume.spec, "access_modes", {} )
     capacity                         = lookup(each.value.persistent_volume.spec, "capacity", {} )
     persistent_volume_reclaim_policy = lookup(each.value.persistent_volume.spec, "persistent_volume_reclaim_policy", null )
-    storage_class_name               = lookup(each.value.persistent_volume.spec, "storage_class_name", null )
+    storage_class_name               = lookup(each.value.persistent_volume.spec, "storage_class_name", "standard" )
     mount_options                    = lookup(each.value.persistent_volume.spec, "mount_options", null )
     persistent_volume_source {
       dynamic aws_elastic_block_store {
@@ -132,7 +132,7 @@ resource "kubernetes_persistent_volume" "self" {
           path           = glusterfs.value.path
           read_only      = lookup(glusterfs.value, "read_only", null)
         }
-    }
+      }
       dynamic host_path {
         for_each = lookup(each.value.persistent_volume.spec.persistent_volume_source, "host_path", null ) == null ? {} : {
           host_path : each.value.persistent_volume.spec.persistent_volume_source.host_path
@@ -235,7 +235,10 @@ resource "kubernetes_persistent_volume" "self" {
           content {
             node_selector_term {
               dynamic match_fields {
-                for_each = lookup(required.value.node_selector_term, "match_fields", null) == null ? {} : {match_fields: required.value.node_selector_term.match_fields}
+                for_each = lookup(required.value.node_selector_term, "match_fields", null) == null ? {}: {
+                  for match_fields in required.value.node_selector_term.match_fields:
+                    match_fields.key => match_fields
+                }
                 content{
                   key      = match_fields.value.key
                   operator = match_fields.value.operator
@@ -243,7 +246,10 @@ resource "kubernetes_persistent_volume" "self" {
                 }
               }
               dynamic match_expressions {
-                for_each = lookup(required.value.node_selector_term, "match_expressions", null) == null ? {} : {match_expressions: required.value.node_selector_term.match_expressions}
+                for_each = lookup(required.value.node_selector_term, "match_expressions", null) == null ? {}: {
+                  for match_expression in required.value.node_selector_term.match_expressions:
+                    match_expression.key => match_expression
+                }
                 content{
                   key      = match_expressions.value.key
                   operator = match_expressions.value.operator
