@@ -33,7 +33,7 @@ def test_policy_members(query):
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail, expected data = {}, received data = {}".format(expected_data, query)}
+        return {"result" : "fail"}
 
 if __name__ == '__main__':
     test_policy_members()

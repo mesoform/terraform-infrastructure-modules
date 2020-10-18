@@ -20,7 +20,7 @@
 
 data external test_upload_manifest_format {
   query = local.upload_manifest
-  program = ["/usr/local/bin/python3", "${path.module}/test_data_upload.py"]
+  program = ["python", "${path.module}/test_data_upload.py"]
 }
 output test_upload_manifest_format {
   value = data.external.test_upload_manifest_format.result
@@ -29,7 +29,7 @@ output test_upload_manifest_format {
 
 data external test_src_files_sha1sum_lookup {
   query = lookup(local.file_sha1sums, "app1", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_app_sha1sums.py"]
+  program = ["python", "${path.module}/test_app_sha1sums.py"]
 }
 output test_src_files_sha1sum_lookup {
   value = data.external.test_src_files_sha1sum_lookup.result
@@ -38,7 +38,7 @@ output test_src_files_sha1sum_lookup {
 
 data external test_flex_std_app1_separation {
   query = lookup(local.as_flex_specs, "app1", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_flex_std_app1_separation.py"]
+  program = ["python", "${path.module}/test_flex_std_app1_separation.py"]
 }
 output test_flex_std_app1_separation {
   value = data.external.test_flex_std_app1_separation.result
@@ -48,7 +48,7 @@ output test_flex_std_app1_separation {
 // if we override `default` app to use `env: standard`, this should be an empty map
 data external test_flex_std_default_separation {
   query = lookup(local.as_flex_specs, "default", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_flex_std_default_separation.py"]
+  program = ["python", "${path.module}/test_flex_std_default_separation.py"]
 }
 output test_flex_std_default_separation {
   value = data.external.test_flex_std_default_separation.result

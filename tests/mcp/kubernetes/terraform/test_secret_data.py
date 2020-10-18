@@ -26,7 +26,7 @@ def test_secret_data(query):
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail, expected data = {}, received data = {}".format(expected_data, query)}
+        return {"result" : "fail"}
 
 
 

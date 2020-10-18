@@ -1,0 +1,59 @@
+name: 'MCP Unit Tests'
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches: 
+    - master
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./tests/mcp
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{env.working-directory}}
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    # Install Python
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        terraform_wrapper: false
+
+    - name: Run unit tests
+      run: |
+        for dir in $(find $(pwd) \( -not -path "$(pwd)/module_import/*" \) -and \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
+          echo "Directory: ${dir}"
+          cd $dir
+          terraform init
+          terraform apply -auto-approve
+          for value in $(terraform output -json | jq -c '.[].value'); do 
+            result=$(echo -n "$value" | jq -r '.result')
+            if [ "$result" != pass ]
+            then 
+              echo "${result}: Unit test for ${dir} failed"
+              exit 222
+            else 
+              echo "Passed"
+            fi
+          done
+        done
