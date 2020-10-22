@@ -35,14 +35,21 @@ output test_src_files_sha1sum_lookup {
   value = data.external.test_src_files_sha1sum_lookup.result
 }
 
-
-data external test_flex_std_app1_separation {
-  query = lookup(local.as_flex_specs, "app1", {})
+data  external test_flex_std_app1_separation {
+  query = {
+    name: "app1"
+    env: lookup(local.as_flex_specs, "app1", null) == null ? "" : lookup(local.as_flex_specs["app1"],"env", "" )
+  }
   program = ["python", "${path.module}/test_flex_std_app1_separation.py"]
 }
 output test_flex_std_app1_separation {
   value = data.external.test_flex_std_app1_separation.result
 }
+////Original Test fails
+//data external test_flex_std_app1_separation {
+//  query = lookup(local.as_flex_specs, "app1", {})
+//  program = ["python", "${path.module}/test_flex_std_app1_separation.py"]
+//}
 
 
 // if we override `default` app to use `env: standard`, this should be an empty map
