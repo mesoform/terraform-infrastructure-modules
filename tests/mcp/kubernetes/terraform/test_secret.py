@@ -4,7 +4,7 @@ Terraform external provider just handles strings in maps, so tests need to consi
 from sys import path, stderr
 
 try:
-    path.insert(1, '../../test_fixtures/python_validator')
+    path.insert(1, '../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
     print(e, file=stderr)
@@ -14,8 +14,10 @@ except Exception as e:
 def test_secret(query):
 
     expected_data = {
-        
-        "secret.file" : "c29tZXN1cGVyc2VjcmV0IGZpbGUgY29udGVudHMgbm9ib2R5IHNob3VsZCBzZWU=\n"
+
+        "login": "login",
+        "password": "password"
+
     }
 
     if query == expected_data:

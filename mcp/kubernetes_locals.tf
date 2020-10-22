@@ -9,23 +9,22 @@ locals {
     basename(dirname(kube_file)) => { config_map : yamldecode(file(kube_file)) }
     if ! contains(split("/", kube_file), "terraform")
   }
-  k8s_config_map_data = { for key1, value1 in local.k8s_config_map :
-    key1 => merge({
-      for key2, value2 in lookup(local.k8s_config_map[key1].config_map, "data", {}) :
-      key2 => value2
+
+  k8s_config_map_data = { for app_name, config in local.k8s_config_map :
+    app_name => merge({
+      for data_key, data_value in lookup(local.k8s_config_map[app_name].config_map, "data", {}) :
+      data_key => data_value
       }, {
-      for val in lookup(local.k8s_config_map[key1].config_map, "data_file", {}) :
-      basename(val) => file(val)
+      for file in lookup(local.k8s_config_map[app_name].config_map, "data_file", {}) :
+      basename(file) => file(file)
     })
   }
-  k8s_config_map_binary_data = { for key1, value1 in local.k8s_config_map :
-    key1 => merge({
-      for key2, value2 in lookup(local.k8s_config_map[key1].config_map, "binary_data", {}) :
-      key2 => value2
-      }, {
-      for val in lookup(local.k8s_config_map[key1].config_map, "binary_file", {}) :
-      basename(val) => filebase64(val)
-    })
+
+  k8s_config_map_binary_data = { for app_name, config in local.k8s_config_map :
+    app_name => {
+      for file in lookup(local.k8s_config_map[app_name].config_map, "binary_file", {}) :
+      basename(file) => filebase64(file)
+    }
   }
 
   k8s_deployments_files = fileset(path.root, "../**/k8s_deployment.y{a,}ml")
@@ -42,13 +41,13 @@ locals {
     if ! contains(split("/", kube_file), "terraform")
   }
 
-  k8s_secret_data = { for key1, value1 in local.k8s_secret :
-    key1 => merge({
-      for key2, value2 in lookup(local.k8s_secret[key1].secret, "data", {}) :
-      key2 => value2
+  k8s_secret_data = { for app_name, config in local.k8s_secret :
+    app_name => merge({
+      for data_key, data_value in lookup(local.k8s_secret[app_name].secret, "data", {}) :
+      data_key => data_value
       }, {
-      for val in lookup(local.k8s_secret[key1].secret, "data_file", {}) :
-      basename(val) => file(val)
+      for file in lookup(local.k8s_secret[app_name].secret, "data_file", {}) :
+      basename(file) => file(file)
     })
   }
 

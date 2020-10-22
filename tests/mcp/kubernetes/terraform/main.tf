@@ -77,3 +77,11 @@ data external test_service {
 output test_service {
   value = data.external.test_service.result
 }
+
+data external test_secret {
+  query   = local.k8s_secret["resources"].secret.data
+  program = ["/usr/local/bin/python3", "${path.module}/test_secret.py"]
+}
+output test_secret {
+  value = data.external.test_secret.result
+}
