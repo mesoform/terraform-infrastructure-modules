@@ -38,6 +38,8 @@ jobs:
 
     - name: Run unit tests
       run: |
+        EXIT_CODE=0
+        MESSAGE="PASSED: All unit tests passed"
         for dir in $(find $(pwd) \( -not -path "$(pwd)/module_import/*" \) -and \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
           echo "Directory: ${dir}"
           cd $dir
@@ -46,11 +48,11 @@ jobs:
           for value in $(terraform output -json | jq -c '.[].value'); do 
             result=$(echo -n "$value" | jq -r '.result')
             if [ "$result" != pass ]
-            then 
-              echo "${result}: Unit test for ${dir} failed"
-              exit 222
-            else 
-              echo "Passed"
+            then
+              MESSAGE="FAIL: There are failed unit tests"
+              EXIT_CODE=222
             fi
           done
         done
+        echo $MESSAGE
+        exit $EXIT_CODE

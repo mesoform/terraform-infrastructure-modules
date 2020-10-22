@@ -1,5 +1,5 @@
 from sys import path, stderr
-
+import platform
 try:
     path.insert(1, '../../../test_fixtures/python_validator')
     from python_validator import python_validator
@@ -18,11 +18,16 @@ def test_config_map_data(query):
     }
 
     """
-
-    expected_data = {
-        "mosquitto.conf" : "log_dest stdout\r\nlog_type all\r\nlog_timestamp true\r\nlistener 9001\r\n",
-        "test" : "test"
-    }
+    if platform.system() == "Windows":
+        expected_data = {
+            "mosquitto.conf" : "log_dest stdout\r\nlog_type all\r\nlog_timestamp true\r\nlistener 9001\r\n",
+            "test" : "test"
+        }
+    else:
+        expected_data = {
+            "mosquitto.conf" : "log_dest stdout\nlog_type all\nlog_timestamp true\nlistener 9001\n",
+            "test" : "test"
+        }
 
     if query == expected_data:
         return {"result": "pass"}
