@@ -1,0 +1,19 @@
+metadata:
+  name: test
+spec:
+  max_replicas: 100
+  min_replicas: 50
+  scale_target_ref:
+    kind: Deployment
+    name: MyApp
+  metric:
+    type: External
+    external:
+      metric:
+        name: latency
+        selector:
+          match_labels:
+            lb_name: test
+      target:
+        type: Value
+        value: 100
