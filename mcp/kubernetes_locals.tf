@@ -89,7 +89,7 @@ locals {
   }
 
   k8s_persistent_volume_claim = { for app, kube_file in var.k8s_persistent_volume_claim_yml :
-    app => { persistent_volume : yamldecode(file(kube_file)) }
+    app => { persistent_volume_claim : yamldecode(file(kube_file)) }
     if fileexists(kube_file)
   }
 
