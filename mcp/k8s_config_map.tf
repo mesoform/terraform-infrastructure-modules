@@ -10,6 +10,6 @@ resource "kubernetes_config_map" "self" {
     namespace     = lookup(each.value.config_map.metadata, "namespace", null)
   }
 
-  data = lookup(local.k8s_config_map_data, each.key, {})
+  data        = lookup(local.k8s_config_map_data, each.key, {})
   binary_data = lookup(local.k8s_config_map_binary_data, each.key, {})
 }
