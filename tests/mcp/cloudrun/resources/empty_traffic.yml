@@ -5,7 +5,7 @@ components:
   specs:
     default:
       name: "default"
-      image_uri: gcr.io/cloud-run-test-1409-1/image
+      image_uri: gcr.io/google-containers/nginx
       metadata:
         annotations:
           "run.googleapis.com/client-name": "terraform"
