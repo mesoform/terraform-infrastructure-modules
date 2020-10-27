@@ -1,6 +1,4 @@
-/******************************************
-  Locals policyuration for module logic
- *****************************************/
+
 locals {
   organization_id = var.organization_id
   organization_level_list_policies = {
