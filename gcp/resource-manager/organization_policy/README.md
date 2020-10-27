@@ -13,6 +13,7 @@ There are 3 levels of policy assignment, Organization, Folder and Project
 ### list constraints
 list constraints take one of `allow` or `deny` keys. Where the value is a string and the string is a
 space separated list. `in:` and `is:`, as per the documentation for list constraints are allowed.
+`"all"` is a special keyword which means all possible values for the policy
 ### boolean constraints
 takes a single key, `enforced` which is a string representation of `true` or `false`
 ## restore default override
@@ -39,21 +40,24 @@ existing.*
 
 ```hcl-terraform
 variable organization_policies {
-  type = map(map(string))
-
+  type = list(map(string))
+  default = []
 }
 variable folder_policies {
-  type = map(map(string))
-
+  type = list(map(string))
+  default = []
 }
 variable project_policies {
-  type = map(map(string))
-
+  type = list(map(string))
+  default = []
+}
+variable organization_id {
+  type = string
 }
 module organization_policies {
-  source = "../../../gcp/resource-manager/organization_policy"
+  source = "git:https://github.com/mesoform/terraform-infrastructure-modules.git//gcp/resource-manager/organization_policy"
   
-  organization_id = "987654321000"
+  organization_id = var.organization_id
   organization_policies = var.organization_policies
   folder_policies = var.folder_policies
   project_policies = var.project_policies
@@ -74,29 +78,40 @@ output project_level_policies {
 Pass in values in a format like below
 ```json
 {
-  "organization_policies": {
-    "gcp.resourceLocations": {
-      "allow": "in:europe-west1-locations in:europe-west2-locations"
+  "organization_id": "98765432100",
+  "organization_policies": [
+    {
+      "constraint": "gcp.resourceLocations",
+      "allow": "in:europe-west2-locations"
     },
-    "iam.disableServiceAccountKeyUpload": {
+    {
+      "constraint": "iam.disableServiceAccountKeyUpload",
       "enforced": "true"
     },
-    "serviceuser.services": {
+    {
+      "constraint": "serviceuser.services",
       "deny": "doubleclicksearch.googleapis.com resourceviews.googleapis.com"
     }
-  },
-  "folder_policies": {
-    "serviceuser.services": {
-      "folder_number": "123345364",
+  ],
+  "folder_policies": [
+    {
+      "constraint": "serviceuser.services",
+      "folder_number": "323203379966",
       "inherit_from_parent": "false",
       "deny": "resourceviews.googleapis.com"
     }
-  },
-  "project_policies": {
-    "serviceuser.services": {
-      "project_id": "mesoform",
+  ],
+  "project_policies": [
+    {
+      "constraint": "serviceuser.services",
+      "project_id": "mesoform-34234243",
+      "restore_default": "true"
+    },
+    {
+      "constraint": "gcp.resourceLocations",
+      "project_id": "mcp-testing-23452432",
       "restore_default": "true"
     }
-  }
+  ]
 }
 ```
