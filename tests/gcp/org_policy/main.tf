@@ -13,21 +13,27 @@ variable project_policies {
 variable organization_id {
   type = string
 }
-module organization_policies {
-  source = "../../../gcp/resource-manager/organization_policy"
 
-  organization_id = var.organization_id
-  organization_policies = var.organization_policies
-  folder_policies = var.folder_policies
-  project_policies = var.project_policies
+locals {
+  org_resourceLocations_allow = {
+    allow_value: element(
+      lookup(
+        lookup(
+          lookup(
+            local.organization_level_policies,
+            "gcp.resourceLocations-98765432100"),
+          "list_policy"),
+        "allow"),
+    0)
+  }
 }
 
-output organization_level_policies {
-  value = module.organization_policies.organization_level_policies
+data external test_complete_org_policy_map_construction {
+
+  query = local.org_resourceLocations_allow
+  program = ["python", "${path.module}/test_complete_org_policy_map_construction.py"]
 }
-output folder_level_policies {
-  value = module.organization_policies.folder_level_policies
-}
-output project_level_policies {
-  value = module.organization_policies.project_level_policies
+
+output test_complete_org_policy_map_construction {
+  value = data.external.test_complete_org_policy_map_construction.result
 }
