@@ -67,7 +67,7 @@ locals {
   }
 
   k8s_service_account = { for app, kube_file in var.k8s_service_account_yml :
-    basename(dirname(kube_file.key)) => { service_account : yamldecode(file(kube_file)) }
+    app => { service_account : yamldecode(file(kube_file)) }
     if fileexists(kube_file)
   }
 
