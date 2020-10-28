@@ -3,6 +3,6 @@ terraform {
 }
 provider "google" {
   region      = "europe-west2"
-  project = "protean-buffer-230514"
+  project = "mcp-testing-23452432"
   version = "2.20"
 }
