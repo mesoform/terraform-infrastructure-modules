@@ -68,7 +68,7 @@ installLinuxDependencies() {
     echo ""
 
     cd "${BIN}"
-    TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.13.5/terraform_0.13.5_linux_amd64.zip
+    TERRAFORM_URL_LIN=https://releases.hashicorp.com/terraform/0.12.0/terraform_0.12.0_linux_amd64.zip
     TERRAFORM_FILE_LIN="${TERRAFORM_URL_LIN##*/}"
     wget "${TERRAFORM_URL_LIN}"
     unzip -o "${TERRAFORM_FILE_LIN}"
@@ -94,7 +94,7 @@ installDarwinDependencies(){
         echo ""
 
         cd "${BIN}"
-        TERRAFORM_URL_DAR=https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_darwin_amd64.zip
+        TERRAFORM_URL_DAR=https://releases.hashicorp.com/terraform/0.12.0/terraform_0.12.0_linux_amd64.zip
         TERRAFORM_FILE_DAR="${TERRAFORM_URL_DAR##*/}"
 
         echo "URL: ${TERRAFORM_URL_DAR}"
@@ -119,7 +119,7 @@ runSetup() {
   echo ""
   echo "Creating Plan ..."
   echo ""
-  terraform plan -var-file="./settings.tfvars" -out="plan.tfplan" 
+  terraform plan -var-file="./settings.tfvars" -out="plan.tfplan"
   if [ -e plan.tfplan ] 
   then 
     read -r -p "Do you wish to apply this plan? (Only 'yes' accepted): " accept
@@ -133,7 +133,7 @@ runSetup() {
         ;;
       *)
         echo ""
-        echo "Applying Aborted"
+        echo "Apply Aborted"
         echo ""
         ;;
     esac
@@ -147,10 +147,12 @@ runDestroy() {
   echo ""
   echo "Creating plan for destroying resources..."
   echo ""
-  terraform plan -destroy
-  read -r -p "Do you wish to destroy resources as shown? (Only 'yes' accepted): " accept
-    case $accept in 
-      yes ) 
+  terraform plan -destroy -out="destroy.tfplan"
+  if [ -e destou.tfplan ]
+  then
+    read -r -p "Do you wish to destroy resources as shown? (Only 'yes' accepted): " accept
+    case $accept in
+      yes )
         echo ""
         echo "Destroying resources..."
         echo ""
@@ -162,6 +164,9 @@ runDestroy() {
         echo ""
         ;;
     esac
+  else
+    echo "Destroy plan failed" | exit 1
+  fi
   entry
 }
 
