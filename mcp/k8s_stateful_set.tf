@@ -17,7 +17,7 @@ resource "kubernetes_stateful_set" "self" {
     replicas               = lookup(each.value.stateful_set.spec, "replicas", null )
     revision_history_limit = lookup(each.value.stateful_set.spec, "revision_history_limit", null )
     selector{
-      match_labels = lookup(each.value.stateful_set.spec, "selector", null) == null ? {} : lookup(each.value.stateful_set.spec.selector, "match_labels", {})
+      match_labels = lookup(each.value.stateful_set.spec.selector, "match_labels", {})
     }
     template {
       metadata {
@@ -25,12 +25,10 @@ resource "kubernetes_stateful_set" "self" {
         generate_name = lookup(each.value.stateful_set.spec.template.metadata, "name", null) == null ? lookup(each.value.stateful_set.metadata, "generate_name", null) : null
         name          = lookup(each.value.stateful_set.spec.template.metadata, "name", null)
         labels        = lookup(each.value.stateful_set.spec.template.metadata, "labels", null)
-        namespace     = lookup(each.value.stateful_set.spec.template.metadata, "namespace", null)
 
       }
       dynamic "spec"{
         for_each = lookup(each.value.stateful_set.spec.template, "spec", null) == null ? {} : {spec: each.value.stateful_set.spec.template.spec}
-        //        iterator = pod
         content {
           active_deadline_seconds         = lookup(spec.value, "active_deadline_seconds", null)
           automount_service_account_token = lookup(spec.value, "automount_service_account_token", null)
@@ -904,8 +902,9 @@ resource "kubernetes_stateful_set" "self" {
         }
       }
     }
+
     dynamic update_strategy {
-      for_each = lookup(each.value.stateful_set.spec, "update_stategy", null) == null ? {} : {update_strategy: each.value.statefule_set.spec.update_strategy}
+      for_each = lookup(each.value.stateful_set.spec, "update_stategy", null) == null ? {} : {update_strategy: each.value.stateful_set.spec.update_strategy}
       content{
         type = lookup(update_strategy.value, "type", null)
           dynamic rolling_update {
@@ -930,7 +929,7 @@ resource "kubernetes_stateful_set" "self" {
         }
         spec {
           access_modes       = lookup(volume_claim_template.value.spec, "access_modes", [] )
-          volume_name        = lookup(volume_claim_template.value.spec, "volume_name", null] )
+          volume_name        = lookup(volume_claim_template.value.spec, "volume_name", null )
           storage_class_name = lookup(volume_claim_template.value.spec, "storage_class_name", null )
           //noinspection HILUnresolvedReference
           resources {
@@ -952,8 +951,9 @@ resource "kubernetes_stateful_set" "self" {
                   values = lookup(match_expressions.value, "values", null )
                 }
               }
-              match_labels = lookup(selector.value,"match_labels", null )
+              match_labels = lookup(selector.value, "match_labels", null )
             }
+          }
         }
       }
     }

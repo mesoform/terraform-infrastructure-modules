@@ -31,7 +31,7 @@ The following Kubernetes adapter modules are currently available:
 [pod](#pod)     
 [secret](#secret)  
 [config_map](#config_map)  
-[ingress](#ingress)
+[ingress](#ingress)  
 [stateful_set](#stateful_set)
 
 ### deployment
