@@ -7,7 +7,8 @@ default credentials to an identity which has the correct roles
 gcloud auth application-default login
 ```
 This opens a browser to request access for an identity like your own user account. Provided that it
-has suitable permissions for the task, Terraform will read the file generated from this process
+has suitable permissions for the task, Terraform will read the file generated from this process. use
+`--no-launch-browser` if behind a firewall.
 
 To create network and instances:
 ```bash

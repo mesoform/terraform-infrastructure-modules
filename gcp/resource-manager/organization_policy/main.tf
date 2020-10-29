@@ -1,9 +1,8 @@
 resource google_organization_policy self {
   for_each = local.organization_level_policies
-//  count = local.organization && local.list_policy && var.deny_list_length > 0 ? 1 : 0
 
   org_id     = local.organization_id
-  constraint = each.key
+  constraint = lookup(each.value, "constraint")
 
   dynamic list_policy {
     for_each = lookup(each.value, "list_policy", null) == null ? {} : {list_policy: lookup(each.value, "list_policy")}
@@ -41,10 +40,9 @@ resource google_organization_policy self {
 
 resource google_folder_organization_policy self {
   for_each = local.folder_level_policies
-//  count = local.organization && local.list_policy && var.deny_list_length > 0 ? 1 : 0
 
   folder     = lookup(each.value, "folder_number")
-  constraint = each.key
+  constraint = lookup(each.value, "constraint")
 
   dynamic list_policy {
     for_each = lookup(each.value, "list_policy", null) == null ? {} : {list_policy: lookup(each.value, "list_policy")}
@@ -82,8 +80,7 @@ resource google_folder_organization_policy self {
 
 resource google_project_organization_policy self {
   for_each = local.project_level_policies
-//  count = local.organization && local.list_policy && var.deny_list_length > 0 ? 1 : 0
-  constraint = each.key
+  constraint = lookup(each.value, "constraint")
   project = lookup(each.value, "project_id")
 
   dynamic list_policy {
