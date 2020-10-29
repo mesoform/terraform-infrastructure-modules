@@ -30,7 +30,9 @@ def test_traffic_config(query):
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail"}
+        return {"result" : "fail",
+                "expected" : "{}".format(expected_data),
+                "received" : "{}".format(query)}
 
 
 if __name__ == '__main__':
