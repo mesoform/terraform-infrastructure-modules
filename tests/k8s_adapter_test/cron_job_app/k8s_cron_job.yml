@@ -1,0 +1,21 @@
+metadata:
+  name: demo
+spec:
+  concurrency_policy: Replace
+  failed_jobs_history_limit: 5
+  schedule: "1 0 * * *"
+  starting_deadline_seconds: 10
+  successful_jobs_history_limit: 10
+  job_template:
+    spec:
+      backoff_limit: 2
+      ttl_seconds_after_finished: 10
+      template:
+        spec:
+          container:
+            - name: hello
+              image: busybox
+              command:
+                - "/bin/sh"
+                - "-c"
+                - "date; echo Hello from Kubernetes cluster"
