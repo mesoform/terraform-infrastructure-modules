@@ -35,7 +35,7 @@ resource "google_storage_bucket" "self" {
   force_destroy = true # code should be transient in GCS and maintained in version control
   project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   name = local.project.name
-  bucket_policy_only = true
+  uniform_bucket_level_access = true
   default_event_based_hold = false
   labels = lookup(local.project, "labels", null)
   # ToDo handle region better between app engine and cloud storage
