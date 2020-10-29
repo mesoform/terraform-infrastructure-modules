@@ -1,0 +1,17 @@
+metadata:
+  name: "mosquitto"
+  namespace:
+  labels:
+    env: "test"
+  generate_name:
+spec:
+  selector:
+    app: "mosquitto"
+  port:
+    - name: "mosquitto-listener"
+      port: 1883
+      target_port: 1883
+    - name: "tomcat-listener"
+      port: 80
+      target_port: 8080
+  type: LoadBalancer

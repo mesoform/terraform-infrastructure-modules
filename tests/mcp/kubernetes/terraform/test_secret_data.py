@@ -20,7 +20,9 @@ def test_secret_data(query):
     """
 
     expected_data = {
-        "secret.file" : "c29tZXN1cGVyc2VjcmV0IGZpbGUgY29udGVudHMgbm9ib2R5IHNob3VsZCBzZWU="
+        "secret.file" : "c29tZXN1cGVyc2VjcmV0IGZpbGUgY29udGVudHMgbm9ib2R5IHNob3VsZCBzZWU=",
+        "login" : "login",
+        "password" : "password"
     }
 
     if query == expected_data:
