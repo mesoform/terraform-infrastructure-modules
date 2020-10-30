@@ -93,6 +93,4 @@ locals {
     app => { persistent_volume_claim : yamldecode(file(kube_file)) }
     if fileexists(kube_file)
   }
-
-
 }
