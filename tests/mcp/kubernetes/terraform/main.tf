@@ -84,4 +84,11 @@ data external test_secret {
 }
 output test_secret {
   value = data.external.test_secret.result
+
+  data external test_job {
+    query   = local.k8s_job["resources"].job.metadata
+    program = ["python", "${path.module}/test_job.py"]
+  }
+  output test_job {
+    value = data.external.test_job.result
 }
