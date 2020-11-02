@@ -6,7 +6,6 @@ locals {
 
   k8s_config_map_data = { for app_name, config in local.k8s_config_map :
     app_name => merge({
-
       for name, content in lookup(local.k8s_config_map[app_name].config_map, "data", {}) :
       name => content
       }, {
@@ -89,5 +88,4 @@ locals {
     app => { persistent_volume_claim : yamldecode(file(kube_file)) }
     if fileexists(kube_file)
   }
-
 }
