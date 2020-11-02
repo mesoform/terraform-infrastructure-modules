@@ -1,14 +1,18 @@
 name: 'MCP Unit Tests'
 
 on:
+  pull_request:
+    branches:
+      - master
   push:
     branches:
-    - master
+      - master
 
 jobs:
   terraform:
-    name: 'Terraform'
+    name: 'MCP Unit Tests'
     runs-on: ubuntu-latest
+    if: contains(github.head_ref, 'MCP') == true
     env:
       working-directory: ./tests/mcp
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
