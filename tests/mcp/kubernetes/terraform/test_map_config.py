@@ -28,7 +28,7 @@ def test_map_config(query):
     """
 
     expected_data = {
-        "resources" : "service"
+        "test_app_1" : "service"
     }
 
     if query == expected_data:
