@@ -40,7 +40,7 @@ output test_secret_data {
 data external test_kubernetes_deployment {
   //query   = lookup(local.k8s_deployments.mosquitto.deployment.metadata, "labels", {})
   query   = lookup(local.k8s_deployments.test_app_1.deployment.spec.selector, "match_labels", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_deployment.py"]
+  program = ["python", "${path.module}/test_deployment.py"]
 }
 output test_deployment {
   value = data.external.test_kubernetes_deployment.result
@@ -48,7 +48,7 @@ output test_deployment {
 
 data external test_pod {
   query   = lookup(local.k8s_pods["test_app_1"].pod.spec, "env", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_pod.py"]
+  program = ["python", "${path.module}/test_pod.py"]
 }
 output test_pod {
   value = data.external.test_pod.result
@@ -56,7 +56,7 @@ output test_pod {
 
 data external test_ingress {
   query   = lookup(local.k8s_ingress["test_app_1"].ingress.spec, "backend", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_ingress.py"]
+  program = ["python", "${path.module}/test_ingress.py"]
 }
 output test_ingress {
   value = data.external.test_ingress.result
@@ -64,7 +64,7 @@ output test_ingress {
 
 data external test_pod_autoscaler {
   query   = lookup(local.k8s_pod_autoscaler["test_app_1"].pod_autoscaler.spec, "scale_target_ref", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_pod_autoscaler.py"]
+  program = ["python", "${path.module}/test_pod_autoscaler.py"]
 }
 output test_pod_autoscaler {
   value = data.external.test_pod_autoscaler.result
@@ -72,7 +72,7 @@ output test_pod_autoscaler {
 
 data external test_service {
   query   = lookup(local.k8s_services["test_app_1"].service.spec, "selector", {})
-  program = ["/usr/local/bin/python3", "${path.module}/test_service.py"]
+  program = ["python", "${path.module}/test_service.py"]
 }
 output test_service {
   value = data.external.test_service.result
@@ -80,15 +80,16 @@ output test_service {
 
 data external test_secret {
   query   = local.k8s_secret["test_app_1"].secret.data
-  program = ["/usr/local/bin/python3", "${path.module}/test_secret.py"]
+  program = ["python", "${path.module}/test_secret.py"]
 }
 output test_secret {
   value = data.external.test_secret.result
+}
 
-  data external test_job {
-    query   = local.k8s_job["resources"].job.metadata
-    program = ["python", "${path.module}/test_job.py"]
-  }
-  output test_job {
-    value = data.external.test_job.result
+data external test_job {
+  query   = local.k8s_job["test_app_1"].job.metadata
+  program = ["python", "${path.module}/test_job.py"]
+}
+output test_job {
+  value = data.external.test_job.result
 }
