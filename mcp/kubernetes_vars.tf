@@ -80,7 +80,7 @@ variable k8s_pod_autoscaler_yml {
 }
 
 variable k8s_stateful_set_yml {
-  description = "path to YAML file containing configuration for k8s_pod_autoscaler"
+  description = "path to YAML file containing configuration for stateful_set"
   type        = map
   default = {
 

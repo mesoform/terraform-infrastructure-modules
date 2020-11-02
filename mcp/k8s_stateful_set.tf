@@ -1,6 +1,6 @@
 //noinspection HILUnresolvedReference
 resource "kubernetes_stateful_set" "self" {
-  for_each = local.k8s_stateful_set
+  for_each         = local.k8s_stateful_set
   wait_for_rollout = lookup(each.value.stateful_set, "wait_fro_rollout", true)
   //noinspection HILUnresolvedReference
   metadata {
@@ -14,10 +14,10 @@ resource "kubernetes_stateful_set" "self" {
   spec {
     service_name           = lookup(each.value.stateful_set.spec, "service_name", "")
     pod_management_policy  = lookup(each.value.stateful_set.spec, "pod_management_policy", null)
-    replicas               = lookup(each.value.stateful_set.spec, "replicas", null )
-    revision_history_limit = lookup(each.value.stateful_set.spec, "revision_history_limit", null )
-    selector{
-      match_labels = lookup(each.value.stateful_set.spec.selector, "match_labels", {})
+    replicas               = lookup(each.value.stateful_set.spec, "replicas", null)
+    revision_history_limit = lookup(each.value.stateful_set.spec, "revision_history_limit", null)
+    selector {
+      match_labels = lookup(each.value.stateful_set.spec, "selector", null) == null ? {} : lookup(each.value.stateful_set.spec.selector, "match_labels", {})
     }
     template {
       metadata {
@@ -25,10 +25,10 @@ resource "kubernetes_stateful_set" "self" {
         generate_name = lookup(each.value.stateful_set.spec.template.metadata, "name", null) == null ? lookup(each.value.stateful_set.metadata, "generate_name", null) : null
         name          = lookup(each.value.stateful_set.spec.template.metadata, "name", null)
         labels        = lookup(each.value.stateful_set.spec.template.metadata, "labels", null)
-
+        //namespace     = lookup(each.value.stateful_set.spec.template.metadata, "namespace", null)
       }
-      dynamic "spec"{
-        for_each = lookup(each.value.stateful_set.spec.template, "spec", null) == null ? {} : {spec: each.value.stateful_set.spec.template.spec}
+      dynamic "spec" {
+        for_each = lookup(each.value.stateful_set.spec.template, "spec", null) == null ? {} : { spec : each.value.stateful_set.spec.template.spec }
         content {
           active_deadline_seconds         = lookup(spec.value, "active_deadline_seconds", null)
           automount_service_account_token = lookup(spec.value, "automount_service_account_token", null)
@@ -197,7 +197,7 @@ resource "kubernetes_stateful_set" "self" {
             }
           }
           dynamic "container" {
-            for_each = lookup(spec.value, "container", []) == [] ? [] : [for container in spec.value.container : {
+            for_each = [for container in lookup(spec.value, "container", []) : {
               image             = lookup(container, "image", null)
               name              = lookup(container, "name", null)
               args              = lookup(container, "args", null)
@@ -218,8 +218,8 @@ resource "kubernetes_stateful_set" "self" {
               liveness_probe           = lookup(container, "liveness_probe", null)
               readiness_probe          = lookup(container, "readiness_probe", null)
               volume_mount             = lookup(container, "volume_mount", [])
-
-            }]
+              }
+            if lookup(spec.value, "container", []) != []]
             content {
               image             = lookup(container.value, "image", null)
               name              = lookup(container.value, "name", null)
@@ -529,14 +529,63 @@ resource "kubernetes_stateful_set" "self" {
           }
           dynamic "init_container" {
             for_each = lookup(spec.value, "init_container", []) == [] ? [] : [for init_container in spec.value.init_container : {
-              name    = lookup(init_container, "name", null)
-              image   = lookup(init_container, "image", null)
-              command = lookup(init_container, "command", null)
+              name                     = lookup(init_container, "name", null)
+              image                    = lookup(init_container, "image", null)
+              command                  = lookup(init_container, "command", null)
+              image_pull_policy        = lookup(init_container, "image_pull_policy", null)
+              stdin                    = lookup(init_container, "stdin", null)
+              stdin_once               = lookup(init_container, "stdin_once", null)
+              termination_message_path = lookup(init_container, "termination_message_path", null)
+              tty                      = lookup(init_container, "tty", null)
+              resources                = lookup(init_container, "resources", null)
+              volume_mount             = lookup(init_container, "volume_mount", [])
+
             }]
             content {
-              name    = lookup(init_container.value, "name", null)
-              image   = lookup(init_container.value, "image", null)
-              command = lookup(init_container.value, "command", null)
+              name                     = lookup(init_container.value, "name", null)
+              image                    = lookup(init_container.value, "image", null)
+              command                  = lookup(init_container.value, "command", null)
+              image_pull_policy        = lookup(init_container.value, "image_pull_policy", null)
+              stdin                    = lookup(init_container.value, "stdin", null)
+              stdin_once               = lookup(init_container.value, "stdin_once", null)
+              termination_message_path = lookup(init_container.value, "termination_message_path", null)
+              tty                      = lookup(init_container.value, "tty", null)
+              dynamic "resources" {
+                for_each = lookup(init_container.value, "resources", null) == null ? {} : { resources : init_container.value.resources }
+                content {
+                  dynamic "limits" {
+                    for_each = lookup(resources.value, "limits", null) == null ? {} : { limits : resources.value.limits }
+                    content {
+                      cpu    = lookup(limits.value, "cpu", null)
+                      memory = lookup(limits.value, "memory", null)
+                    }
+                  }
+                  dynamic "requests" {
+                    for_each = lookup(resources.value, "requests", null) == null ? {} : { requests : resources.value.requests }
+                    content {
+                      cpu    = lookup(requests.value, "cpu", null)
+                      memory = lookup(requests.value, "memory", null)
+                    }
+                  }
+                }
+              }
+              dynamic "volume_mount" {
+                for_each = lookup(init_container.value, "volume_mount", []) == [] ? [] : [for volume_mount in init_container.value.volume_mount : {
+                  mount_path        = lookup(volume_mount, "mount_path", null)
+                  name              = lookup(volume_mount, "name", null)
+                  read_only         = lookup(volume_mount, "read_only", null)
+                  sub_path          = lookup(volume_mount, "sub_path", null)
+                  mount_propagation = lookup(volume_mount, "mount_propagation", null)
+                }]
+                content {
+                  mount_path        = lookup(volume_mount.value, "mount_path", null)
+                  name              = lookup(volume_mount.value, "name", null)
+                  read_only         = lookup(volume_mount.value, "read_only", null)
+                  sub_path          = lookup(volume_mount.value, "sub_path", null)
+                  mount_propagation = lookup(volume_mount.value, "mount_propagation", null)
+
+                }
+              }
             }
           }
           dynamic "security_context" {
@@ -902,23 +951,22 @@ resource "kubernetes_stateful_set" "self" {
         }
       }
     }
-
     dynamic update_strategy {
-      for_each = lookup(each.value.stateful_set.spec, "update_stategy", null) == null ? {} : {update_strategy: each.value.stateful_set.spec.update_strategy}
-      content{
+      for_each = lookup(each.value.stateful_set.spec, "update_stategy", null) == null ? {} : { update_strategy : each.value.statefule_set.spec.update_strategy }
+      content {
         type = lookup(update_strategy.value, "type", null)
-          dynamic rolling_update {
-            for_each = lookup(update_strategy.value,"rolling_update", null) == null ? {} : {rolling_update: update_strategy.value.rolling_update}
-            content {
-              partition = lookup(rolling_update.value, "partition" , null )
-            }
+        dynamic rolling_update {
+          for_each = lookup(update_strategy.value, "rolling_update", null) == null ? {} : { rolling_update : update_strategy.value.rolling_update }
+          content {
+            partition = lookup(rolling_update.value, "partition", null)
           }
+        }
 
       }
     }
     //noinspection HILUnresolvedReference
     dynamic "volume_claim_template" {
-      for_each = lookup(each.value.stateful_set.spec, "volume_claim_template", {})
+      for_each = lookup(each.value.stateful_set.spec, "volume_claim_template", {}) == null ? {} : { volume_claim_template : each.value.stateful_set.spec.volume_claim_template }
       content {
         metadata {
           annotations   = lookup(volume_claim_template.value.metadata, "annotations", null)
@@ -928,30 +976,30 @@ resource "kubernetes_stateful_set" "self" {
           namespace     = lookup(volume_claim_template.value.metadata, "namespace", null)
         }
         spec {
-          access_modes       = lookup(volume_claim_template.value.spec, "access_modes", [] )
-          volume_name        = lookup(volume_claim_template.value.spec, "volume_name", null )
-          storage_class_name = lookup(volume_claim_template.value.spec, "storage_class_name", null )
+          access_modes       = lookup(volume_claim_template.value.spec, "access_modes", [])
+          volume_name        = lookup(volume_claim_template.value.spec, "volume_name", null)
+          storage_class_name = lookup(volume_claim_template.value.spec, "storage_class_name", null)
           //noinspection HILUnresolvedReference
           resources {
-            limits   = lookup(volume_claim_template.value.spec.resources, "limits", {} )
-            requests = lookup(volume_claim_template.value.spec.resources, "requests", {} )
+            limits   = lookup(volume_claim_template.value.spec.resources, "limits", {})
+            requests = lookup(volume_claim_template.value.spec.resources, "requests", {})
           }
           dynamic "selector" {
-            for_each =  lookup(volume_claim_template.value.spec, "selector",null ) == null ? {} : {selector: volume_claim_template.value.spec.selector}
+            for_each = lookup(volume_claim_template.value.spec, "selector", null) == null ? {} : { selector : volume_claim_template.value.spec.selector }
             content {
               //noinspection HILUnresolvedReference
               dynamic "match_expressions" {
-                for_each = lookup(selector.value, "match_expressions", null) == null ? {}: {
-                  for match_expression in selector.value.match_expressions:
-                    match_expression.key => match_expression
+                for_each = lookup(selector.value, "match_expressions", null) == null ? {} : {
+                  for match_expression in selector.value.match_expressions :
+                  match_expression.key => match_expression
                 }
                 content {
-                  key = lookup(match_expressions.value, "key", null )
+                  key      = lookup(match_expressions.value, "key", null)
                   operator = lookup(match_expressions.value, "operator", null)
-                  values = lookup(match_expressions.value, "values", null )
+                  values   = lookup(match_expressions.value, "values", null)
                 }
               }
-              match_labels = lookup(selector.value, "match_labels", null )
+              match_labels = lookup(selector.value, "match_labels", null)
             }
           }
         }
