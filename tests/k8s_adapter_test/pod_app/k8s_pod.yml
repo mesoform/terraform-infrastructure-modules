@@ -1,0 +1,37 @@
+metadata:
+  name: "nginx-example"
+  namespace:
+  labels:
+    app: "TestApp"
+spec:
+  service_account_name:
+    pod-app-service-account
+  secret: pod-app-service-account-token-brds5
+  dns_policy: None
+  dns_config:
+    nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+      - 9.9.9.9
+    searches:
+      - example.com
+    option:
+      - name: ndots
+        value: 1
+      - name: use-vc
+  env:
+    name: environment
+    value: test
+  container:
+    - name: "nginx-example"
+      image: "nginx:1.7.8"
+      port:
+        - container_port: 8080
+      liveness_probe:
+        http_get:
+          port: 80
+          http_header:
+            name: X-Custom-Header
+            value: Awesome
+        initial_delay_seconds: 3
+        period_seconds: 3

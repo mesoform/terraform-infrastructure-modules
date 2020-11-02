@@ -3,7 +3,7 @@ locals {
     for app, config in local.k8s_services :
     app => merge(config, lookup(local.k8s_deployments, app, {}))
   }
-
+    
   k8s_config_map = { for app, kube_file in var.k8s_config_map_yml :
     app => { config_map : yamldecode(file(kube_file)) }
     if fileexists(kube_file)
@@ -11,7 +11,6 @@ locals {
 
   k8s_config_map_data = { for app_name, config in local.k8s_config_map :
     app_name => merge({
-
       for name, content in lookup(local.k8s_config_map[app_name].config_map, "data", {}) :
       name => content
       }, {
@@ -21,7 +20,6 @@ locals {
   }
 
   k8s_config_map_binary_data = { for app_name, config in local.k8s_config_map :
-
     app_name => merge({
       for name, content in lookup(local.k8s_config_map[app_name].config_map, "binary_data", {}) :
       name => content
@@ -97,8 +95,7 @@ locals {
   }
 
   k8s_persistent_volume_claim = { for app, kube_file in var.k8s_persistent_volume_claim_yml :
-    app => { persistent_volume : yamldecode(file(kube_file)) }
+    app => { persistent_volume_claim : yamldecode(file(kube_file)) }
     if fileexists(kube_file)
   }
-
 }
