@@ -12,7 +12,8 @@ jobs:
   terraform:
     name: 'MCP Unit Tests'
     runs-on: ubuntu-latest
-    if: contains(github.head_ref, 'MCP') == true
+    if: contains(github.head_ref, 'MCP') &&
+        (startswith(github.head_ref, 'feat') || startswith(github.head_ref, 'bug') || startswith(github.head_ref, 'patch'))
     env:
       working-directory: ./tests/mcp
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
