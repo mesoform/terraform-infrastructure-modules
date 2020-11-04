@@ -93,3 +93,11 @@ data external test_job {
 output test_job {
   value = data.external.test_job.result
 }
+
+data external test_stateful_set {
+  query   = local.k8s_stateful_set["test_app_1"].stateful_set.spec.volume_claim_template.metadata
+  program = ["python", "${path.module}/test_stateful_set.py"]
+}
+output stateful_set {
+  value = data.external.test_stateful_set.result
+}

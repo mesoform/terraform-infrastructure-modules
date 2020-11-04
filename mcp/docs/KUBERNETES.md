@@ -31,10 +31,8 @@ The following Kubernetes adapter modules are currently available:
 [pod](#pod)     
 [secret](#secret)  
 [config_map](#config_map)  
-[ingress](#ingress)
-[stateful_set](#stateful_set)  
-[persistent_volume](#persistent_volume)  
-[persistent_volume_claim](#persistent_volume_claim)  
+[ingress](#ingress)  
+[stateful_set](#stateful_set)
 
 ### deployment
 
@@ -221,7 +219,7 @@ Configuration is as follows:
 Similarly to Deployment, StatefulSet manages Pods based on a container spec, but unlike Deployment, a statefulset maintains an identity for each pod.
 Each pod has a persistent identifier that persists through rescheduling, and can claim a persistent_volume.
 
-k8s_stateful_set.yml file is used to configure the a deploymlent of a StatefulSet resource. 
+k8s_stateful_set.yml file is used to configure the a deploymlent of a StatefulSet resource.
 **NOTE**: A template of a pod may be specified in `spec.template.spec`, which would be configured in the same way that [k8s_pod.yml](#pod) spec was.
 Similarly `spec.volume_claim_template` is configured the same as [k8s_persistent_volume_claim.yml](#persitent_volume_claim)  
 Attributes configuration:  
@@ -246,7 +244,7 @@ spec:
       "k8s-app": "prometheus"
   template:
     metadata:
-      namespace: 
+      namespace:
     #This section is the configured the same as k8s_pod.yml spec block
     spec:
       ...
@@ -268,7 +266,7 @@ Attributes configuration:
 | `spec.storage_class_name`| string | false | Name of the persistent volumes storage class | "Standard" |
 | `spec.node_affinity.required.node_selector_term`| map | true if `spec.node_affinity` | node selector term with `match_expressions` and `match_fields` attributes ORed | none |
 | `match_expressions` or `match_fields`| map |false | Expression or field to map with attributes: `key`, `operator` (`"In"`, `"NotIn"`, `"Exists"`, `"DoesNotExist"`) and `values`([details](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/persistent_volume_claim#values)) | none |  
- 
+
 An example of a k8s_persistent_volume.yml file configuration:
 ```yaml
 metadata:
@@ -285,7 +283,7 @@ spec:
 
 ### persistent_volume_claim
 This adapter can request for persistent volume and claim it.
-Configuration for a persistent_volume is done with k8s_persistent_volume.yml file. 
+Configuration for a persistent_volume is done with k8s_persistent_volume.yml file.
 
 Attributes configuration:  
 
@@ -297,7 +295,7 @@ Attributes configuration:
 | `spec.resources`| map | true | list of the minimum resources the volume should have with `limits` or `requests` maps defined | none |
 | `spec.storage_class_name`| string | false | Name of the claims storage class | `"Standard"` |
 
-**Note** `spec.volume_name` specifies the binding reference for the persistent volume backing the claim. 
+**Note** `spec.volume_name` specifies the binding reference for the persistent volume backing the claim.
 If creating a persistent volume with `k8s_persistent_volume.yml`, `volume_name` will be set to the name assigned to that resource.
 Otherwise `spec.volume_name` can be specified to link to an already existing persistent volume
 
@@ -310,7 +308,7 @@ spec:
   access_modes:
     - "ReadWriteMany"
   resources:
-    requests: 
+    requests:
       storage: "5Gi"      
   volume_name: "volume"
 ```

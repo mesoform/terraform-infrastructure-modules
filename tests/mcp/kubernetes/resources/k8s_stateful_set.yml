@@ -1,0 +1,33 @@
+metadata:
+  name: web
+spec:
+  selector:
+    match_labels:
+      app: nginx # has to match .spec.template.metadata.labels
+  service_name: "nginx"
+  replicas: 1 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      termination_grace_period_seconds: 10
+      container:
+      - name: nginx
+        image: k8s.gcr.io/nginx-slim:0.8
+        port:
+        - container_port: 80
+          name: web
+        volume_mount:
+        - name: www-data
+          mount_path: /usr/share/nginx/html
+  volume_claim_template:
+    metadata:
+      name: www-data
+    spec:
+      access_modes:
+        - ReadWriteOnce
+      storage_class_name: "standard"
+      resources:
+        requests:
+          storage: 1Gi
