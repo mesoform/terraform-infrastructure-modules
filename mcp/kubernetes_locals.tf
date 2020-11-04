@@ -84,6 +84,11 @@ locals {
     if fileexists(kube_file)
   }
 
+  k8s_stateful_set = { for app, kube_file in var.k8s_stateful_set_yml :
+    app => {stateful_set : yamldecode(file(kube_file)) }
+    if fileexists(kube_file)
+  }
+
   k8s_persistent_volume = { for app, kube_file in var.k8s_persistent_volume_yml :
     app => { persistent_volume : yamldecode(file(kube_file)) }
     if fileexists(kube_file)

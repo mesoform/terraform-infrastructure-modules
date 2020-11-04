@@ -94,3 +94,11 @@ variable k8s_persistent_volume_claim_yml {
     "test_app_1" = "../resources/k8s_pod_persistent_volume_claim.yml"
   }
 }
+
+variable k8s_stateful_set_yml {
+  description = "path to YAML file containing configuration for stateful_set"
+  type        = map
+  default = {
+    "test_app_1" = "../resources/k8s_stateful_set.yml"
+  }
+}
