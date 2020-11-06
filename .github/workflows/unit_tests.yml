@@ -12,7 +12,7 @@ jobs:
   unit-tests:
     name: 'Unit Tests'
     runs-on: ubuntu-latest
-    if: startswith(github.head_ref, 'feat') || startswith(github.head_ref, 'bug') || startswith(github.head_ref, 'patch')
+    if: startswith(github.head_ref, 'feat/') || startswith(github.head_ref, 'bug/') || startswith(github.head_ref, 'patch/')
     env:
       working-directory: ./tests/mcp
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
