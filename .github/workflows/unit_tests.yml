@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startswith(github.head_ref, 'feat/') || startswith(github.head_ref, 'bug/') || startswith(github.head_ref, 'patch/')
     env:
-      working-directory: ./tests/mcp
+      working-directory: ./tests
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -42,6 +42,7 @@ jobs:
     # Run unit tests in MCP module
     - name: Run MCP unit tests
       run: |
+        cd mcp
         MESSAGE="PASSED: All unit tests passed"
         for dir in $(find $(pwd) \( -not -path "$(pwd)/module_import/*" \) -and \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
           echo "Directory: ${dir}"
