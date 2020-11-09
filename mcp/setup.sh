@@ -7,11 +7,17 @@ entry(){
   echo ""
   echo "Select Option: "
 
-  select choice in "setup" "get" "destroy" "help" "exit"; do
+  select choice in "setup" "deploy" "get" "destroy" "help" "exit"; do
     case $choice in 
       setup )
-        installDependencies
+        echo ""
+        echo "Starting setup ..."
+        echo ""
         runSetup
+        ;;
+      deploy )
+        installDependencies
+        runDeploy
         ;;
       get )
         installDependencies
@@ -111,7 +117,135 @@ installDarwinDependencies(){
     fi
 }
 
-runSetup() {
+runSetup(){
+  echo "terraform{" > main.tf
+  echo "Where would you like to deploy terraform to?"
+  select choice in "gcs" "s3" "http" "kubernetes" "local"; do
+    case $choice in
+      gcs )
+        gcsBackend
+        ;;
+      s3 )
+        s3Backend
+        ;;
+      http )
+        httpBackend
+        ;;
+      kubernetes )
+        kubernetesBackend
+        ;;
+      local) ;;
+      *);;
+    esac
+    break
+  done
+  echo "}" >> main.tf
+  {
+    echo "module mcp{"
+    echo "  source = \"github.com/mesoform/terraform-infrastructure-modules//mcp\""
+  } >> main.tf
+  setVars
+  echo "}" >> main.tf
+
+  cat main.tf
+  echo ""
+  read -r -p "Are you happy with this configuration? [y]es or [n]o: " accept
+    case $accept in
+      y )
+        echo ""
+        echo "Setup Complete"
+        echo ""
+        entry
+        ;;
+      n)
+        echo ""
+        echo "Configuration rejected"
+        echo ""
+        read -r -p "Restart setup? [y]es or [n]o: " restart
+          case $restart in
+          y )
+            echo ""
+            echo "Restarting setup ..."
+            echo ""
+            runSetup
+            ;;
+          *)
+            echo ""
+            echo "Deleting main.tf..."
+            echo ""
+            rm main.tf
+            entry
+            ;;
+          esac
+        ;;
+      *)
+    esac
+  entry
+
+}
+
+gcsBackend(){
+  echo "  backend \"gcs\"{" >> main.tf
+  read -r -p "Enter bucket name: " bucket
+  echo "    bucket = \"${bucket}\"" >> main.tf
+  read -r -p "Enter folder: " folder
+  echo "    folder = \"${folder}\""  >> main.tf
+  echo "  }" >> main.tf
+}
+
+s3Backend(){
+  echo "  backend \"gcs\"{" >> main.tf
+  read -r -p "Enter bucket name: " bucket
+  echo "    bucket = \"${bucket}\"" >> main.tf
+  read -r -p "Enter key: " key
+  echo "    key = \"${key}\""  >> main.tf
+  read -r -p "Enter region: " region
+  echo "    folder = \"${region}\""  >> main.tf
+  echo "  }" >> main.tf
+}
+
+httpBackend(){
+  echo "  backend \"gcs\"{" >> main.tf
+  read -r -p "Enter address: " address
+  echo "    address = \"${address}\"" >> main.tf
+  read -r -p "Enter lock address: " lock_address
+  echo "    lock_address = \"${lock_address}\""  >> main.tf
+  read -r -p "Enter unlock address: " unlock_address
+  echo "    unlock_address = \"${unlock_address}\""  >> main.tf
+  echo "  }" >> main.tf
+}
+
+kubernetesBackend(){
+  echo "  backend \"gcs\"{" >> main.tf
+  read -r -p "Enter secret suffix: " secret_suffix
+  echo "    secret_suffix = \"${secret_suffix}\"" >> main.tf
+  read -r -p "Load config file? (true or false): " config
+  echo "    load_config_file = ${config}"  >> main.tf
+  echo "  }" >> main.tf
+}
+
+setVars(){
+  read -r -p "Enter path to directory of configuration files: " path
+  {
+    echo "  user_project_config_yml = \"${path}/user_project_config.yml\""
+    echo "  gcp_ae_yml = \"${path}/gcp_ae.yml\""
+    echo "  gcp_cloudrun_yml = \"${path}/gcp_cloudrun.yml\""
+    echo "  k8s_deployment_yml = \"${path}/k8s_deployment.yml\""
+    echo "  k8s_service_yml = \"${path}/k8s_service.yml\""
+    echo "  k8s_config_map_yml = \"${path}/k8s_config_map.yml\""
+    echo "  k8s_secret_files_yml = \"${path}/k8s_secret_files.yml\""
+    echo "  k8s_pod_yml = \"${path}/k8s_pod.yml\""
+    echo "  k8s_ingress_yml = \"${path}/k8s_ingress.yml\""
+    echo "  k8s_service_account_yml = \"${path}/k8s_service_account.yml\""
+    echo "  k8s_job_yml = \"${path}/k8s_job.yml\""
+    echo "  k8s_cron_job_yml = \"${path}/k8s_cron_job.yml\""
+    echo "  k8s_pod_autoscaler_yml = \"${path}/k8s_pod_autoscaler.yml\""
+    echo "  k8s_stateful_set_yml = \"${path}/k8s_stateful_set.yml\""
+    echo "  k8s_persistent_volume_yml = \"${path}/k8s_persistent_volume.yml\""
+    echo "  k8s_persistent_volume_claim_yml = \"${path}/k8s_persistent_volume_claim.yml\""
+  } >> main.tf
+}
+runDeploy() {
   echo ""
   echo "Initialising terraform ..."
   echo ""
@@ -119,54 +253,16 @@ runSetup() {
   echo ""
   echo "Creating Plan ..."
   echo ""
-  terraform plan -var-file="./settings.tfvars" -out="plan.tfplan"
-  if [ -e plan.tfplan ] 
-  then 
-    read -r -p "Do you wish to apply this plan? (Only 'yes' accepted): " accept
-    case $accept in 
-      yes ) 
-        echo ""
-        echo "Applying Plan..."
-        echo ""
-        terraform apply plan.tfplan 
-        rm plan.tfplan
-        ;;
-      *)
-        echo ""
-        echo "Apply Aborted"
-        echo ""
-        ;;
-    esac
-  else
-    echo "Terraform plan failed" | exit 1
-  fi
+  terraform apply
   entry
 }
 
 runDestroy() {
+
   echo ""
   echo "Creating plan for destroying resources..."
   echo ""
-  terraform plan -destroy -out="destroy.tfplan"
-  if [ -e destou.tfplan ]
-  then
-    read -r -p "Do you wish to destroy resources as shown? (Only 'yes' accepted): " accept
-    case $accept in
-      yes )
-        echo ""
-        echo "Destroying resources..."
-        echo ""
-        terraform destroy -auto-approve
-        ;;
-      *)
-        echo ""
-        echo "Destroy Aborted"
-        echo ""
-        ;;
-    esac
-  else
-    echo "Destroy plan failed" | exit 1
-  fi
+  terraform destroy
   entry
 }
 
@@ -185,10 +281,12 @@ getState(){
 OPTION=$1
 case $OPTION in 
   "setup" | "-setup")
-    installDependencies
     runSetup
     ;;
-  
+  "deploy" | "-deploy")
+    installDependencies
+    runDeploy
+    ;;
   "help" | "-help")
     help
     ;;
