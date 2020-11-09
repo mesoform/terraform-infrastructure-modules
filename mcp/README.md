@@ -1,28 +1,15 @@
 # Multi-Cloud Platform Module
-## Contents
-<<<<<<< Updated upstream
+
 * [Information](#Information)  
 * [Structure](#Structure)     
 * [MMCF](#MMCF)  
 * [project.yml](#projectyml)      
-* [Google Cloud Platform Adapters](#google-cloud-platform)
-    * [App Engine](docs/GCP_APP_ENGINE.md)
-    * [Cloud Run](docs/GCP_CLOUDRUN.md)
+* [Google Cloud Platform Adapters](#google-cloud-platform)  
+    * [App Engine](docs/GCP_APP_ENGINE.md)  
+    * [Cloud Run](docs/GCP_CLOUDRUN.md)  
 * [Kubernetes adapter](docs/KUBERNETES.md)  
 * [Contributing](#Contributing)  
-* [License](#License)
-=======
-[Information](#Information)   
-[Setup](#Setup)   
-[Structure](#Structure)     
-[MMCF](#MMCF)  
-[project.yml](#projectyml)      
-[gcp_ae.yml](#gcp_aeyml)    
-[gcp_cloudrun.yml](#gcp_cloudrunyml)  
-[Kubernetes adapter](docs/KUBERNETES.md)  
-[Contributing](#Contributing)  
-[License](#License)
->>>>>>> Stashed changes
+* [License](#License)  
 
 ## Information
 Converter module for transforming MMCF (Mesoform Multi-Cloud Configuration Format) YAML into values
