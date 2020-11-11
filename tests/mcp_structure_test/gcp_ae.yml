@@ -1,0 +1,32 @@
+create_google_project: true
+project_id: mesoform-new-app-3
+organization_name: mesoform.com
+billing_account: "01E253-806DFE-7C3FDB"
+location_id: "europe-west2-locations"
+project_labels: &google_project_labels
+  type: frontend
+
+
+components:
+  common:
+    entrypoint: java -cp "WEB-INF/lib/*:WEB-INF/classes/." io.ktor.server.jetty.EngineMain
+    runtime: java11
+    env: flex
+    env_variables:
+      GCP_ENV: true
+      GCP_PROJECT_ID: mesoform-new-app-1
+    system_properties:
+      java.util.logging.config.file: WEB-INF/logging.properties
+  specs:
+    experiences-search-sync:
+      env: standard
+    experiences-search:
+      env: standard
+    experiences-sidecar:
+      env: standard
+    default:
+      manual_scaling:
+        instances: 1
+      root_dir: app_1
+      runtime: java8
+      build_dir: build

@@ -1,0 +1,5 @@
+mcf_version: 1
+name: &project_name mesoform-new-app-3
+version: 1
+labels: &project_labels
+  billing: central
