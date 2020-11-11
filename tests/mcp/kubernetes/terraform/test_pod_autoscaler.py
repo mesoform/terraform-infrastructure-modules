@@ -21,7 +21,9 @@ def test_pod_autoscaler(query):
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail, expected data = {}, received data = {}".format(expected_data, query)}
+        return {"result" : "fail",
+                "expected" : "{}".format(expected_data),
+                "received" : "{}".format(query)}
 
 
 if __name__ == '__main__':

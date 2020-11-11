@@ -5,7 +5,7 @@ components:
   specs:
     default:
       name: "default"
-      image_uri: gcr.io/cloud-run-test-1409-1/image
+      image_uri: gcr.io/google-containers/nginx
       metadata:
         annotations:
           "run.googleapis.com/client-name": "terraform"
@@ -29,3 +29,25 @@ components:
         -
           percent: 25
           revision_name: 'old'
+
+    empty:
+      name: "default"
+      image_uri: gcr.io/google-containers/nginx
+      metadata:
+        annotations:
+          "run.googleapis.com/client-name": "terraform"
+      auth: true
+      iam:
+        replace_policy: false
+        bindings:
+          'viewer':
+            members:
+              - 'user:user@gmail.com'
+              - 'group:user@gmail.com'
+          'admin':
+            members:
+              - 'domain:domain.com'
+        add_member:
+          role: 'admin'
+          member: 'user:user@gmail.com'
+      traffic:
