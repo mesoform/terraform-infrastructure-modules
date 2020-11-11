@@ -159,4 +159,81 @@ terraform plan -var-file resources/single_manifest.tfvars -out my.plan 2>&1 > /d
 
 
 ## Running the tests from a CI/CD pipeline
+### Github Actions
+Tests are automated in github actions using workflows. For each job in a workflow, 
+there are different steps which validate unit tests for each module.
+Unit tests are run by applying the main.tf files described [above](#the-test-module).
 
+Example MCP unit tests
+```yamlex
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  unit-tests:
+    name: 'Unit Tests'
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./tests/mcp
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{env.working-directory}}
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    # Install Python
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+
+    # Install the latest version of Terraform CLI
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_wrapper: false
+
+    # Run unit tests in MCP module
+    - name: Run MCP unit tests
+      run: |
+        MESSAGE="PASSED: All unit tests passed"
+        for dir in $(find $(pwd) \( -not -path "$(pwd)/module_import/*" \) -and \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
+          echo "Directory: ${dir}"
+          cd $dir
+          terraform init
+          terraform apply -auto-approve
+          for key in $(terraform output -json | jq -r 'keys[]'); do
+            output=$(terraform output -json $key)
+            result=$(echo $output | jq -r '.result')
+            echo ${result^^}
+            if [ "$result" != "pass" ]
+            then
+              MESSAGE="FAIL: There are failed unit tests"
+              echo "    Expected data: $(echo $output | jq -r '.expected')"
+              echo "    Received data: $(echo $output | jq -r '.received')"
+              EXIT_CODE=3
+            fi
+          done
+        done
+        echo $MESSAGE
+        exit $EXIT_CODE
+```
+
+Workflows are successfull when all steps are completed without any exit code other that 0.
+Non-zero exit codes indicate a fail, due to either an error in the workflow file or failed unit tests
+
+| Exit code | Description |
+|:----:|:----|
+| `0` | Success |
+| `1` | General Error | 
+| `2` | Misuse of shell builtins (e.g. missing keyword, permission problem etc )|
+| `3` | Unit test failed  (query and expected data don't match) |  
