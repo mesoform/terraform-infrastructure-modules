@@ -143,9 +143,8 @@ runSetup(){
   {
     echo "module mcp{"
     echo "  source = \"github.com/mesoform/terraform-infrastructure-modules//mcp\""
+    echo "}"
   } >> main.tf
-  setVars
-  echo "}" >> main.tf
 
   cat main.tf
   echo ""
@@ -224,27 +223,6 @@ kubernetesBackend(){
   echo "  }" >> main.tf
 }
 
-setVars(){
-  read -r -p "Enter path to directory of configuration files: " path
-  {
-    echo "  user_project_config_yml = \"${path}/user_project_config.yml\""
-    echo "  gcp_ae_yml = \"${path}/gcp_ae.yml\""
-    echo "  gcp_cloudrun_yml = \"${path}/gcp_cloudrun.yml\""
-    echo "  k8s_deployment_yml = \"${path}/k8s_deployment.yml\""
-    echo "  k8s_service_yml = \"${path}/k8s_service.yml\""
-    echo "  k8s_config_map_yml = \"${path}/k8s_config_map.yml\""
-    echo "  k8s_secret_files_yml = \"${path}/k8s_secret_files.yml\""
-    echo "  k8s_pod_yml = \"${path}/k8s_pod.yml\""
-    echo "  k8s_ingress_yml = \"${path}/k8s_ingress.yml\""
-    echo "  k8s_service_account_yml = \"${path}/k8s_service_account.yml\""
-    echo "  k8s_job_yml = \"${path}/k8s_job.yml\""
-    echo "  k8s_cron_job_yml = \"${path}/k8s_cron_job.yml\""
-    echo "  k8s_pod_autoscaler_yml = \"${path}/k8s_pod_autoscaler.yml\""
-    echo "  k8s_stateful_set_yml = \"${path}/k8s_stateful_set.yml\""
-    echo "  k8s_persistent_volume_yml = \"${path}/k8s_persistent_volume.yml\""
-    echo "  k8s_persistent_volume_claim_yml = \"${path}/k8s_persistent_volume_claim.yml\""
-  } >> main.tf
-}
 runDeploy() {
   echo ""
   echo "Initialising terraform ..."

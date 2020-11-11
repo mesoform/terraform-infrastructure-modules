@@ -31,8 +31,58 @@ function runSetup() {
         5{
             break
         }
+        Default {
+            break
+        }
     }
-    setvars
+    "}" >> main.tf
+    "module mcp{" >> main.tf
+    "  source = ""github.com/mesoform/terraform-infrastructure-modules//mcp""" >> main.tf
+    "}" >> main.tf
+
+    cat main.tf
+    $accept = Read-Host -Prompt "Are you happy with this configuration? [y]es or [n]o"
+    switch ($accept)
+    {
+        y {
+            Write-Host ""
+            Write-Host "Setup Complete"
+            Write-Host ""
+            break
+        }
+        n {
+            Write-Host ""
+            Write-Host "Configuration rejected"
+            Write-Host ""
+            $restart = Read-Host -Prompt "Restart setup? [y]es or [n]o: "
+            switch ($restart)
+            {
+                y {
+                    Write-Host ""
+                    Write-Host "Restarting setup ... "
+                    Write-Host ""
+                    runSetup
+                    break
+                }
+                Default {
+                    Write-Host ""
+                    Write-Host "Deleting main.tf ..."
+                    Write-Host ""
+                    rm main.tf
+                    entry
+                    break
+                }
+            }
+            break
+        }
+        Default {
+            Write-Host ""
+            Write-Host "Invalid choice, configuration rejected"
+            Write-Host ""
+            break
+        }
+    }
+    entry
 }
 
 function gcsBackend() {
@@ -72,25 +122,6 @@ function kubernetesBackend() {
     "  }" >> main.tf
 }
 
-function setVars(){
-    $path = Read-Host -Prompt "Enter path to directory of configuration files"
-    "  user_project_config_yml = ""${path}/user_project_config.yml""" >> main.tf
-    "  gcp_ae_yml = ""${path}/gcp_ae.yml""" >> main.tf
-    "  gcp_cloudrun_yml = ""${path}/gcp_cloudrun.yml""" >> main.tf
-    "  k8s_deployment_yml = ""${path}/k8s_deployment.yml""" >> main.tf
-    "  k8s_service_yml = ""${path}/k8s_service.yml""" >> main.tf
-    "  k8s_config_map_yml = ""${path}/k8s_config_map.yml""" >> main.tf
-    "  k8s_secret_files_yml = ""${path}/k8s_secret_files.yml""" >> main.tf
-    "  k8s_pod_yml = ""${path}/k8s_pod.yml""" >> main.tf
-    "  k8s_ingress_yml = ""${path}/k8s_ingress.yml""" >> main.tf
-    "  k8s_service_account_yml = ""${path}/k8s_service_account.yml""" >> main.tf
-    "  k8s_job_yml = ""${path}/k8s_job.yml""" >> main.tf
-    "  k8s_cron_job_yml = ""${path}/k8s_cron_job.yml""" >> main.tf
-    "  k8s_pod_autoscaler_yml = ""${path}/k8s_pod_autoscaler.yml""" >> main.tf
-    "  k8s_stateful_set_yml = ""${path}/k8s_stateful_set.yml""" >> main.tf
-    "  k8s_persistent_volume_yml = ""${path}/k8s_persistent_volume.yml""" >> main.tf
-    "  k8s_persistent_volume_claim_yml = ""${path}/k8s_persistent_volume_claim.yml""" >> main.tf
-}
 
 function runDeploy() {
     Write-Host ""
@@ -145,7 +176,7 @@ function entry() {
             getState
             break
         }
-        4{
+        5{
             exit
         }
         default{
@@ -153,9 +184,9 @@ function entry() {
             Write-Host "Invalid Inupt"
             Write-Host ""
             entry
+            break
         }
     }
-    entry
 }
 
 entry
