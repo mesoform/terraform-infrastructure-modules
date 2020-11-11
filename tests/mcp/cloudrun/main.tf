@@ -36,9 +36,8 @@ output test_traffic_config {
   value = data.external.test_traffic_with_revision.result
 }
 
-//tests traffic block with no settings, run `terraform apply -var 'gcp_cloudrun_yml=resrouces/empty_traffic.yml'
 data external test_traffic_empty{
-  query = local.cloudrun_traffic["default"] == [] ? {} : {"format" = "not empty list"}
+  query = local.cloudrun_traffic["empty"] == [] ? {} : {"format" = "not empty list"}
   program = ["python", "${path.module}/test_traffic_empty.py"]
 }
 

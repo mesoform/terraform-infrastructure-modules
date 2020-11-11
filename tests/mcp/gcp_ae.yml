@@ -50,7 +50,7 @@ components:
           name: my-volume
           size_gb: 10
           volume_type: tmpfs
-    default:
+    app2:
       name: default
       runtime: java8
       src_path: app2

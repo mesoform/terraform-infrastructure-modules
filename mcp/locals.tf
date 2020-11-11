@@ -14,7 +14,7 @@ locals {
   user_project_config_yml = file(var.user_project_config_yml)
   project                 = yamldecode(local.user_project_config_yml)
   user_gae_config_yml     = fileexists(var.gcp_ae_yml)? file(var.gcp_ae_yml) : null
-  gae                     = local.user_gae_config_yml == null ? {} : yamldecode(local.user_gae_config_yml)
+  gae                     = try(yamldecode(local.user_gae_config_yml), {})
   gae_components          = lookup(local.gae, "components", {})
   gae_components_specs    = lookup(local.gae_components, "specs", {})
 
