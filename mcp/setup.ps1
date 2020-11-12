@@ -89,8 +89,8 @@ function gcsBackend() {
     "  backend ""gcs""{" >> main.tf
     $bucket = Read-Host -Prompt "Enter bucket name"
     "    bucket = ""$bucket""" >> main.tf
-    $folder = Read-Host -Prompt "Enter folder name"
-    "    folder = ""$folder""" >> main.tf
+    $prefix = Read-Host -Prompt "Enter gcs prfix"
+    "    prefix = ""$prefix""" >> main.tf
     "  }" >> main.tf
 }
 function s3Backend() {

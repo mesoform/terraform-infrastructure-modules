@@ -187,8 +187,8 @@ gcsBackend(){
   echo "  backend \"gcs\"{" >> main.tf
   read -r -p "Enter bucket name: " bucket
   echo "    bucket = \"${bucket}\"" >> main.tf
-  read -r -p "Enter folder: " folder
-  echo "    folder = \"${folder}\""  >> main.tf
+  read -r -p "Enter gcs prefix: " prefix
+  echo "    prefix = \"${prefix}\""  >> main.tf
   echo "  }" >> main.tf
 }
 
