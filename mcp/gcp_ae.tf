@@ -169,7 +169,7 @@ resource "google_app_engine_flexible_app_version" "self" {
 
         content {
           name = files.key
-          source_url = "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.value}"
+          source_url = "https://storage.googleapis.com/${google_storage_bucket.self[0].name}/${files.value}"
           sha1_sum = files.value
         }
       }
@@ -389,7 +389,7 @@ resource "google_app_engine_standard_app_version" "self" {
 
         content {
           name = files.key
-          source_url = "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.value}"
+          source_url = "https://storage.googleapis.com/${google_storage_bucket.self[0].name}/${files.value}"
           sha1_sum = files.value
         }
       }
@@ -448,8 +448,8 @@ resource "google_app_engine_standard_app_version" "self" {
     for_each = lookup(each.value, "libraries", null) == null ? {} : {libraries: each.value.libraries}
 
     content {
-      name = lookup(libraries.value, "shell", null)
-      version = lookup(libraries.value, "shell", null)
+      name = lookup(libraries.value, "name", null)
+      version = lookup(libraries.value, "version", null)
     }
   }
 
