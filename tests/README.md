@@ -228,7 +228,7 @@ jobs:
         exit $EXIT_CODE
 ```
 
-Workflows are successfull when all steps are completed without any exit code other that 0.
+Workflows are successful when all steps are completed without any exit code other than 0.
 Non-zero exit codes indicate a fail, due to either an error in the workflow file or failed unit tests
 
 | Exit code | Description |

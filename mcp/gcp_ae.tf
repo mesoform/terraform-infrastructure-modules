@@ -443,16 +443,6 @@ resource "google_app_engine_standard_app_version" "self" {
     }
   }
 
-  //noinspection HILUnresolvedReference
-  dynamic "libraries" {
-    for_each = lookup(each.value, "libraries", null) == null ? {} : {libraries: each.value.libraries}
-
-    content {
-      name = lookup(libraries.value, "name", null)
-      version = lookup(libraries.value, "version", null)
-    }
-  }
-
   //noinspection HILUnresolvedReference,ConflictingProperties
   dynamic "basic_scaling" {
     # Only one of automatic_scaling, basic_scaling or manual_scaling are allowed so check for the other here
