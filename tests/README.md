@@ -159,7 +159,7 @@ terraform plan -var-file resources/single_manifest.tfvars -out my.plan 2>&1 > /d
 
 
 ## Running the tests from a CI/CD pipeline
-### Github Actions
+### Github Actions  
 Tests are automated in github actions using workflows. For each job in a workflow, 
 there are different steps which validate unit tests for each module.
 Unit tests are run by applying the main.tf files described [above](#the-test-module).
