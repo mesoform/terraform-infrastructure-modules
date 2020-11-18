@@ -966,7 +966,7 @@ resource "kubernetes_stateful_set" "self" {
     }
     //noinspection HILUnresolvedReference
     dynamic "volume_claim_template" {
-      for_each = lookup(each.value.stateful_set.spec, "volume_claim_template", {}) == null ? {} : { volume_claim_template : each.value.stateful_set.spec.volume_claim_template }
+      for_each = lookup(each.value.stateful_set.spec, "volume_claim_template", null) == null ? {} : { volume_claim_template : each.value.stateful_set.spec.volume_claim_template }
       content {
         metadata {
           annotations   = lookup(volume_claim_template.value.metadata, "annotations", null)
