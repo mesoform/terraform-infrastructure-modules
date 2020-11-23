@@ -1,0 +1,10 @@
+location_id: "europe-west1"
+components:
+  specs:
+    default:
+      name: "default"
+      image_uri: *image_uri
+      metadata:
+        annotations:
+          "run.googleapis.com/client-name": "terraform"
+        auth: false

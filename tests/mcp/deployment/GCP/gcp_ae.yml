@@ -1,0 +1,13 @@
+create_google_project: false
+location: "europe-west"
+components:
+  common:
+    entrypoint: python main.py
+    runtime: python38
+    env: standard
+  specs:
+    default:
+      name: test-app
+      src_path: app/helloworld
+      skip_files: DOCKERFILE
+      root_dir: app
