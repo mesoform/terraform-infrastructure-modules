@@ -9,7 +9,7 @@ jobs:
   unit-tests:
     name: 'Deployment tests'
     runs-on: ubuntu-latest
-    #    if: contains(github.head_ref, 'mcp') && (startswith(github.head_ref, 'feat/') || startswith(github.head_ref, 'bug/') || startswith(github.head_ref, 'patch/'))
+    if: contains(github.head_ref, 'mcp') && (startswith(github.head_ref, 'feat/') || startswith(github.head_ref, 'bug/') || startswith(github.head_ref, 'patch/'))
     env:
       working-directory: ./tests/mcp/deployment
 #      GCP_PROJECT_ID: ${{secrets.GCP_PROJECT}}
@@ -47,6 +47,7 @@ jobs:
           cd GCP/app/build/helloworld
           gcloud services enable cloudbuild.googleapis.com
           gcloud services enable cloudresourcemanager.googleapis.com
+          gcloud services enable appengine.googleapis.com
           gcloud builds submit --tag gcr.io/${{env.GCP_PROJECT_ID}}/helloworld
           gsutil ls -b gs://${{env.GCP_PROJECT_ID}}-bucket || gsutil mb gs://${{env.GCP_PROJECT_ID}}-bucket
           cd ../../..
@@ -74,6 +75,7 @@ jobs:
           } > main.tf
           cat main.tf
           terraform init
+          terraform refresh
           terraform plan -out="./plan.tfplan"
           terraform apply plan.tfplan
 
@@ -86,12 +88,41 @@ jobs:
 
       - name: deploy k8s
         run: |
-          cd k8s/terraform
+          cd k8s
+          mkdir terraform
+          cd terraform
+          touch main.tf
+          {
+            echo "terraform {"
+            echo "  backend \"gcs\"{"
+            echo "    bucket = \"${{env.GCP_PROJECT_ID}}-bucket\""
+            echo "    prefix = \"tf-state-files\""
+            echo "  }"
+            echo "}"
+            echo "module gcp {"
+            echo "  source = \"/../../../mcp_structure_test/mcp\""
+            echo "}"
+          } > main.tf
+          cat main.tf
+          terraform init
+          terraform refresh
+          terraform plan -out="./plan.tfplan"
+          terraform apply plan.tfplan
           ls
 
       - name: error cleanup
         if: ${{ failure() }}
-        run: echo "failed"
+        run: |
+          if [ -d "GCP/terraform" ]; then
+            cd GCP/terraform
+            terraform destroy -auto-approve
+          fi
+          if [ -d "GCP/terraform" ]; then
+            cd ${{env.working_directory}}
+            cd k8s/terraform
+            terraform detsroy -auto-apptove
+          fi
+
 
 
       #TODO: Deploy AWS
