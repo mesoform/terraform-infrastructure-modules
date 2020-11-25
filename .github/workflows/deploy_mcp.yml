@@ -78,13 +78,21 @@ jobs:
           terraform init
           terraform refresh
           terraform plan -out="./plan.tfplan"
-          terraform apply plan.tfplan
+      #          terraform apply plan.tfplan
 
       - name: setup kubectl
         run: |
+          CREATE=false
           gcloud components install kubectl
           gcloud services enable container.googleapis.com
-          gcloud container clusters create mcpdeploytest-cluster --num-nodes=1
+          response=$(gcloud container clusters describe mcpdeploytest-cluster || echo "ClusterNotFound")
+          if [[ $response = "ClusterNotFound" ]]
+          then
+            echo "Creating cluster"
+            gcloud container clusters create mcpdeploytest-cluster --num-nodes=1
+          else
+            echo "Cluster exists"
+          fi
           gcloud container clusters get-credentials mcpdeploytest-cluster
 
       - name: deploy k8s
@@ -109,7 +117,10 @@ jobs:
           terraform refresh
           terraform plan -out="./plan.tfplan"
           terraform apply plan.tfplan
-          ls
+
+#      - name: delete project
+#        run: |
+#          gcloud projects delete ${{env.GCP_PROJECT_ID}}
 
       - name: error cleanup
         if: ${{ failure() }}
