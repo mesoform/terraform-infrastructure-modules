@@ -4,17 +4,15 @@ on:
   push:
     branches:
       - master
-    types: [labeled]
 
 jobs:
   unit-tests:
     name: 'Deployment tests'
     runs-on: ubuntu-latest
-    if: contains(github.head_ref, 'mcp') && (${{ github.event.label.name == 'feat' }} || ${{ github.event.label.name == 'bug' }}|| ${{ github.event.label.name == 'patch' }} )
+    if: contains(github.head_ref, 'mcp')
     env:
       working-directory: ./tests/mcp/deployment
-#      GCP_PROJECT_ID: ${{secrets.GCP_PROJECT}}
-      GCP_PROJECT_ID: "mcpdeploytest-$(date '+%d%m%Y-%H%M')"
+      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}"
 
     defaults:
       run:
@@ -42,8 +40,10 @@ jobs:
           project_id: ${{env.GCP_PROJECT_ID}}
           service_account_key: ${{secrets.GCP_SA_KEY}}
           export_default_credentials: true
+
       - name: Setup GCP
         run: |
+          gcloud projects create ${{env.GCP_PROJECT_ID}}
           gcloud config set compute/zone europe-west2
           cd GCP/app/build/helloworld
           gcloud services enable cloudbuild.googleapis.com
@@ -57,7 +57,7 @@ jobs:
           echo 'image_uri: gcr.io/${{env.GCP_PROJECT_ID}}/helloworld' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
           echo 'project_id: ${{env.GCP_PROJECT_ID}}' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
 
-      - name: Deploy GCP modules
+      - name: Deploy and destroy GCP modules
         run: |
           cd GCP
           mkdir terraform
@@ -79,6 +79,8 @@ jobs:
           terraform refresh
           terraform plan -out="./plan.tfplan"
       #          terraform apply plan.tfplan
+      #          terraform plan -destroy -out="./destroy.tfplan"
+      #          terraform apply destroy.tfplan
 
       - name: setup kubectl
         run: |
@@ -108,8 +110,8 @@ jobs:
             echo "    prefix = \"tf-state-files\""
             echo "  }"
             echo "}"
-            echo "module gcp {"
-            echo "  source = \"/../../../mcp_structure_test/mcp\""
+            echo "module k8s {"
+            echo "  source = \"../../../../../mcp\""
             echo "}"
           } > main.tf
           cat main.tf
@@ -117,10 +119,11 @@ jobs:
           terraform refresh
           terraform plan -out="./plan.tfplan"
           terraform apply plan.tfplan
+          terraform plan -destroy -out="./destroy.tfplan"
+          terraform apply destroy.tfplan
 
-#      - name: delete project
-#        run: |
-#          gcloud projects delete ${{env.GCP_PROJECT_ID}}
+      - name: delete project
+        run: gcloud projects delete ${{env.GCP_PROJECT_ID}}
 
       - name: error cleanup
         if: ${{ failure() }}
@@ -129,10 +132,10 @@ jobs:
             cd GCP/terraform
             terraform destroy -auto-approve
           fi
-          if [ -d "GCP/terraform" ]; then
+          if [ -d "k8s/terraform" ]; then
             cd ${{env.working_directory}}
             cd k8s/terraform
-            terraform detsroy -auto-apptove
+            terraform detsroy -auto-approve
           fi
 
 

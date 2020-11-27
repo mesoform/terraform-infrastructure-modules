@@ -62,11 +62,11 @@ components:
         data:
           'test': 'test'
         data_file:
-          - ../app_2/resources/mosquitto.conf
+          - ../resources/mosquitto.conf
         binary_data:
           bar: L3Jvb3QvMTAw
         binary_file:
-          - ../app_2/resources/binary.bin
+          - ../resources/binary.bin
       secret:
         metadata:
           annotations:
@@ -81,7 +81,7 @@ components:
           login: login
           password: password
         data_file:
-          - ../app_2/resources/secret.file
+          - ../resources/secret.file
       service:
         metadata:
           name: "mosquitto"
@@ -101,7 +101,7 @@ components:
               target_port: 8080
           type: LoadBalancer
     app_2:
-      k8s_pod_autoscaler:
+      pod_autoscaler:
         metadata:
           name: test
         spec:
@@ -126,39 +126,13 @@ components:
           name: "nginx-example"
           namespace:
           labels:
-            app: "TestApp"
+            app: "nginx"
         spec:
-          service_account_name:
-            pod-app-service-account
-          secret: pod-app-service-account-token-brds5
-          dns_policy: None
-          dns_config:
-            nameservers:
-              - 1.1.1.1
-              - 8.8.8.8
-              - 9.9.9.9
-            searches:
-              - example.com
-            option:
-              - name: ndots
-                value: 1
-              - name: use-vc
-          env:
-            name: environment
-            value: test
           container:
             - name: "nginx-example"
               image: "nginx:1.7.8"
               port:
-                - container_port: 8080
-              liveness_probe:
-                http_get:
-                  port: 80
-                  http_header:
-                    name: X-Custom-Header
-                    value: Awesome
-                initial_delay_seconds: 3
-                period_seconds: 3
+                - container_port: 80
       service_account:
         metadata:
           name: "pod-app-service-account"
@@ -169,6 +143,99 @@ components:
           - name: "pod-app-secret-file"
         automount_service_account_token:
           true
+    app_3:
+      ingress:
+        metadata:
+          name: "example-ingress"
+        spec:
+          backend:
+            service_name: "service"
+            service_port: 8080
+          rule:
+            host:
+            http:
+              paths:
+                - path: "/"
+                  backend:
+                    service_port: 8080
+                    service_name: "service"
+      stateful_set:
+        metadata:
+          name: "test-stateful-set"
+          labels:
+            app: "test"
+        spec:
+          selector:
+            match_labels:
+              app: "test"
+          template:
+            metadata:
+              name: "test-stateful-set"
+              labels:
+                app: "test"
+            spec:
+              env:
+                name: "test-stateful-set"
+                value: test
+              container:
+                - name: "test-stateful-set"
+                  image: "nginx:1.7.8"
+                  port:
+                    - container_port: 8080
+                  liveness_probe:
+                    http_get:
+                      port: 80
+                      http_header:
+                        name: X-Custom-Header
+                        value: Awesome
+                    initial_delay_seconds: 3
+                    period_seconds: 3
+    app_4:
+      k8s_persistent_volume_claim:
+        metadata:
+          name: perisistent-volume-claim
+        spec:
+          access_modes:
+            - "ReadWriteMany"
+          resources:
+            requests:
+              storage: "2Gi"
+          volume_name: "pv-test"
+      pod:
+        metadata:
+          name: "nginx-example-2"
+          namespace:
+          labels:
+            app: "nginx"
+        spec:
+          container:
+            - name: "nginx-example-2"
+              image: "nginx:1.7.8"
+              port:
+                - container_port: 80
+      cron_job:
+        metadata:
+          name: demo
+        spec:
+          concurrency_policy: Replace
+          failed_jobs_history_limit: 5
+          schedule: "1 0 * * *"
+          starting_deadline_seconds: 10
+          successful_jobs_history_limit: 10
+          job_template:
+            spec:
+              backoff_limit: 2
+              ttl_seconds_after_finished: 10
+              template:
+                spec:
+                  container:
+                    - name: hello
+                      image: busybox
+                      command:
+                        - "/bin/sh"
+                        - "-c"
+                        - "date; echo Hello from Kubernetes cluster"
+
     default:
       manual_scaling:
         instances: 1

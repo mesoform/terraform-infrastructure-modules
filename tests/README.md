@@ -160,6 +160,7 @@ terraform plan -var-file resources/single_manifest.tfvars -out my.plan 2>&1 > /d
 
 ## Running the tests from a CI/CD pipeline
 ### Github Actions  
+#### Unit Tests 
 Tests are automated in github actions using workflows. For each job in a workflow, 
 there are different steps which validate unit tests for each module.
 Unit tests are run by applying the main.tf files described [above](#the-test-module).
@@ -237,3 +238,159 @@ Non-zero exit codes indicate a fail, due to either an error in the workflow file
 | `1` | General Error | 
 | `2` | Misuse of shell builtins (e.g. missing keyword, permission problem etc )|
 | `3` | Unit test failed  (query and expected data don't match) |  
+
+#### Deployment Tests
+A github workflow can be used to verify successful deployment of terraform modules. 
+The steps included are:
+1. Download terraform and any other services required (python, gcloud, aws, etc)
+2. Configure cloud services for deployment. This will usualy require a service account with permissions to create relevant resources
+3. Plan and apply terraform infrastructure
+4. Destroy infrastructure and delete cloud resources
+
+An example workflow file is:
+
+```
+name: 'Deployment Tests'
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  unit-tests:
+    name: 'Deployment tests'
+    runs-on: ubuntu-latest
+    if: contains(github.head_ref, 'mcp')
+    env:
+      working-directory: ./tests/mcp/deployment
+      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}"
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{env.working-directory}}
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      # Install the latest version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{env.GCP_PROJECT_ID}}
+          service_account_key: ${{secrets.GCP_SA_KEY}}
+          export_default_credentials: true
+
+      - name: Setup GCP
+        run: |
+          gcloud projects create ${{env.GCP_PROJECT_ID}}
+          gcloud config set compute/zone europe-west2
+          cd GCP/app/build/helloworld
+          gcloud services enable cloudbuild.googleapis.com
+          gcloud services enable cloudresourcemanager.googleapis.com
+          gcloud services enable appengine.googleapis.com
+          gcloud builds submit --tag gcr.io/${{env.GCP_PROJECT_ID}}/helloworld
+          gsutil ls -b gs://${{env.GCP_PROJECT_ID}}-bucket || gsutil mb gs://${{env.GCP_PROJECT_ID}}-bucket
+          cd ../../..
+          echo 'name: ${{env.GCP_PROJECT_ID}}-bucket' > project.yml
+          echo 'project_id: ${{env.GCP_PROJECT_ID}}' | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
+          echo 'image_uri: gcr.io/${{env.GCP_PROJECT_ID}}/helloworld' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
+          echo 'project_id: ${{env.GCP_PROJECT_ID}}' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
+
+      - name: Deploy and destroy GCP modules
+        run: |
+          cd GCP
+          mkdir terraform
+          cd terraform
+          touch main.tf
+          {
+            echo "terraform {"
+            echo "  backend \"gcs\"{"
+            echo "    bucket = \"${{env.GCP_PROJECT_ID}}-bucket\""
+            echo "    prefix = \"tf-state-files\""
+            echo "  }"
+            echo "}"
+            echo "module gcp {"
+            echo "  source = \"../../../../../mcp\""
+            echo "}"
+          } > main.tf
+          cat main.tf
+          terraform init
+          terraform refresh
+          terraform plan -out="./plan.tfplan"
+      #          terraform apply plan.tfplan
+      #          terraform plan -destroy -out="./destroy.tfplan"
+      #          terraform apply destroy.tfplan
+
+      - name: setup kubectl
+        run: |
+          CREATE=false
+          gcloud components install kubectl
+          gcloud services enable container.googleapis.com
+          response=$(gcloud container clusters describe mcpdeploytest-cluster || echo "ClusterNotFound")
+          if [[ $response = "ClusterNotFound" ]]
+          then
+            echo "Creating cluster"
+            gcloud container clusters create mcpdeploytest-cluster --num-nodes=1
+          else
+            echo "Cluster exists"
+          fi
+          gcloud container clusters get-credentials mcpdeploytest-cluster
+
+      - name: deploy k8s
+        run: |
+          cd k8s
+          mkdir terraform
+          cd terraform
+          touch main.tf
+          {
+            echo "terraform {"
+            echo "  backend \"gcs\"{"
+            echo "    bucket = \"${{env.GCP_PROJECT_ID}}-bucket\""
+            echo "    prefix = \"tf-state-files\""
+            echo "  }"
+            echo "}"
+            echo "module k8s {"
+            echo "  source = \"../../../../../mcp\""
+            echo "}"
+          } > main.tf
+          cat main.tf
+          terraform init
+          terraform refresh
+          terraform plan -out="./plan.tfplan"
+          terraform apply plan.tfplan
+          terraform plan -destroy -out="./destroy.tfplan"
+          terraform apply destroy.tfplan
+
+      - name: delete project
+        run: gcloud projects delete ${{env.GCP_PROJECT_ID}}
+
+      - name: error cleanup
+        if: ${{ failure() }}
+        run: |
+          if [ -d "GCP/terraform" ]; then
+            cd GCP/terraform
+            terraform destroy -auto-approve
+          fi
+          if [ -d "k8s/terraform" ]; then
+            cd ${{env.working_directory}}
+            cd k8s/terraform
+            terraform detsroy -auto-approve
+          fi
+
+
+
+      #TODO: Deploy AWS
+```

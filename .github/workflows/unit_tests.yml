@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+    types: [opened, synchonize, reopened, labeled]
   push:
     branches:
       - master
@@ -12,7 +13,7 @@ jobs:
   unit-tests:
     name: 'Unit Tests'
     runs-on: ubuntu-latest
-    if: startswith(github.head_ref, 'feat/') || startswith(github.head_ref, 'bug/') || startswith(github.head_ref, 'patch/')
+    if: ${{github.event.label.name == 'feature'}} || ${{github.event.label.name == 'bug'}} || ${{github.event.label.name == 'patch'}}
     env:
       working-directory: ./tests
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
