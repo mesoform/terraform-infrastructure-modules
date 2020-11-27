@@ -1,9 +1,4 @@
 locals {
-  k8s = {
-    for app, config in local.k8s_services :
-    app => merge(config, lookup(local.k8s_deployments, app, {}))
-  }
-    
   k8s_config_map = { for app, kube_file in var.k8s_config_map_yml :
     app => { config_map : yamldecode(file(kube_file)) }
     if fileexists(kube_file)

@@ -103,12 +103,13 @@ Below is a list of attributes which are available to both GAE standard and GAE f
 | `entrypoint` | string | true | command to run to start the app/service when deployed to GAE | none |
 
 #### Google App Engine Standard component configuration
-attributes specific to only GAE standard
+attributes specific to only GAE standard  
+
 | Key | Type | Required | Description | Default |
 |:----|:----:|:--------:|:------------|:-------:|
-| static_files | string | false | | none |
-| static_files.path | string | true within static_files context only | | none |
-| upload_path_regex | string |  true within static_files context only | | none |
+| `static_files` | string | false | | none |
+| `static_files.path` | string | true within static_files context only | | none |
+| `upload_path_regex` | string |  true within static_files context only | | none |
 
 #### Manifest Files
 For GAE deployments with a deployment type of `files`, a `mmcf-manifest.json` manifest file should be included.
@@ -135,7 +136,15 @@ Example:
 }
 ```
 
-#### Troubleshooting Google App Engine
+#### Requirements.txt
+
+For applications that are dependent on third party libraries, define a `requirements.txt` file. 
+For example a python web app using flask would need:
+```text
+Flask==1.1.2
+```  
+
+### Troubleshooting Google App Engine
 #### Error: "deployment.0.files": one of `deployment.0.files,deployment.0.zip` must be specified
 Receiving an error like below is likely caused by missing manifest files in the build directory
 ```bash

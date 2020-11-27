@@ -35,7 +35,7 @@ resource "google_storage_bucket" "self" {
   force_destroy = true # code should be transient in GCS and maintained in version control
   project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
   name = local.project.name
-  bucket_policy_only = true
+  uniform_bucket_level_access = true
   default_event_based_hold = false
   labels = lookup(local.project, "labels", null)
   # ToDo handle region better between app engine and cloud storage
@@ -169,7 +169,7 @@ resource "google_app_engine_flexible_app_version" "self" {
 
         content {
           name = files.key
-          source_url = "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.value}"
+          source_url = "https://storage.googleapis.com/${google_storage_bucket.self[0].name}/${files.value}"
           sha1_sum = files.value
         }
       }
@@ -389,7 +389,7 @@ resource "google_app_engine_standard_app_version" "self" {
 
         content {
           name = files.key
-          source_url = "https://storage.googleapis.com/${google_storage_bucket.self.name}/${files.value}"
+          source_url = "https://storage.googleapis.com/${google_storage_bucket.self[0].name}/${files.value}"
           sha1_sum = files.value
         }
       }
@@ -440,16 +440,6 @@ resource "google_app_engine_standard_app_version" "self" {
           http_headers = lookup(static_files.value, "http_headers", {})
         }
       }
-    }
-  }
-
-  //noinspection HILUnresolvedReference
-  dynamic "libraries" {
-    for_each = lookup(each.value, "libraries", null) == null ? {} : {libraries: each.value.libraries}
-
-    content {
-      name = lookup(libraries.value, "shell", null)
-      version = lookup(libraries.value, "shell", null)
     }
   }
 
