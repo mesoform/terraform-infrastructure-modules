@@ -1,31 +1,11 @@
-project_id: mesoform-new-app-3
-location_id: "europe-west2-locations"
-
+project_id: app-1-project-296817
+location_id: "europe-west2"
 components:
   specs:
     default:
       name: "default"
-      image_name: helloworld
-      image_uri: gcr.io/cloudrun/hello
+      image_uri: gcr.io/app-1-project-296817/helloworld
       metadata:
         annotations:
           "run.googleapis.com/client-name": "terraform"
-      auth: true
-      iam:
-        replace_policy: false
-        bindings:
-          'owner':
-            members:
-              - 'dmytro.gavryschuk@mesoform.com'
-          'admin':
-            members:
-              - 'domain:domain.com'
-        add_member:
-          role: 'editor'
-          member: 'user:dmytro.gavryschuk@mesoform.com'
-      traffic:
-      #  -
-      #    percent: 75
-      #  -
-      #    percent: 25
-      #    revision_name: 'old'
+      auth: false

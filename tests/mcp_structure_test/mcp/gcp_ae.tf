@@ -63,20 +63,20 @@ resource "google_storage_bucket_object" "self" {
 resource "google_project_service" "flex" {
   count = length(local.as_flex_specs) > 0 ? 1 : 0
 
-  project                    = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
-  service                    = "appengineflex.googleapis.com"
-  disable_dependent_services = false
-  //disable_dependent_services = true
+  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
+  service = "appengineflex.googleapis.com"
+  //disable_dependent_services = false
+  disable_dependent_services = true
 }
 
 
 resource "google_project_service" "std" {
   count = length(local.as_std_specs) > 0 ? 1 : 0
 
-  project                    = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
-  service                    = "appengine.googleapis.com"
-  disable_dependent_services = false
-  //disable_dependent_services = true
+  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
+  service = "appengine.googleapis.com"
+  //disable_dependent_services = false
+  disable_dependent_services = true
 }
 
 
@@ -366,7 +366,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   delete_service_on_destroy = var.tf_delete_service_on_destroy
 }
 
-/*
+
 //noinspection HILUnresolvedReference
 resource "google_app_engine_standard_app_version" "self" {
   for_each = local.as_std_specs
@@ -508,4 +508,3 @@ resource "google_app_engine_standard_app_version" "self" {
   noop_on_destroy           = var.tf_noop_on_destroy
   delete_service_on_destroy = var.tf_delete_service_on_destroy
 }
-*/
