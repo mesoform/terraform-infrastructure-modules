@@ -1,5 +1,5 @@
 create_google_project: false
-project_id: app-1-project-296817
+project_id: global-cluster-2
 #organization_name: mesoform.com
 billing_account: "123456-123456-123456"
 location_id: "europe-west2"
@@ -13,7 +13,7 @@ components:
     runtime: python37
     env: standard
     env_variables:
-      GCP_PROJECT_ID: app-1-project-296817
+      GCP_PROJECT_ID: global-cluster-2
   specs:
     default:
       name: app_1

@@ -1,11 +1,12 @@
-project_id: app-1-project-296817
+project_id: global-cluster-2
 location_id: "europe-west2"
 components:
   specs:
     default:
       name: "default"
-      image_uri: gcr.io/app-1-project-296817/helloworld
+      image_uri: gcr.io/global-cluster-2/helloworld
       metadata:
         annotations:
           "run.googleapis.com/client-name": "terraform"
+          "autoscaling.knative.dev/maxScale": "1000"
       auth: false

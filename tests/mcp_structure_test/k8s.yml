@@ -153,6 +153,7 @@ components:
                 - container_port: 8080
               liveness_probe:
                 http_get:
+                  path: "/"
                   port: 80
                   http_header:
                     name: X-Custom-Header
@@ -161,7 +162,7 @@ components:
                 period_seconds: 3
       service_account:
         metadata:
-          name: "pod-app-service-account"
+          name: pod-app-service-account
         #image_pull_secret:
         #  - name: pod-app-secret-file
         #  - name: name_2
