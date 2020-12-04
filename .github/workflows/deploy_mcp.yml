@@ -49,15 +49,19 @@ jobs:
           gcloud services enable cloudresourcemanager.googleapis.com
           gcloud services enable cloudbuild.googleapis.com
           gcloud services enable appengine.googleapis.com
+          gcloud services enable artifactregistry.googleapis.com
           gcloud config set compute/zone europe-west2
+          gcloud iam service-accounts create ga-deploy --description="Deploy with github actions" --display-name="Deploy github"
+          gcloud projects add-iam-policy-binding ga-test-0212 --member="serviceAccount:ga-deploy@${{env.GCP_PROJECT_ID}}.iam.gserviceaccount.com" --role="roles/owner"
           cd GCP/app/build/helloworld
           gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_bucket
           gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_cloudbuild
-          gcloud builds submit --tag gcr.io/${{env.GCP_PROJECT_ID}}/helloworld
+          gcloud artifacts repositories create app-repo --repository-format=docker --location=europe-west2 --description="Repository for storing app"
+          gcloud builds submit --tag europe-west2-docker.pkg.dev/ga-test-0212/app-repo/helloworld
           cd ../../..
-          echo 'name: ${{env.GCP_PROJECT_ID}}-bucket' > project.yml
+          echo 'name: ${{env.GCP_PROJECT_ID}}_bucket' > project.yml
           echo 'project_id: ${{env.GCP_PROJECT_ID}}' | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
-          echo 'image_uri: gcr.io/${{env.GCP_PROJECT_ID}}/helloworld' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
+          echo 'image_uri: &image_uri europe-west2-docker.pkg.dev/${{env.GCP_PROJECT_ID}}/app-repo/hello-world' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
           echo 'project_id: ${{env.GCP_PROJECT_ID}}' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
 
       - name: Deploy GCP modules
@@ -69,7 +73,7 @@ jobs:
           {
             echo "terraform {"
             echo "  backend \"gcs\"{"
-            echo "    bucket = \"${{env.GCP_PROJECT_ID}}-bucket\""
+            echo "    bucket = \"${{env.GCP_PROJECT_ID}}_bucket\""
             echo "    prefix = \"tf-state-files\""
             echo "  }"
             echo "}"
@@ -106,7 +110,7 @@ jobs:
           {
             echo "terraform {"
             echo "  backend \"gcs\"{"
-            echo "    bucket = \"${{env.GCP_PROJECT_ID}}-bucket\""
+            echo "    bucket = \"${{env.GCP_PROJECT_ID}}_bucket\""
             echo "    prefix = \"tf-state-files\""
             echo "  }"
             echo "}"
