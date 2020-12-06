@@ -360,6 +360,9 @@ resource "google_app_engine_flexible_app_version" "self" {
   # Terraform in-built properties
   noop_on_destroy = var.tf_noop_on_destroy
   delete_service_on_destroy = var.tf_delete_service_on_destroy
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 
@@ -493,4 +496,7 @@ resource "google_app_engine_standard_app_version" "self" {
   # Terraform in-built properties
   noop_on_destroy = var.tf_noop_on_destroy
   delete_service_on_destroy = var.tf_delete_service_on_destroy
+  lifecycle {
+    create_before_destroy = true
+  }
 }
