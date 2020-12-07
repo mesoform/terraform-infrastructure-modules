@@ -1,6 +1,6 @@
 variable user_project_config_yml {
   type    = string
-  default = "../project.yml"
+  default = "../../tests/project.yml"
 }
 variable google_project {
   type    = string
@@ -33,5 +33,5 @@ variable tf_delete_service_on_destroy {
 variable gcp_ae_yml {
   description = "path to YAML file containing configuration for GAE Applications/Services"
   type        = string
-  default     = "../gcp_ae.yml"
+  default     = "../../tests/gcp_ae.yml"
 }
