@@ -53,11 +53,33 @@ resource "google_cloud_run_service" "self" {
   name     = each.value.name
   project  = google_project_service.cloudrun[0].project
   template {
+    //noinspection HILUnresolvedReference
     spec{
+      container_concurrency = lookup(each.value, "container_concurrency", 0)
+      timeout_seconds       = lookup(each.value, "timeout_seconds", null)
+      service_account_name  = lookup(each.value, "service_account_name", null)
       //noinspection HILUnresolvedReference
       containers {
-        image = local.cloudrun_specs[each.key].image_uri
+        image   = each.value.containers.image_uri
+        args    = lookup(each.value.containers, "args", null)
+        command = lookup(each.value.containers, "command", null)
         //noinspection HILUnresolvedReference
+        dynamic "ports" {
+          for_each = lookup(each.value.containers, "ports", {})
+          content {
+            name           = lookup(ports.value, "name", null)
+            protocol       = lookup(ports.value, "protocol", null)
+            container_port = ports.value.container_port
+          }
+        }
+        //noinspection HILUnresolvedReference
+        dynamic "resources" {
+          for_each = lookup(each.value.containers, "resources", {})
+          content {
+            limits   = lookup(resources.value, "limits", null)
+            requests = lookup(resources.value, "requests", null)
+          }
+        }
         dynamic "env"{
           for_each = lookup(each.value, "environment_vars", {})
           content {
@@ -68,9 +90,18 @@ resource "google_cloud_run_service" "self" {
       }
     }
     //noinspection HILUnresolvedReference
-    metadata {
-      name        = length(each.value.metadata) > 0 ? lookup(each.value.metadata, "name", null): null
-      annotations = length(each.value.metadata) > 0 ? lookup(each.value.metadata, "annotations", null) : null
+    dynamic "metadata" {
+      for_each = lookup(each.value, "metadata", {})
+      content {
+        name             = lookup(metadata.value, "name", null)
+        annotations      = lookup(metadata.value, "annotations", null)
+        labels           = lookup(metadata.value, "labels", null)
+        generation       = lookup(metadata.value, "generation", null)
+        resource_version = lookup(metadata.value, "resource_version", null)
+        self_link        = lookup(metadata.value, "self_link", null)
+        uid              = lookup(metadata.value, "uid", null)
+        namespace        = lookup(metadata.value, "namespace", null)
+      }
     }
   }
   dynamic "traffic" {

@@ -1,11 +1,12 @@
-project_id: &project_id cloud-run-test-1409-1
+project_id: &project_id project1234
 location_id: "europe-west1"
 
 components:
   specs:
     default:
       name: "default"
-      image_uri: gcr.io/google-containers/nginx
+      containers:
+        image: gcr.io/google-containers/nginx
       metadata:
         annotations:
           "run.googleapis.com/client-name": "terraform"

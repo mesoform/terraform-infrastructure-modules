@@ -59,11 +59,11 @@ create_google_project: true
 create_artifact_registry: true
 
 components:
-
   specs:
     default:
       name: default
-      image_uri: image
+      containers:
+        image: location-docker.pkg.dev/project-id/repository/image
       environment_vars:
         'EG': 'something'
         'EG2': 'something-else'
