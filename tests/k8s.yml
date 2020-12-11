@@ -1,0 +1,178 @@
+components:
+  common:
+    name: name
+  specs:
+    app_1:
+      deployment:
+        metadata:
+          name: "mosquitto"
+          namespace:
+          labels:
+            app: "mosquitto"
+        spec:
+          replicas: 1
+          selector:
+            match_labels:
+              app: "mosquitto"
+          template:
+            metadata:
+              labels:
+                app: "mosquitto"
+            spec:
+              container:
+                - name: "mosquitto"
+                  image: "eclipse-mosquitto:1.6.2"
+                  port:
+                    - container_port: 1883
+                  resources:
+                    limits:
+                      cpu: "0.5"
+                      memory: "512Mi"
+                    requests:
+                      cpu: "250m"
+                      memory: "50Mi"
+                  volume_mount:
+                    - name: mosquitto-secret-file
+                      mount_path: /mosquitto/secret
+                    - name: mosquitto-config-file
+                      mount_path: mosquitto/config
+                - name: "tomcat-example"
+                  image: "tomcat:8.5-jdk8-adoptopenjdk-openj9"
+                  port:
+                    - container_port: 8080
+                  resources:
+                    limits:
+                      cpu: "0.5"
+                      memory: "512Mi"
+                    requests:
+                      cpu: "250m"
+                      memory: "50Mi"
+              volume:
+                - name: mosquitto-config-file
+                  config_map:
+                    name: mosquitto-config-file
+                - name: mosquitto-secret-file
+                  secret:
+                    secret_name: mosquitto-secret-file
+      config_map:
+        metadata:
+          name: "mosquitto-config-file"
+          labels:
+            env: "test"
+        data:
+          'test': 'test'
+        data_file:
+          - ../app_2/resources/mosquitto.conf
+        binary_data:
+          bar: L3Jvb3QvMTAw
+        binary_file:
+          - ../app_2/resources/binary.bin
+      secret:
+        metadata:
+          annotations:
+            key1:
+            key2:
+          name: "mosquitto-secret-file"
+          namespace:
+          labels:
+            env: "test"
+        type: Opaque
+        data:
+          login: login
+          password: password
+        data_file:
+          - ../app_2/resources/secret.file
+      service:
+        metadata:
+          name: "mosquitto"
+          namespace:
+          labels:
+            env: "test"
+          generate_name:
+        spec:
+          selector:
+            app: "mosquitto"
+          port:
+            - name: "mosquitto-listener"
+              port: 1883
+              target_port: 1883
+            - name: "tomcat-listener"
+              port: 80
+              target_port: 8080
+          type: LoadBalancer
+    app_2:
+      k8s_pod_autoscaler:
+        metadata:
+          name: test
+        spec:
+          max_replicas: 100
+          min_replicas: 50
+          scale_target_ref:
+            kind: Deployment
+            name: MyApp
+          metric:
+            type: External
+            external:
+              metric:
+                name: latency
+                selector:
+                  match_labels:
+                    lb_name: test
+              target:
+                type: Value
+                value: 100
+      pod:
+        metadata:
+          name: "nginx-example"
+          namespace:
+          labels:
+            app: "TestApp"
+        spec:
+          service_account_name:
+            pod-app-service-account
+          secret: pod-app-service-account-token-brds5
+          dns_policy: None
+          dns_config:
+            nameservers:
+              - 1.1.1.1
+              - 8.8.8.8
+              - 9.9.9.9
+            searches:
+              - example.com
+            option:
+              - name: ndots
+                value: 1
+              - name: use-vc
+          env:
+            name: environment
+            value: test
+          container:
+            - name: "nginx-example"
+              image: "nginx:1.7.8"
+              port:
+                - container_port: 8080
+              liveness_probe:
+                http_get:
+                  path: "/"
+                  port: 80
+                  http_header:
+                    name: X-Custom-Header
+                    value: Awesome
+                initial_delay_seconds: 3
+                period_seconds: 3
+      service_account:
+        metadata:
+          name: pod-app-service-account
+        #image_pull_secret:
+        #  - name: pod-app-secret-file
+        #  - name: name_2
+        secret:
+          - name: "pod-app-secret-file"
+        automount_service_account_token:
+          true
+    default:
+      manual_scaling:
+        instances: 1
+      root_dir: mcp
+      runtime: java8
+      build_dir: build

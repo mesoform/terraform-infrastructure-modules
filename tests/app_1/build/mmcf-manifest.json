@@ -1,0 +1,7 @@
+{
+    "artifactDir": "helloworld",
+    "contents": [
+      "main.py",
+      "requirements.txt"
+    ]
+}
