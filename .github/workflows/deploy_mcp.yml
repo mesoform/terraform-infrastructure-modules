@@ -79,7 +79,7 @@ jobs:
       - name: Configure Files
         run: |
           cd GCP
-          echo "name: ${{env.GCP_PROJECT_ID}}_bucket" > project.yml
+          echo "name: ${{env.GCP_PROJECT_ID}}_app_bucket" > project.yml
           cat project.yml
           echo "project_id: &project_id ${{env.GCP_PROJECT_ID}}" | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
           echo "app_name: &app_name ${{env.GCP_PROJECT_ID}}" | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
