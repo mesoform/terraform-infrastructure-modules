@@ -1,5 +1,8 @@
 //noinspection HILUnresolvedReference
 locals {
+  cloudrun_default = {
+    annotations = {"autoscaling.knative.dev/maxScale" = "1000", "run.googleapis.com/client-name" = "terraform"}
+  }
   user_cloudrun_config_yml  = fileexists(var.gcp_cloudrun_yml) ? file(var.gcp_cloudrun_yml) : null
   cloudrun                  = try(yamldecode(local.user_cloudrun_config_yml), {})
   cloudrun_components       = lookup(local.cloudrun, "components", {})
