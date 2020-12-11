@@ -3,7 +3,7 @@ Cloud run manages the deployment of scalable containerized serverless applicatio
 ### gcp_cloudrun.yml
 #### Prerequisites
 * If creating a new project your must have an existing billing account ID to specify in the `billing_account` setting
-* Cloud run retrieves images hosted in Container Registry or Artifact Registry.  
+* Cloud run retrieves images hosted in Artifact Registry (recommended)  or Container Registry.  
 If creating a project, there must be an existing image that you have access to (public/global),
 which is specified with the `image_uri` value in `gcp_clourun.yml`.
 If using an existing project you can use an image hosted within the projects Container Registry or Artifact Registy,

@@ -243,13 +243,18 @@ Non-zero exit codes indicate a fail, due to either an error in the workflow file
 A github workflow can be used to verify successful deployment of terraform modules. 
 The steps included are:
 1. Download terraform and any other services required (python, gcloud, aws, etc)
-2. Configure cloud services for deployment. This will usualy require a service account with permissions to create relevant resources
+2. Configure cloud services for deployment. This will require a service account with permissions to create relevant resources
 3. Plan and apply terraform infrastructure
 4. Destroy infrastructure and delete cloud resources
 
-An example workflow file is:
+The deployment workflow file can be found [here](../.github/workflows/deploy_mcp.yml).
+Relevant yaml configuration files and resources are in the deployment directory, with subdirectories for relevant adaptors. 
+E.g. for kubernetes mcp deployment tests`tests/mcp/deployment/k8s`.
 
-```
+
+
+Workflow:
+```yamlx
 name: 'Deployment Tests'
 
 on:
@@ -286,67 +291,58 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
+
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@master
         with:
-          project_id: ${{env.GCP_PROJECT_ID}}
           service_account_key: ${{secrets.GCP_SA_KEY}}
           export_default_credentials: true
 
       - name: Setup GCP
         run: |
-          gcloud projects create ${{env.GCP_PROJECT_ID}}
-          gcloud config set compute/zone europe-west2
-          cd GCP/app/build/helloworld
-          gcloud services enable cloudbuild.googleapis.com
+          gcloud projects create ${{env.GCP_PROJECT_ID}} --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
+          gcloud components install beta --quiet
+          gcloud beta billing projects link ${{env.GCP_PROJECT_ID}} --billing-account=${{secrets.GCP_BILLING_ID}}
           gcloud services enable cloudresourcemanager.googleapis.com
+          gcloud services enable cloudbuild.googleapis.com
+          gcloud services enable container.googleapis.com
           gcloud services enable appengine.googleapis.com
-          gcloud builds submit --tag gcr.io/${{env.GCP_PROJECT_ID}}/helloworld
-          gsutil ls -b gs://${{env.GCP_PROJECT_ID}}-bucket || gsutil mb gs://${{env.GCP_PROJECT_ID}}-bucket
-          cd ../../..
-          echo 'name: ${{env.GCP_PROJECT_ID}}-bucket' > project.yml
-          echo 'project_id: ${{env.GCP_PROJECT_ID}}' | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
-          echo 'image_uri: gcr.io/${{env.GCP_PROJECT_ID}}/helloworld' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
-          echo 'project_id: ${{env.GCP_PROJECT_ID}}' | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
+          gcloud services enable artifactregistry.googleapis.com
+          gcloud services enable run.googleapis.com
+          gcloud config set compute/zone europe-west2
+          gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_bucket
+          gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_cloudbuild
 
-      - name: Deploy and destroy GCP modules
+      - name: Build App
+        run: |
+          cd GCP/app/build/helloworld
+          gcloud artifacts repositories create app-repo --repository-format=docker --location=europe-west2 --description="Repository for storing app"
+          gcloud builds submit --tag europe-west2-docker.pkg.dev/${{env.GCP_PROJECT_ID}}/app-repo/helloworld
+
+      - name: Create New SA
+        run: |
+          gcloud iam service-accounts create ga-deploy --description="Deploy with github actions" --display-name="Service account deploys through github action"
+          gcloud iam service-accounts keys create ./sa-key.json --iam-account ga-deploy@${{env.GCP_PROJECT_ID}}.iam.gserviceaccount.com --no-user-output-enabled
+          gcloud projects add-iam-policy-binding ${{env.GCP_PROJECT_ID}} --member="serviceAccount:ga-deploy@${{env.GCP_PROJECT_ID}}.iam.gserviceaccount.com" --role="roles/owner" --no-user-output-enabled
+          gcloud projects add-iam-policy-binding ${{env.GCP_PROJECT_ID}} --member="serviceAccount:ga-deploy@${{env.GCP_PROJECT_ID}}.iam.gserviceaccount.com" --role="roles/artifactregistry.admin" --no-user-output-enabled
+          gcloud auth activate-service-account --key-file=sa-key.json
+
+      - name: Configure Files
         run: |
           cd GCP
-          mkdir terraform
-          cd terraform
-          touch main.tf
-          {
-            echo "terraform {"
-            echo "  backend \"gcs\"{"
-            echo "    bucket = \"${{env.GCP_PROJECT_ID}}-bucket\""
-            echo "    prefix = \"tf-state-files\""
-            echo "  }"
-            echo "}"
-            echo "module gcp {"
-            echo "  source = \"../../../../../mcp\""
-            echo "}"
-          } > main.tf
-          cat main.tf
-          terraform init
-          terraform refresh
-          terraform plan -out="./plan.tfplan"
-      #          terraform apply plan.tfplan
-      #          terraform plan -destroy -out="./destroy.tfplan"
-      #          terraform apply destroy.tfplan
+          echo "name: ${{env.GCP_PROJECT_ID}}_bucket" > project.yml
+          cat project.yml
+          echo "project_id: &project_id ${{env.GCP_PROJECT_ID}}" | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
+          echo "app_name: &app_name ${{env.GCP_PROJECT_ID}}" | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
+          cat gcp_ae.yml
+          echo "image_uri: &image_uri europe-west2-docker.pkg.dev/${{env.GCP_PROJECT_ID}}/app-repo/helloworld:latest" | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
+          echo "project_id: ${{env.GCP_PROJECT_ID}}" | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
+          cat gcp_cloudrun.yml
 
       - name: setup kubectl
         run: |
-          CREATE=false
           gcloud components install kubectl
-          gcloud services enable container.googleapis.com
-          response=$(gcloud container clusters describe mcpdeploytest-cluster || echo "ClusterNotFound")
-          if [[ $response = "ClusterNotFound" ]]
-          then
-            echo "Creating cluster"
-            gcloud container clusters create mcpdeploytest-cluster --num-nodes=1
-          else
-            echo "Cluster exists"
-          fi
+          gcloud container clusters create mcpdeploytest-cluster --num-nodes=1
           gcloud container clusters get-credentials mcpdeploytest-cluster
 
       - name: deploy k8s
@@ -358,7 +354,7 @@ jobs:
           {
             echo "terraform {"
             echo "  backend \"gcs\"{"
-            echo "    bucket = \"${{env.GCP_PROJECT_ID}}-bucket\""
+            echo "    bucket = \"${{env.GCP_PROJECT_ID}}_bucket\""
             echo "    prefix = \"tf-state-files\""
             echo "  }"
             echo "}"
@@ -374,23 +370,36 @@ jobs:
           terraform plan -destroy -out="./destroy.tfplan"
           terraform apply destroy.tfplan
 
+      - name: Deploy GCP modules
+        run: |
+          cd GCP
+          mkdir terraform
+          cd terraform
+          touch main.tf
+          {
+            echo "terraform {"
+            echo "  backend \"gcs\"{"
+            echo "    bucket = \"${{env.GCP_PROJECT_ID}}_bucket\""
+            echo "    prefix = \"tf-state-files\""
+            echo "  }"
+            echo "}"
+            echo "module gcp {"
+            echo "  source = \"../../../../../mcp\""
+            echo "}"
+          } > main.tf
+          cat main.tf
+          terraform init
+          terraform refresh
+          terraform plan -out="./plan.tfplan"
+          terraform apply plan.tfplan
+          terraform plan -destroy -out="./destroy.tfplan"
+
       - name: delete project
         run: gcloud projects delete ${{env.GCP_PROJECT_ID}}
 
       - name: error cleanup
         if: ${{ failure() }}
-        run: |
-          if [ -d "GCP/terraform" ]; then
-            cd GCP/terraform
-            terraform destroy -auto-approve
-          fi
-          if [ -d "k8s/terraform" ]; then
-            cd ${{env.working_directory}}
-            cd k8s/terraform
-            terraform detsroy -auto-approve
-          fi
+        run: gcloud projects delete ${{env.GCP_PROJECT_ID}}
 
 
-
-      #TODO: Deploy AWS
 ```
