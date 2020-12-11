@@ -90,18 +90,15 @@ resource "google_cloud_run_service" "self" {
       }
     }
     //noinspection HILUnresolvedReference
-    dynamic "metadata" {
-      for_each = lookup(each.value, "metadata", {})
-      content {
-        name             = lookup(metadata.value, "name", null)
-        annotations      = lookup(metadata.value, "annotations", null)
-        labels           = lookup(metadata.value, "labels", null)
-        generation       = lookup(metadata.value, "generation", null)
-        resource_version = lookup(metadata.value, "resource_version", null)
-        self_link        = lookup(metadata.value, "self_link", null)
-        uid              = lookup(metadata.value, "uid", null)
-        namespace        = lookup(metadata.value, "namespace", null)
-      }
+    metadata {
+      name             = lookup(metadata.value, "name", null)
+      annotations      = merge(local.cloudrun_default.annotations, lookup(metadata.value, "annotations", {}))
+      labels           = lookup(metadata.value, "labels", {})
+      generation       = lookup(metadata.value, "generation", null)
+      resource_version = lookup(metadata.value, "resource_version", null)
+      self_link        = lookup(metadata.value, "self_link", null)
+      uid              = lookup(metadata.value, "uid", null)
+      namespace        = lookup(metadata.value, "namespace", null)
     }
   }
   dynamic "traffic" {
