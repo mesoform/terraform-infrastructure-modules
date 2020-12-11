@@ -29,11 +29,11 @@ variable tf_delete_service_on_destroy {
 variable gcp_ae_yml {
   description = "path to YAML file containing configuration for GAE Applications/Services"
   type        = string
-  default     = "../../tests/gcp_ae.yml"
+  default     = "../gcp_ae.yml"
 }
 
 variable gcp_cloudrun_yml {
-  description = "path to YAML file containing configuration for GAE Applications/Services"
+  description = "path to YAML file containing configuration for Cloudrun Applications/Services"
   type        = string
-  default     = "../../tests/gcp_cloudrun.yml"
+  default     = "../gcp_cloudrun.yml"
 }
