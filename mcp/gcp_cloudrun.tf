@@ -70,7 +70,7 @@ resource "google_cloud_run_service" "self" {
     //noinspection HILUnresolvedReference
     metadata {
       name        = length(each.value.metadata) > 0 ? lookup(each.value.metadata, "name", null): null
-      annotations = length(each.value.metadata) > 0 ? lookup(each.value.metadata, "annotations", null) : null
+      annotations = merge(local.cloudrun_default.annotations, lookup(each.value, "metadata", null) == null ? {} : lookup(each.value.metadata, "annotations", {}))
     }
   }
   dynamic "traffic" {
