@@ -312,7 +312,7 @@ resource "kubernetes_stateful_set" "self" {
                         for_each = lookup(post_start.value, "http_get", null) == null ? {} : { http_get : post_start.value.http_get }
                         content {
                           host   = lookup(http_get.value, "host", null)
-                          path   = lookup(http_get.value, "path", null)
+                          path   = lookup(http_get.value, "path", "/")
                           scheme = lookup(http_get.value, "scheme", null)
                           port   = http_get.value.port
                           dynamic "http_header" {
@@ -952,13 +952,13 @@ resource "kubernetes_stateful_set" "self" {
       }
     }
     dynamic update_strategy {
-      for_each = lookup(each.value.stateful_set.spec, "update_stategy", null) == null ? {} : { update_strategy : each.value.statefule_set.spec.update_strategy }
+      for_each = lookup(each.value.stateful_set.spec, "update_stategy", null) == null ? {} : { update_strategy : each.value.stateful_set.spec.update_strategy }
       content {
-        type = lookup(update_strategy.value, "type", null)
+        type = lookup(update_strategy.value, "type", "RollingUpdate")
         dynamic rolling_update {
           for_each = lookup(update_strategy.value, "rolling_update", null) == null ? {} : { rolling_update : update_strategy.value.rolling_update }
           content {
-            partition = lookup(rolling_update.value, "partition", null)
+            partition = lookup(rolling_update.value, "partition", 0)
           }
         }
 
