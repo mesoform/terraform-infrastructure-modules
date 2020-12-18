@@ -13,7 +13,7 @@ jobs:
   unit-tests:
     name: 'Unit Tests'
     runs-on: ubuntu-latest
-    if: ${{github.event.label.name == 'feature'}} || ${{github.event.label.name == 'bug'}} || ${{github.event.label.name == 'patch'}}
+    if: ${{github.event.pull_requests.labels.*.name == 'feature'}} || ${{github.event.pull_requests.labels.*.name == 'bug'}} || ${{github.event.pull_requests.labels.*.name == 'patch'}}
     env:
       working-directory: ./tests
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
