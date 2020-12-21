@@ -5,11 +5,12 @@ components:
   specs:
     default:
       name: "default"
-      containers:
-        image: gcr.io/google-containers/nginx
-      metadata:
-        annotations:
-          "run.googleapis.com/client-name": "terraform"
+      template:
+        containers:
+          image: gcr.io/google-containers/nginx
+        metadata:
+          annotations:
+            "run.googleapis.com/client-name": "terraform"
       auth: true
       iam:
         replace_policy: false
@@ -33,10 +34,12 @@ components:
 
     empty:
       name: "default"
-      image_uri: gcr.io/google-containers/nginx
-      metadata:
-        annotations:
-          "run.googleapis.com/client-name": "terraform"
+      template:
+        containers:
+          image: gcr.io/google-containers/nginx
+        metadata:
+          annotations:
+            "run.googleapis.com/client-name": "terraform"
       auth: true
       iam:
         replace_policy: false
