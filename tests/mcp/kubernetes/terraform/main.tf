@@ -39,7 +39,7 @@ output test_secret_data {
 
 data external test_kubernetes_deployment {
   //query   = lookup(local.k8s_deployments.mosquitto.deployment.metadata, "labels", {})
-  query   = lookup(local.k8s_deployments.test_app_1.deployment.spec.selector, "match_labels", {})
+  query   = lookup(local.k8s_deployments["test_app_1"].deployment.spec.selector, "match_labels", {})
   program = ["python", "${path.module}/test_deployment.py"]
 }
 output test_deployment {
