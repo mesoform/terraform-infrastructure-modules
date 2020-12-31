@@ -76,17 +76,14 @@ jobs:
           gcloud auth activate-service-account --key-file=sa-key.json
 
       # Configure yaml files to contain relevant project info
-      - name: Configure Files
+      - name: Configure GCP Files
         run: |
           cd GCP
           echo "name: ${{env.GCP_PROJECT_ID}}_app_bucket" > project.yml
-          cat project.yml
-          echo "project_id: &project_id ${{env.GCP_PROJECT_ID}}" | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
-          echo "app_name: &app_name ${{env.GCP_PROJECT_ID}}" | cat - gcp_ae.yml > temp && mv temp gcp_ae.yml
-          cat gcp_ae.yml
-          echo "image_uri: &image_uri europe-west2-docker.pkg.dev/${{env.GCP_PROJECT_ID}}/app-repo/helloworld:latest" | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
-          echo "project_id: ${{env.GCP_PROJECT_ID}}" | cat - gcp_cloudrun.yml > temp && mv temp gcp_cloudrun.yml
-          cat gcp_cloudrun.yml
+          cat gcp_ae.yml | sed -r "s/<project_id>/${{env.GCP_PROJECT_ID}}/" > temp && mv temp gcp_ae.yml
+          cat gcp_cloudrun.yml | sed -r "s/<project_id>/${{env.GCP_PROJECT_ID}}/" > temp && mv temp gcp_cloudrun.yml
+          cat gcp_cloudrun.yml | sed -r "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" > temp && mv temp gcp_cloudrun.yml
+
 
       # Install kubectl and create gke cluster
       - name: setup kubectl
@@ -98,21 +95,9 @@ jobs:
       # Setup main.tf, deploy and destroy k8s
       - name: deploy k8s
         run: |
-          cd k8s
-          mkdir terraform
-          cd terraform
-          touch main.tf
-          {
-            echo "terraform {"
-            echo "  backend \"gcs\"{"
-            echo "    bucket = \"${{env.GCP_PROJECT_ID}}_bucket\""
-            echo "    prefix = \"tf-state-files\""
-            echo "  }"
-            echo "}"
-            echo "module k8s {"
-            echo "  source = \"../../../../../mcp\""
-            echo "}"
-          } > main.tf
+          cd k8s/terraform
+          cat main.tf | sed -r "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" > temp && mv temp main.tf
+          cat main.tf | sed -r "s/source-path/..\/..\/..\/..\/..\/mcp/" > temp && mv temp main.tf
           cat main.tf
           terraform init
           terraform refresh
@@ -124,21 +109,9 @@ jobs:
       # Setup main.tf and deploy gcp modules. Also plan destroy but don't apply due to app engine issues.
       - name: Deploy GCP modules
         run: |
-          cd GCP
-          mkdir terraform
-          cd terraform
-          touch main.tf
-          {
-            echo "terraform {"
-            echo "  backend \"gcs\"{"
-            echo "    bucket = \"${{env.GCP_PROJECT_ID}}_bucket\""
-            echo "    prefix = \"tf-state-files\""
-            echo "  }"
-            echo "}"
-            echo "module gcp {"
-            echo "  source = \"../../../../../mcp\""
-            echo "}"
-          } > main.tf
+          cd GCP/terraform
+          cat main.tf | sed -r "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" > temp && mv temp main.tf
+          cat main.tf | sed -r "s/source-path/..\/..\/..\/..\/..\/mcp/" > temp && mv temp main.tf
           cat main.tf
           terraform init
           terraform refresh
