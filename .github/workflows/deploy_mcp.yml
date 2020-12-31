@@ -100,7 +100,6 @@ jobs:
           cat main.tf | sed -r "s/source-path/..\/..\/..\/..\/..\/mcp/" > temp && mv temp main.tf
           cat main.tf
           terraform init
-          terraform refresh
           terraform plan -out="./plan.tfplan"
           terraform apply plan.tfplan
           terraform plan -destroy -out="./destroy.tfplan"
@@ -114,7 +113,6 @@ jobs:
           cat main.tf | sed -r "s/source-path/..\/..\/..\/..\/..\/mcp/" > temp && mv temp main.tf
           cat main.tf
           terraform init
-          terraform refresh
           terraform plan -out="./plan.tfplan"
           terraform apply plan.tfplan
           terraform plan -destroy -out="./destroy.tfplan"
