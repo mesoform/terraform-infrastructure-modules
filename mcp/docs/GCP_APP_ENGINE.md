@@ -1,8 +1,28 @@
 # Google App Engine  
 App Engine allows for building scalable applications on serverless platforms [(Documentation)](https://cloud.google.com/appengine)
 ### gcp_ae.yml
-#### Prerequisites
-##### IAM permission
+#### Prerequisites:
+#### Container/Files
+The build and delivery of the files/container for the application should be done prior to app engine deployment. 
+Ensure these resources can be accessed for your app engine deployment.  
+##### Containers
+Container image should be hosted in [artifact registry](https://cloud.google.com/artifact-registry/docs/docker), 
+or [google container registry](https://cloud.google.com/container-registry/docs/pushing-and-pulling) (deprecated).   
+##### Files
+Files should be stored in [google cloud storage](https://cloud.google.com/storage/docs) with a manifest 
+`mmcf-manifest.json` should be included in the same directory as gcp_ae.yml.  
+This file should contain the names and storage locations of all application files.  
+
+Example:
+```
+{
+  "requirements.txt": "https://storage.googleapis.com/<bucket>/<path>/main.py",
+  "main.py": "https://storage.googleapis.com/<bucket>/<path>/main.py",
+  ...
+}
+```
+
+#### IAM permission
 * If creating a project from scratch, you must have a seed project on Google Cloud Platform that
  will be used as the build project and as a place for identity and access management. "Cloud
  Resource Manager", "App Engine Admin, and "Cloud Billing" APIs need to be enabled on the
@@ -93,21 +113,6 @@ components:
       runtime: java8
 ```
 
-#### Deployment Versioning
-Multiple versions of a service can be deployed at once. 
-* `gcp_ae.yml` will only contain the specifications for one version of each service.  
-* Updating the container version or manifest will not produce a new app engine version, but will update the current deployment
-* If the version key is updated in `gcp_ae.yml` the current deployment will be replaced with the new version
-* To run multiple versions, [terraform workspaces](https://www.terraform.io/docs/state/workspaces.html) should be used.  
-  E.g. to deploy a new version of an application:
-    1. Make a new branch using VCS and make version and configuratio changes to `gcp_ae.yml` 
-    2. Make a new terraform workspace by running: `terraform workspace new <version name>` 
-    3. Import google app engine configuration to state file by running `terraform import 'module.mcp.google_app_engine_application.self[0]' <project-id>`
-    Without this step terraform will try to create a new `google_app_engine_application` resource, when only one per project is allowed, resulting in an error.
-    4. Apply changes with `terraform apply`
-    5. Commit terraform configuraton and statefiles to VCS
-    
-
 
 #### Google App Engine common attributes
 Below is a list of attributes which are available to both GAE standard and GAE flexible apps (this
@@ -120,7 +125,7 @@ Below is a list of attributes which are available to both GAE standard and GAE f
 | `runtime` | string | true | GAE available runtime. This differs between environment. Check the GAE docs for details | none |
 | `entrypoint` | string | true | command to run to start the app/service when deployed to GAE | none |
 
-#### Google App Engine Standard component configuration
+#### Google App Engine Standard component configuration  
 attributes specific to only GAE standard  
 
 | Key | Type | Required | Description | Default |
@@ -129,17 +134,47 @@ attributes specific to only GAE standard
 | `static_files.path` | string | true within static_files context only | | none |
 | `upload_path_regex` | string |  true within static_files context only | | none |
 
-#### Manifest Files
-For GAE deployments with a deployment type of `files`, a `mmcf-manifest.json` manifest file should be included in the same directory as gcp_ae.yml.
-This file should contain the names and storage locations of all application files.
-
-Example:
-```json
-{
-    "requirements.txt": "https://storage.googleapis.com/<bucket>/<path>/main.py",
-    "main.py": "https://storage.googleapis.com/<bucket>/<path>/main.py"
-}
+#### Google App Engine Flexible component Configuration  
+An example flexible app engine configuration
+```yaml
+project_id: &project_id ae-flex-test
+create_google_project: false
+location_id: "europe-west2"
+components:
+  common:
+    entrypoint: python main.py
+    runtime: python38
+    env: flex
+    env_variables:
+      GCP_PROJECT_ID: *project_id
+  specs:
+    default:
+      version_id: v3
+      deployment:
+        container:
+          image: "europe-west2-docker.pkg.dev/<project_id>/<repository_name>/helloworld:latest" 
+      automatic_scaling: {} #Will use the default automatic_scaling settings
+      resources: 
+        memory_gb: 2
+      readiness_check: 
+        success_threshold: 3
 ```
+***NOTE***: For the container image ensure that the tag or digest is included on the full URI  
+
+#### Deployment Versioning  
+Multiple versions of a service can be deployed at once. 
+* `gcp_ae.yml` will only contain the specifications for one version of each service.  
+* Updating the container version or manifest will not produce a new app engine version, but will update the current deployment
+* If the version key is updated in `gcp_ae.yml` the current deployment will be replaced with the new version
+* To run multiple versions, [terraform workspaces](https://www.terraform.io/docs/state/workspaces.html) should be used.  
+  E.g. to deploy a new version of an application:
+    1. Make a new branch using VCS and make version and configuratio changes to `gcp_ae.yml` 
+    2. Make a new terraform workspace by running: `terraform workspace new <version name>` 
+    3. Import google app engine configuration to state file by running `terraform import 'module.mcp.google_app_engine_application.self[0]' <project-id>`
+    Without this step terraform will try to create a new `google_app_engine_application` resource, when only one per project is allowed, resulting in an error.
+    4. Apply changes with `terraform apply`
+    5. Commit terraform configuraton and statefiles to VCS
+
 
 #### Requirements.txt
 
