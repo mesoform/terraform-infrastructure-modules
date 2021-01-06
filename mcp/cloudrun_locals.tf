@@ -1,7 +1,20 @@
 //noinspection HILUnresolvedReference
 locals {
   cloudrun_default = {
-    annotations = {"autoscaling.knative.dev/maxScale" = "1000", "run.googleapis.com/client-name" = "terraform"}
+    metadata = {
+      annotations = {
+        "run.googleapis.com/client-name"    = "terraform"
+        "run.googleapis.com/ingress"        = "all"
+        "run.googleapis.com/ingress-status" = "all"
+
+      }
+    }
+    template_metadata = {
+      annotations = {
+        "autoscaling.knative.dev/maxScale" = "1000"
+        "run.googleapis.com/client-name" = "terraform"
+      }
+    }
   }
   user_cloudrun_config_yml  = fileexists(var.gcp_cloudrun_yml) ? file(var.gcp_cloudrun_yml) : null
   cloudrun                  = try(yamldecode(local.user_cloudrun_config_yml), {})
@@ -26,4 +39,5 @@ locals {
           merge(setting, {latest_revision = lookup(setting, "revision_name", null) == null ? true: false})
     ]
   }
+
 }

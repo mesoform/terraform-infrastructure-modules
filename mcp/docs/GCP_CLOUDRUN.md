@@ -59,17 +59,24 @@ create_google_project: true
 create_artifact_registry: true
 
 components:
+  common: 
+      
 
   specs:
     default:
       name: default
-      image_uri: image
-      environment_vars:
-        'EG': 'something'
-        'EG2': 'something-else'
       metadata:
         annotations:
-          "run.googleapis.com/client-name": "terraform"  
+          'Top level': Annotations
+      template:
+        metadata:
+          annotations:
+            "run.googleapis.com/client-name": "terraform"  
+        containers:
+          image: location-docker.pkg.dev/project-id/repository/image
+          environment_vars:
+            'EG': 'something'
+            'EG2': 'something-else'
       auth: true
       iam:
         replace_policy: true
