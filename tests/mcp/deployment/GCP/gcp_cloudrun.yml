@@ -4,10 +4,9 @@ components:
   specs:
     default:
       name: "default"
-      image_uri: <image_uri>
-      metadata:
-        annotations:
-          "run.googleapis.com/client-name": "terraform"
+      template:
+        containers:
+          image: <image_uri>
       auth: true
       iam:
         add_member:
