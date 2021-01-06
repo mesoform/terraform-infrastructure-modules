@@ -1,5 +1,6 @@
+project_id: &project_id <project_id>
 create_google_project: false
-location: "europe-west"
+location_id: "europe-west2"
 components:
   common:
     entrypoint: python main.py
@@ -7,7 +8,6 @@ components:
     env: standard
   specs:
     default:
-      name: test-app
-      src_path: app/helloworld
+      src_path: app
       skip_files: DOCKERFILE
       root_dir: app
