@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+    types: [opened, synchonize, reopened, labeled]
   push:
     branches:
       - master
@@ -12,7 +13,7 @@ jobs:
   unit-tests:
     name: 'Unit Tests'
     runs-on: ubuntu-latest
-    if: startswith(github.head_ref, 'feat/') || startswith(github.head_ref, 'bug/') || startswith(github.head_ref, 'patch/')
+    if: ${{github.event.pull_requests.labels.*.name == 'feature'}} || ${{github.event.pull_requests.labels.*.name == 'bug'}} || ${{github.event.pull_requests.labels.*.name == 'patch'}}
     env:
       working-directory: ./tests
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
@@ -30,8 +31,7 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+        python-version: '3.x'
 
     # Install the latest version of Terraform CLI
     - name: Setup Terraform

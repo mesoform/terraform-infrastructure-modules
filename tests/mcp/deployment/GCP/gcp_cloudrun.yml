@@ -1,0 +1,15 @@
+project_id: &project_id <project_id>
+location_id: "europe-west2"
+components:
+  specs:
+    default:
+      name: "default"
+      image_uri: <image_uri>
+      metadata:
+        annotations:
+          "run.googleapis.com/client-name": "terraform"
+      auth: true
+      iam:
+        add_member:
+          role: 'viewer'
+          member: 'user:alex.bailey@mesoform.com'

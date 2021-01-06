@@ -1,0 +1,13 @@
+project_id: &project_id <project_id>
+create_google_project: false
+location_id: "europe-west2"
+components:
+  common:
+    entrypoint: python main.py
+    runtime: python38
+    env: standard
+  specs:
+    default:
+      src_path: app
+      skip_files: DOCKERFILE
+      root_dir: app
