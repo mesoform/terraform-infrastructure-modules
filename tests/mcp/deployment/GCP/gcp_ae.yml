@@ -11,5 +11,5 @@ components:
       automatic_scaling: {}
       deployment:
         container:
-          image: *image_uri
+          image: <image_uri>
 
