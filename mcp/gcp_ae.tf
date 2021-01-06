@@ -183,7 +183,7 @@ resource "google_app_engine_flexible_app_version" "self" {
         for_each = lookup(automatic_scaling.value, "cpu_utilization", null) == null ? {cpu_utilization: {target_utilization: local.default.automatic_scaling.target_utilization}} : {cpu_utilization: automatic_scaling.value.cpu_utilization}
         //noinspection HILUnresolvedReference
         content {
-          target_utilization        = cpu_utilization.value.target_utilization
+          target_utilization        = lookup(cpu_utilization.value, "target_utilization",local.default.automatic_scaling.target_utilization)
           aggregation_window_length = lookup(cpu_utilization.value, "aggregation_window_length", null )
         }
       }
