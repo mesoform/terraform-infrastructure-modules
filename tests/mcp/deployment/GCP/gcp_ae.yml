@@ -4,10 +4,11 @@ components:
   common:
     entrypoint: python main.py
     runtime: python38
-    env: standard
+    env: flex
   specs:
     default:
-      name: test-app
-      src_path: app/helloworld
-      skip_files: DOCKERFILE
-      root_dir: app
+      manual_scaling:
+        instances: 2
+      deployment:
+        container:
+          image: *image_uri

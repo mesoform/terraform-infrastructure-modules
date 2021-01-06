@@ -3,24 +3,49 @@ App Engine allows for building scalable applications on serverless platforms [(D
 ### gcp_ae.yml
 #### Prerequisites:
 #### Container/Files
-The build and delivery of the files/container for the application should be done prior to app engine deployment. 
-Ensure these resources can be accessed for your app engine deployment.  
+The build and delivery of the files/container for the application should be done prior to app engine deployment.   
 ##### Containers
 Container image should be hosted in [artifact registry](https://cloud.google.com/artifact-registry/docs/docker), 
 or [google container registry](https://cloud.google.com/container-registry/docs/pushing-and-pulling) (deprecated).   
-##### Files
-Files should be stored in [google cloud storage](https://cloud.google.com/storage/docs) with a manifest 
-`mmcf-manifest.json` should be included in the same directory as gcp_ae.yml.  
-This file should contain the names and storage locations of all application files.  
-
-Example:
+##### Files  
+A `mmcf-manifest.json` manifest file should be included in the subdirectory for each application. By default it is found in `<app_dir>/build`.
 ```
-{
-  "requirements.txt": "https://storage.googleapis.com/<bucket>/<path>/main.py",
-  "main.py": "https://storage.googleapis.com/<bucket>/<path>/main.py",
-  ...
+    mesoform-service/
+        L project.yml
+        L gcp_ae.yml
+        L terraform/
+            L main.tf
+        L app1/
+            L build/
+                L mmcf-manifest.yml
+                L exploded-project-app/
+                    L ...
+```
+These files within the application directory should be stored in a [google cloud storage](https://cloud.google.com/storage/docs) bucket 
+following the same directory structure as described in the manifest. 
+All the files must be readable with the credentials supplied.  
+An example manifest for an app:  
+Example:
+```json
+{ 
+  "artifactDir": "exploded-project-app",
+  "contents": [
+    "META-INF/MANIFEST.MF",
+    "WEB-INF/logging.properties",
+    "WEB-INF/classes/logback.xml",
+    "WEB-INF/classes/application.conf",
+    "WEB-INF/lib/annotations-4.1.1.4.jar",
+    "WEB-INF/lib/commons-logging-1.2.jar",
+    "WEB-INF/lib/gson-2.8.6.jar",
+    "WEB-INF/lib/api-common-1.9.0.jar",
+    "WEB-INF/lib/ktor-network-1.3.2.jar",
+    "WEB-INF/lib/ktor-utils-jvm-1.3.2.jar",
+    "WEB-INF/web.xml"
+  ]
 }
 ```
+In cloud storage the locations of these `MANIFEST.MF` would be: `"https://storage.googleapis.com/<bucket>/<service name>/exploded-project-app/META-INF/MANIFEST.MF"`.
+The key `bucket_name` is the name of the bucket which holds the services files. 
 
 #### IAM permission
 * If creating a project from scratch, you must have a seed project on Google Cloud Platform that
@@ -59,6 +84,7 @@ Example:
 |:----|:----:|:--------:|:------------|:-------:|
 | `project_id` | string | true | The GCP project identifier. https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project | none |
 | `project_name` | string | false | more descriptive and human understandable identifier for the project. | value of `project_id` |
+| `bucket_name` | string | true if deploying using files | name of the google storage bucket storing the AS files | value of `project_id` |
 | `create_google_project` | boolean | false | whether or not to create a new project with the details provided. implies the project will be deleted with the deployment when asked to delete.| `false` |
 | `billing_account` | string | true if `create_google_project` is true | The alphanumeric ID of the billing account this project belongs to. | none |
 | `organization_name` | string | true if `create_google_project` is true | [MUTUALLY EXCLUSIVE WITH `folder_id`] The name of the organization this project belongs to. Only one of organization_name or folder_id may be specified. To specify an organization for the project to be part of, the account performing the deployment | none |
@@ -81,6 +107,7 @@ Example:
 ```yamlex
 create_google_project: true
 project_id: &project_id <google project id>
+bucket_name: <cloud storage bucket name>
 organization_name: mesoform.com
 folder_id: 0000000000
 billing_account: "1234-5678-2345-7890"
@@ -109,7 +136,6 @@ components:
     experiences-sidecar:
       env: standard
     default:
-      root_dir: experiences-service
       runtime: java8
 ```
 
@@ -135,7 +161,7 @@ attributes specific to only GAE standard
 | `upload_path_regex` | string |  true within static_files context only | | none |
 
 #### Google App Engine Flexible component Configuration  
-An example flexible app engine configuration
+An example flexible app engine configuration:  
 ```yaml
 project_id: &project_id ae-flex-test
 create_google_project: false

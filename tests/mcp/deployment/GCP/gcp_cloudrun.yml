@@ -3,7 +3,8 @@ components:
   specs:
     default:
       name: "default"
-      image_uri: *image_uri
+      containers:
+        image: *image_uri
       metadata:
         annotations:
           "run.googleapis.com/client-name": "terraform"

@@ -15,6 +15,8 @@ data "google_organization" "self" {
 }
 
 
+
+
 //noinspection HILUnresolvedReference
 resource "google_project" "self" {
   count = lookup(local.gae, "create_google_project", false) ? 1 : 0
@@ -133,7 +135,7 @@ resource "google_app_engine_flexible_app_version" "self" {
       }
 
       dynamic "files" {
-        for_each = lookup(local.as_file_manifest, each.key, {})
+        for_each = lookup(local.src_files, each.key, {})
         content {
           name = files.key
           source_url = files.value
@@ -349,7 +351,7 @@ resource "google_app_engine_standard_app_version" "self" {
 
     content {
       dynamic "files" {
-        for_each = lookup(local.as_file_manifest, each.key, {})
+        for_each = lookup(local.src_files, each.key, {})
         content {
           name = files.key
           source_url = files.value

@@ -43,12 +43,26 @@ locals {
       # level. See env_variables below
       as => merge(lookup(local.gae_components, "common", {}), config)
   }
-
   //noinspection HILUnresolvedReference
-  as_file_manifest = {
-    for as, specs in local.gae_components_specs:
-      as => jsondecode(file(specs.value.files.manifest))
-      if lookup(specs.deployment, "files", null) != null
+  as_paths = {
+    for as, spec in local.as_all_specs :
+      as => {
+        build_dir : format("%s/%s", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build"))
+        manifest : format("../%s/%s/mmcf-manifest.json", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build"))
+    }
   }
+
+  manifests = {
+    for as, path in local.as_paths: as =>
+      jsondecode(file(path.manifest))
+  }
+
+  src_files = {
+    for as, manifest in local.manifests : as => {
+      for path in manifest.contents: basename(path) =>
+        "https://storage.googleapis.com/${lookup(local.gae, "bucket_name", local.gae.project_id)}/${local.as_paths[as].build_dir}/${manifest.artifactDir}/${path}"
+    }
+  }
+
 }
 
