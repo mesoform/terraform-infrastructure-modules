@@ -55,6 +55,7 @@ locals {
   manifests = {
     for as, path in local.as_paths: as =>
       jsondecode(file(path.manifest))
+      if fileexists(path.manifest)
   }
 
   src_files = {
