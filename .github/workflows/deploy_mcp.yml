@@ -80,9 +80,9 @@ jobs:
         run: |
           cd GCP
           echo "name: ${{env.GCP_PROJECT_ID}}_app_bucket" > project.yml
-          cat gcp_ae.yml | sed -r "s/<project_id>/${{env.GCP_PROJECT_ID}}/" > temp && mv temp gcp_ae.yml
-          cat gcp_cloudrun.yml | sed -r "s/<project_id>/${{env.GCP_PROJECT_ID}}/" > temp && mv temp gcp_cloudrun.yml
-          cat gcp_cloudrun.yml | sed -r "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" > temp && mv temp gcp_cloudrun.yml
+          sed -i "s/<project_id>/${{env.GCP_PROJECT_ID}}/" gcp_ae.yml
+          sed -i "s/<project_id>/${{env.GCP_PROJECT_ID}}/" gcp_cloudrun.yml
+          sed -i "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" gcp_cloudrun.yml
 
 
       # Install kubectl and create gke cluster
@@ -96,8 +96,8 @@ jobs:
       - name: deploy k8s
         run: |
           cd k8s/terraform
-          cat main.tf | sed -r "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" > temp && mv temp main.tf
-          cat main.tf | sed -r "s/source-path/..\/..\/..\/..\/..\/mcp/" > temp && mv temp main.tf
+          sed -i "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" main.tf
+          sed -i "s/source-path/..\/..\/..\/..\/..\/mcp/" main.tf
           cat main.tf
           terraform init
           terraform plan -out="./plan.tfplan"
@@ -109,8 +109,8 @@ jobs:
       - name: Deploy GCP modules
         run: |
           cd GCP/terraform
-          cat main.tf | sed -r "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" > temp && mv temp main.tf
-          cat main.tf | sed -r "s/source-path/..\/..\/..\/..\/..\/mcp/" > temp && mv temp main.tf
+          sed -i "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" main.tf
+          sed -i "s/source-path/..\/..\/..\/..\/..\/mcp/" main.tf
           cat main.tf
           terraform init
           terraform plan -out="./plan.tfplan"
