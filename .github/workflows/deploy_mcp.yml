@@ -92,26 +92,26 @@ jobs:
           gcloud container clusters create mcpdeploytest-cluster --num-nodes=1
           gcloud container clusters get-credentials mcpdeploytest-cluster
 
-      # Setup deploy.tf, deploy and destroy k8s
+      # Setup main.tf, deploy and destroy k8s
       - name: deploy k8s
         run: |
           cd k8s/terraform
-          sed -i "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" deploy.tf
-          sed -i "s/source-path/..\/..\/..\/..\/..\/mcp/" deploy.tf
-          cat deploy.tf
+          sed -i "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" main.tf
+          sed -i "s/source-path/..\/..\/..\/..\/..\/mcp/" main.tf
+          cat main.tf
           terraform init
           terraform plan -out="./plan.tfplan"
           terraform apply plan.tfplan
           terraform plan -destroy -out="./destroy.tfplan"
           terraform apply destroy.tfplan
 
-      # Setup deploy.tf and deploy gcp modules. Also plan destroy but don't apply due to app engine issues.
+      # Setup main.tf and deploy gcp modules. Also plan destroy but don't apply due to app engine issues.
       - name: Deploy GCP modules
         run: |
           cd GCP/terraform
-          sed -i "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" deploy.tf
-          sed -i "s/source-path/..\/..\/..\/..\/..\/mcp/" deploy.tf
-          cat deploy.tf
+          sed -i "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" main.tf
+          sed -i "s/source-path/..\/..\/..\/..\/..\/mcp/" main.tf
+          cat main.tf
           terraform init
           terraform plan -out="./plan.tfplan"
           terraform apply plan.tfplan
