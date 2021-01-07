@@ -191,7 +191,13 @@ components:
 Multiple versions of a service can be deployed at once. 
 * `gcp_ae.yml` will only contain the specifications for one version of each service.  
 * Updating the container version or manifest will not produce a new app engine version, but will update the current deployment
-* If the version key is updated in `gcp_ae.yml` the current deployment will be replaced with the new version
+* If the version key is updated in `gcp_ae.yml` a new deployment version will be made. Terraform will attempt to destroy the previous version, but this will result in: 
+  ```
+    Error when reading or editing AppVersion: googleapi: Error 400: Cannot delete a version with a non-zero traffic allocation. 
+    Please update your traffic split to remove the allocation for this version and try again.
+  ```
+  After this error has occurred, reallocate the traffic from the previous version to the new version. This ensures that the version to be destroyed has 0 traffic. 
+  Running `terraform apply` will then have a plan to destroy the previous version, which should be successful. 
 * To run multiple versions, [terraform workspaces](https://www.terraform.io/docs/state/workspaces.html) should be used.  
   E.g. to deploy a new version of an application:
     1. Make a new branch using VCS and make version and configuratio changes to `gcp_ae.yml` 
