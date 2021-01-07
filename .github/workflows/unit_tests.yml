@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{github.event.pull_requests.labels.*.name == 'feature'}} || ${{github.event.pull_requests.labels.*.name == 'bug'}} || ${{github.event.pull_requests.labels.*.name == 'patch'}}
     env:
-      working-directory: ./tests
+      working-directory: ./tests/mcp
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -42,9 +42,9 @@ jobs:
     # Run unit tests in MCP module
     - name: Run MCP unit tests
       run: |
-        cd mcp
+        cd unit_tests
         MESSAGE="PASSED: All unit tests passed"
-        for dir in $(find $(pwd) \( -not -path "$(pwd)/module_import/*" \) -and \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
+        for dir in $(find $(pwd) \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
           echo "Directory: ${dir}"
           cd $dir
           terraform init
