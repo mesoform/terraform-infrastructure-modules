@@ -5,14 +5,15 @@ on:
     branches:
       - master
 
+# a comment
 jobs:
-  unit-tests:
+  deployment-tests:
     name: 'Deployment tests'
     runs-on: ubuntu-latest
 
     env:
       working-directory: ./tests/mcp/deployment
-      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}"
+      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-${GITHUB_RUN_NUMBER}"
 
     defaults:
       run:
@@ -89,8 +90,8 @@ jobs:
       - name: setup kubectl
         run: |
           gcloud components install kubectl
-          gcloud container clusters create mcpdeploytest-cluster --num-nodes=1
-          gcloud container clusters get-credentials mcpdeploytest-cluster
+          gcloud container clusters create mcpdeploytest-cluster --num-nodes=1 --zone=europe-west2-a --node-locations=europe-west2-a,europe-west2-c
+          gcloud container clusters get-credentials mcpdeploytest-cluster --zone=europe-west2-a
 
       # Setup main.tf, deploy and destroy k8s
       - name: deploy k8s
