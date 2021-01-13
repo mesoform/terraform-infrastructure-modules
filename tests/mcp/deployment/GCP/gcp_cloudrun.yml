@@ -7,8 +7,4 @@ components:
       template:
         containers:
           image: <image_uri>
-      auth: true
-      iam:
-        add_member:
-          role: 'viewer'
-          member: 'user:alex.bailey@mesoform.com'
+      auth: false
