@@ -4,12 +4,7 @@ components:
   specs:
     default:
       name: "default"
-      image_uri: <image_uri>
-      metadata:
-        annotations:
-          "run.googleapis.com/client-name": "terraform"
-      auth: true
-      iam:
-        add_member:
-          role: 'viewer'
-          member: 'user:alex.bailey@mesoform.com'
+      template:
+        containers:
+          image: <image_uri>
+      auth: false
