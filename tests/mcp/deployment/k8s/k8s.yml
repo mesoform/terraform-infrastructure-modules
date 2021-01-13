@@ -5,21 +5,25 @@ components:
     app_1:
       deployment:
         metadata:
-          name: terraform-example
+          name: "mosquitto"
+          namespace:
           labels:
-            test: "ExampleApp"
+            app: "mosquitto"
         spec:
+          replicas: 1
           selector:
             match_labels:
-              test: "ExampleApp"
+              app: "mosquitto"
           template:
             metadata:
               labels:
-                test: "ExampleApp"
+                app: "mosquitto"
             spec:
               container:
-                - image: "nginx:1.7.8"
-                  name: "example"
+                - name: "mosquitto"
+                  image: "eclipse-mosquitto:1.6.2"
+                  port:
+                    - container_port: 1883
                   resources:
                     limits:
                       cpu: "0.5"
@@ -27,24 +31,36 @@ components:
                     requests:
                       cpu: "250m"
                       memory: "50Mi"
-                  liveness_probe:
-                    http_get:
-                      path: "/nginx_status"
-                      port: 80
-                      http_header:
-                        name: "X-Custom-Header"
-                        value: "Awesome"
-                    initial_delay_seconds: 3
-                    period_seconds: 3
-
+                  volume_mount:
+                    - name: mosquitto-secret-file
+                      mount_path: /mosquitto/secret
+                    - name: mosquitto-config-file
+                      mount_path: mosquitto/config
+                - name: "tomcat-example"
+                  image: "tomcat:8.5-jdk8-adoptopenjdk-openj9"
+                  port:
+                    - container_port: 8080
+                  resources:
+                    limits:
+                      cpu: "0.5"
+                      memory: "512Mi"
+                    requests:
+                      cpu: "250m"
+                      memory: "50Mi"
+              volume:
+                - name: mosquitto-config-file
+                  config_map:
+                    name: mosquitto-config-file
+                - name: mosquitto-secret-file
+                  secret:
+                    secret_name: mosquitto-secret-file
       config_map:
         metadata:
-          name: "config"
+          name: "mosquitto-config-file"
           labels:
             env: "test"
         data:
-          api_host: "myhost:433"
-          db_host: "dbhost:5432"
+          'test': 'test'
         data_file:
           - ../resources/mosquitto.conf
         binary_data:
@@ -53,21 +69,36 @@ components:
           - ../resources/binary.bin
       secret:
         metadata:
-          name: "basic-auth"
-        type: "kubernetes.io/basic-auth"
+          annotations:
+            key1:
+            key2:
+          name: "mosquitto-secret-file"
+          namespace:
+          labels:
+            env: "test"
+        type: Opaque
         data:
-          username: "admin"
-          password: "password"
+          login: login
+          password: password
+        data_file:
+          - ../resources/secret.file
       service:
         metadata:
-          name: "terraform-example"
+          name: "mosquitto"
+          namespace:
+          labels:
+            env: "test"
+          generate_name:
         spec:
-          session_affinity: "ClientIP"
           selector:
-            app: "terraform-example"
+            app: "mosquitto"
           port:
-            - port: 8080
-              target_port: 80
+            - name: "mosquitto-listener"
+              port: 1883
+              target_port: 1883
+            - name: "tomcat-listener"
+              port: 80
+              target_port: 8080
           type: LoadBalancer
     app_2:
       pod_autoscaler:
