@@ -4,7 +4,7 @@ Terraform external provider just handles strings in maps, so tests need to consi
 from sys import path, stderr
 
 try:
-    path.insert(1, '../../../test_fixtures/python_validator')
+    path.insert(1, '../../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
     print(e, file=stderr)
@@ -34,9 +34,10 @@ def test_src_files_manifest_format(query):
 
     for both app1 and app2 (default) but with slightly different content in appengine-web.xml
     """
-    #  If the default app has `env: standard` set which should override common, then the result for
-    #  the flex list should not include the default app
-    expected_data = {}
+    expected_data = {
+        "env": "flex",
+        "name": "app1"
+    }
 
     if query == expected_data:
         return {"result": "pass"}

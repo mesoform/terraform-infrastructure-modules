@@ -1,7 +1,7 @@
 from sys import path, stderr
 
 try:
-    path.insert(1, '../../test_fixtures/python_validator')
+    path.insert(1, '../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
     print(e, file=stderr)

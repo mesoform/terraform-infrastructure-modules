@@ -1,7 +1,7 @@
 from sys import path, stderr
 
 try:
-    path.insert(1, '../../test_fixtures/python_validator')
+    path.insert(1, '../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
     print(e, file=stderr)
@@ -16,22 +16,16 @@ def test_traffic_config(query):
     and should be transformed into a list of maps, which should have the configuration
     for each traffic setting.
 
+    This test ensures that there is no error if the traffic block has no settings as seen
+    below:
+
     E.g.
     traffic:
-      -
-        percent: 75
 
-    needs to be configured in google_cloud_run_service to match:
-    traffic{
-      percent = 75
-      latest_revision = true
-    }
+
     """
 
-    expected_data = {
-        "latest_revision": "true",
-        "percent": "75"
-    }
+    expected_data = {}
 
     if query == expected_data:
         return {"result": "pass"}
@@ -39,7 +33,6 @@ def test_traffic_config(query):
         return {"result" : "fail",
                 "expected" : "{}".format(expected_data),
                 "received" : "{}".format(query)}
-
 
 
 if __name__ == '__main__':

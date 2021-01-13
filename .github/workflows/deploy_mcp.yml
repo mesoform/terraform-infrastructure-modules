@@ -9,7 +9,7 @@ jobs:
   unit-tests:
     name: 'Deployment tests'
     runs-on: ubuntu-latest
-    if: contains(github.head_ref, 'mcp')
+
     env:
       working-directory: ./tests/mcp/deployment
       GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}"
