@@ -1,6 +1,3 @@
-"""
-Terraform external provider just handles strings in maps, so tests need to consider this
-"""
 from sys import path, stderr
 
 try:
@@ -9,16 +6,29 @@ try:
 except Exception as e:
     print(e, file=stderr)
 
-
 @python_validator
-def test_secret(query):
+def test_policy_members(query):
+    """
+    Tests that members and their roles are accessible.
+    The result shows the roles and how many members are assigned to that role.
+    Roles and members are defined like:
+
+    role:
+      members:
+        -{type}:{member}
+        -{type}:{member}
+    role2:
+      members:
+        -{type}
+
+    """
 
     expected_data = {
-
-        "login": "login",
-        "password": "password"
-
+        'viewer' : '2',
+        'admin' : '1'
     }
+
+
 
     if query == expected_data:
         return {"result": "pass"}
@@ -27,6 +37,5 @@ def test_secret(query):
                 "expected" : "{}".format(expected_data),
                 "received" : "{}".format(query)}
 
-
 if __name__ == '__main__':
-    test_secret()
+    test_policy_members()
