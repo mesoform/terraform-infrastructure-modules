@@ -18,29 +18,13 @@
 //  }
 //}
 
-//data external test_upload_manifest_format {
-//  query = local.upload_manifest
-//  program = ["python", "${path.module}/test_data_upload.py"]
-//}
-//output test_upload_manifest_format {
-//  value = data.external.test_upload_manifest_format.result
-//}
-//
-//
-//data external test_src_files_sha1sum_lookup {
-//  query = lookup(local.file_sha1sums, "app1", {})
-//  program = ["python", "${path.module}/test_app_sha1sums.py"]
-//}
-//output test_src_files_sha1sum_lookup {
-//  value = data.external.test_src_files_sha1sum_lookup.result
-//}
 
-data external test_src_files {
+data external test_manifest_to_src {
   query = local.src_files["app1"]
-  program = ["python", "${path.module}/test_src_files.py"]
+  program = ["python", "${path.module}/test_manifest_to_src.py"]
 }
 output test_src_files{
-  value = data.external.test_src_files.result
+  value = data.external.test_manifest_to_src.result
 }
 
 data  external test_flex_std_app1_separation {
