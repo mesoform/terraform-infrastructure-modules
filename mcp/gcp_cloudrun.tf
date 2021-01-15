@@ -120,7 +120,7 @@ resource "google_cloud_run_service" "self" {
     }
   }
   dynamic "traffic" {
-    for_each = local.cloudrun_traffic[each.key] == [] ? [{percent = 100}] : local.cloudrun_traffic[each.key]
+    for_each = local.cloudrun_traffic[each.key] == [] ? local.cloudrun_default.traffic : local.cloudrun_traffic[each.key]
     //noinspection HILUnresolvedReference
     content {
       percent         = traffic.value.percent
