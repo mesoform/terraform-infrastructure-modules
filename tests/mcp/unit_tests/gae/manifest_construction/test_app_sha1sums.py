@@ -5,7 +5,7 @@ from sys import path as sys_path, stderr
 from os import path as os_path
 
 try:
-    sys_path.insert(1, '../../../test_fixtures/python_validator')
+    sys_path.insert(1, '../../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
     print(e, file=stderr)

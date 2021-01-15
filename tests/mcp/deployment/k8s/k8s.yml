@@ -133,6 +133,7 @@ components:
               image: "nginx:1.7.8"
               port:
                 - container_port: 80
+
       service_account:
         metadata:
           name: "pod-app-service-account"
@@ -190,6 +191,7 @@ components:
                         value: Awesome
                     initial_delay_seconds: 3
                     period_seconds: 3
+
     app_4:
       k8s_persistent_volume_claim:
         metadata:
