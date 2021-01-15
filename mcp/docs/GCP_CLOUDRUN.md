@@ -30,7 +30,7 @@ provided you have the correct IAM permissions to access it.
 | `domain_name` | string | false | Custom domain name for service, domain must already exist| none |
 | `traffic` | list | false | list of traffic allocation configs across revisions| none |
 | `traffic.-.percent` | map | true if `traffic.-` exists | The percentage of traffic for revision, if `revision_name` is not specified latest revision is used| none |
-| `traffic.-.revision_name` | string | false | The name of the revision the traffic should be allocated to | 'latest_revision' is set to true by default |
+| `traffic.-.revision_name` | string | false | The name of the revision the traffic should be allocated to | 'latest_revision' is set to true if this key is not present  |
 
 #### IAM Usage
 ##### Policy/Member Settings
@@ -51,6 +51,12 @@ Similarly, if there are existing role bindings, which you would like to add a me
 
 More information can be found in the terraform [documentation](https://www.terraform.io/docs/providers/google/r/cloud_run_service_iam.html).
 
+#### Multiple Versions
+By default the revision name for a cloudrun deployment is auto-generated. 
+To specify a revision name for the cloudrun deployment, the key `components.specs.<app_name>.template.metadata.name` must be set, 
+following the format of `<app_name>-<revision_id>`. 
+
+
 #### Example
 ```yaml
 project_id: <id>
@@ -61,19 +67,16 @@ create_artifact_registry: true
 components:
   common: 
       
-
   specs:
     default:
       name: default
       metadata:
-        annotations:
-          'Top level': Annotations
+        
       template:
         metadata:
-          annotations:
-            "run.googleapis.com/client-name": "terraform"  
+          name: default-2
         containers:
-          image: location-docker.pkg.dev/project-id/repository/image
+          image: <location>-docker.pkg.dev/project-id/repository/image
           environment_vars:
             'EG': 'something'
             'EG2': 'something-else'
@@ -95,10 +98,9 @@ components:
       domain_name: "domain.com"
       #Use hyphens to separate traffic configurations, making a list of configurations
       traffic:
-        -
-          percent: 25
-        -
-         percent: 75
-         revision_name: "revision"
+        - percent: 25
+        - revision_name: "default-2"
+          percent: 75
+         
 
 ```

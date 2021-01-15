@@ -15,6 +15,9 @@ locals {
         "run.googleapis.com/client-name" = "terraform"
       }
     }
+    traffic = {
+      percentage = 100
+    }
   }
   user_cloudrun_config_yml  = fileexists(var.gcp_cloudrun_yml) ? file(var.gcp_cloudrun_yml) : null
   cloudrun                  = try(yamldecode(local.user_cloudrun_config_yml), {})

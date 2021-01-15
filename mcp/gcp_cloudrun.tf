@@ -124,7 +124,7 @@ resource "google_cloud_run_service" "self" {
     content {
       percent         = lookup(traffic.value, "percent", null)
       revision_name   = lookup(traffic.value, "revision_name", null)
-      latest_revision = lookup(traffic.value, "latest_revision", null)
+      latest_revision = lookup(traffic.value, "revision_name", null) == null ? true : false
     }
   }
 
@@ -154,7 +154,7 @@ data "google_iam_policy" "auth" {
 resource "google_cloud_run_service_iam_policy" "self" {
   for_each = {
     for key, specs in local.cloudrun_specs : key => specs
-      if lookup(local.cloudrun_iam[key], "replace_policy", true)
+      if ! specs.auth || lookup(local.cloudrun_iam[key], "replace_policy", false)
   }
   location = google_cloud_run_service.self[each.key].location
   project  = google_cloud_run_service.self[each.key].project
@@ -167,7 +167,7 @@ resource "google_cloud_run_service_iam_policy" "self" {
 resource "google_cloud_run_service_iam_binding" "self" {
   for_each = {
     for key, bindings in local.cloudrun_iam_bindings : key => bindings
-      if local.cloudrun_specs[key].auth && ! lookup(local.cloudrun_iam[key], "replace_policy", true)
+      if local.cloudrun_specs[key].auth && ! lookup(local.cloudrun_iam[key], "replace_policy", false)
   }
   project  = google_cloud_run_service.self[each.key].project
   location = google_cloud_run_service.self[each.key].location
