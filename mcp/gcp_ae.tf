@@ -108,10 +108,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   runtime_channel = lookup(each.value, "runtime_channel", null)
   runtime_main_executable_path = lookup(each.value, "runtime_main_executable_path", null)
   serving_status = lookup(each.value, "serving_status", null)
-  env_variables = merge(
-    lookup(local.gae.components.common, "env_variables", {}),
-    lookup(each.value, "env_variables", {})
-  )
+  env_variables = local.env_variables[each.key]
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
@@ -346,10 +343,7 @@ resource "google_app_engine_standard_app_version" "self" {
   instance_class = lookup(each.value, "instance_class", null)
   runtime_api_version = lookup(each.value, "runtime_api_version", null)
   threadsafe = lookup(each.value, "threadsafe", null)
-  env_variables = merge(
-    lookup(local.gae.components.common, "env_variables", {}),
-    lookup(each.value, "env_variables", {})
-  )
+  env_variables = local.env_variables[each.key]
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
