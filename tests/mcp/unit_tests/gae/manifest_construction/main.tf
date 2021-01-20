@@ -46,3 +46,10 @@ data external test_flex_std_default_separation {
 output test_flex_std_default_separation {
   value = data.external.test_flex_std_default_separation.result
 }
+data external test_env_variables {
+  query = lookup(local.env_variables, "app1", {})
+  program = ["python", "${path.module}/test_env_variables.py"]
+}
+output test_env_variables {
+  value = data.external.test_env_variables.result
+}

@@ -65,5 +65,11 @@ locals {
     }
   }
 
+  env_variables = {
+    for as, specs in local.as_all_specs: as => merge(
+      lookup(local.gae_components, "common", null ) == null ? {} : lookup(local.gae_components.common, "env_variables", {}),
+      lookup(specs, "env_variables", {}))
+  }
+
 }
 
