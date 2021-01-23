@@ -46,8 +46,6 @@ jobs:
         MESSAGE="PASSED: All unit tests passed"
         for dir in $(find $(pwd) \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
           echo ""
-          echo ""
-          echo ""
           cd $dir
           adapter_name=$(find . -name "*locals*" | sed -e "s/^.\///" -e "s/_locals.tf$//")
           echo -e "\033[1m${adapter_name^^} TESTS\033[0m"
@@ -65,6 +63,7 @@ jobs:
               EXIT_CODE=3
             fi
           done
+          echo ""
         done
-        echo $MESSAGE
+        echo ${MESSAGE^^}
         exit $EXIT_CODE
