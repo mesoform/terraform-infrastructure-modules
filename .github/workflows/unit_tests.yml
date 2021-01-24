@@ -62,7 +62,7 @@ jobs:
             fi
           done
         done
-        echo $MESSAGE
+        echo  -e "\033[1m${MESSAGE}\033[0m"
         exit $EXIT_CODE
 
     # TODO: Add steps for other infrastructure module unit tests

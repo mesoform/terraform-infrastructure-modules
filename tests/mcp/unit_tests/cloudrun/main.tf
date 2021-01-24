@@ -45,6 +45,6 @@ output test_traffic_empty {
   value = data.external.test_traffic_empty.result
 }
 
-
-
-
+output "test_regex" {
+  value = local.test
+}

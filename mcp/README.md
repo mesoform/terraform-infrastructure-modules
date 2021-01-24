@@ -142,6 +142,23 @@ components:
       runtime: java8
 ```
 
+### Setup.sh/Setup.ps1  
+This script will setup and manage the terraform infrastructure code. Run the script within a terraform directory for your 
+service, and it will configure the `main.tf` file, as well as allow you to deploy, destroy, and view the infrastructure.
+```
+mesoform-service/
+    L common.yml
+    L gcp_ae.yml
+    L micro-service1/
+    |     L src/
+    |     L resources/
+    L micro-service2/
+    |     L __init__.py
+    |     L resources
+    L terraform
+    |     L main.tf
+```
+The script also will configure git and terraform workspaces for deployments of multiple versions of services.
 
 ## Contributing
 

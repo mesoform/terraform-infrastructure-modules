@@ -7,7 +7,7 @@ entry(){
   echo ""
   echo "Select Option: "
 
-  select choice in "setup" "deploy" "get" "destroy" "help" "exit"; do
+  select choice in "setup" "deploy" "new-version" "get" "destroy" "help" "exit"; do
     case $choice in 
       setup )
         echo ""
@@ -27,6 +27,11 @@ entry(){
         installDependencies
         runDestroy
         ;;
+      new-version )
+        installDependencies
+        runNewVersion
+        ;;
+
       help) help;;
       exit) exit;;
       *) exit;;
@@ -232,6 +237,123 @@ runDeploy() {
   echo "Creating Plan ..."
   echo ""
   terraform apply
+  entry
+}
+
+runNewVersion(){
+  echo ""
+  echo "Checking for repository"
+  echo ""
+  if [ $(command -v git) ]
+  then
+    cd ..
+    git init
+    git add -A
+    git commit -m "initial commit"
+    echo "New version of: "
+    select module in "AppEngine" "CloudRun"; do
+      case $module in
+        AppEngine )
+          appEngineVersion
+          ;;
+        CloudRun )
+          cloudRunVersion
+          entry
+          ;;
+        * )
+          echo ""
+          echo "Invalid Choice"
+          echo ""
+          entry
+          ;;
+      esac
+    done
+  else
+    echo ""
+    echo "Git not installed, please install"
+    echo ""
+    entry
+  fi
+}
+
+appEngineVersion(){
+  echo ""
+  echo "App Engine Version Setup"
+  echo ""
+  read -r -p "What is the project id: " project
+  read -r -p "What is the version name/id: " version
+  echo ""
+  echo "Continue with these settings? "
+  echo "    Project ID: $project"
+  echo "    Version: $version "
+  echo ""
+
+  select item in "yes" "no" "cancel"; do
+    case $item in
+      yes )
+        git checkout -b gcp-ae-"$version"
+        cd terraform
+        terraform workspace new "gcp-ae-$version"
+        terraform init
+        terraform import 'module.mcp.google_app_engine_application.self[0]' "$project"
+        versionHelp
+        ;;
+      cancel )
+        echo "Cancelling setup"
+        entry
+        ;;
+      * )
+        appEngineVersion
+        ;;
+    esac
+  done
+}
+
+cloudRunVersion(){
+  echo ""
+  echo "Cloud Run Revision Setup"
+  echo ""
+  read -r -p "Enter project id: " project
+  read -r -p "Enter name of the cloudrun service? " service
+  read -r -p "Enter revision name/id: " revision
+  read -r -p "Enter the location_id of the service? " location
+  echo "Continue with these settings? "
+  echo "    Project ID: $project"
+  echo "    Service: $service"
+  echo "    Revision: $revision"
+  echo "    Location: $location "
+  echo ""
+
+  select item in "yes" "no" "cancel"; do
+    case $item in
+      yes )
+        git checkout -b gcp-cloudrun-"$revision"
+        cd terraform
+        terraform workspace new "gcp-cloudrun-$revision"
+        terraform import "module.mcp.google_cloud_run_service.self[\"${service}\"]" "$location"/"$project"/"$service"
+        terraform import "module.mcp.google_cloud_run_service_iam_policy.self[\"${service}\"]" projects/"$project"/locations/"$location"/services/"$service"
+        versionHelp
+        ;;
+      cancel )
+        echo "Cancelling setup"
+        entry
+        ;;
+      * )
+        cloudRunVersion
+        ;;
+    esac
+  done
+}
+
+versionHelp(){
+  echo ""
+  echo "Imports Complete"
+  echo ""
+  echo "To update the version for your services: "
+  echo "  1. Update the version ID or revision name, as well as any other configuration changes, in the relevant yaml files"
+  echo "  2. Run 'terraform apply' to deploy changes"
+  echo "  3. Run 'git add -A && commit -m \"<commit message>\"' to commit changes to yaml files and state files"
+  echo ""
   entry
 }
 
