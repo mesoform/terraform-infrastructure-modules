@@ -146,16 +146,179 @@ function getState() {
     terraform show
 }
 
+function runNewVersion(){
+    Write-Host ""
+    Write-Host "Checking for repository ... "
+    Write-Host ""
+    if ([bool](Get-Command -Name git -ErrorAction SilentlyContinue)) {
+        cd ..
+        git init
+        git add -A
+        git commit -m initial commit
+        Write-Host "New version of: 1) AppEngine   2) Cloudrun "
+        Write-Host "    1) App Engine  "
+        Write-Host "    2) Cloud Run "
+        Write-Host "    3) Cancel "
+        Write-Host ""
+        $choice = Read-Host
+        switch ($choice) {
+            1{
+                appEngineVersion
+                break
+            }
+            2{
+                cloudRunVersion
+                break
+            }
+            3{
+                entry
+                break
+            }
+            default{
+                Write-Host ""
+                Write-Host "Invalid Inupt"
+                Write-Host ""
+                runNewVersion
+                break
+            }
+        }
+    } else {
+        Write-Host ""
+        Write-Host "Git not installed, please install "
+        Write-Host ""
+    }
+}
+
+function appEngineVersion(){
+    Write-Host ""
+    Write-Host "App Engine Versionn Setup"
+    Write-Host ""
+    $project = Read-Host -Prompt "Enter project id: "
+    $version = Read-Host -Prompt "Enter version name/id: "
+    Write-Host "Continue with these settings? "
+    Write-Host "    Project Id: $project"
+    Write-Host "    version: $version"
+    $continue = Read-Host -Prompt "[y]es, [n]o or [c]ancel"
+    switch ($continue){
+        y{
+            git stash
+            $branch = "gcp-ae-$revision"
+            if ([bool](git branch --list $branch))
+            {
+                git checkout $branch
+            } else {
+                git checkout -b $branch
+            }
+            cd terraform
+            terraform workspace new $branch
+            terraform init
+            try {
+                terraform import 'module.mcp.google_app_engine_application.self[0]' "$project"
+            }
+            catch {
+                Write-Host "Import Failed"
+                exit
+            }
+            break
+        }
+        n{
+            appEngineVersion
+            break
+        }
+        c{
+            Write-Host ""
+            Write-Host "Cancelled Version Setup"
+            Write-Host ""
+            entry
+            break
+        }
+        default{
+            Write-Host "Invalid choice"
+            appEngineVersion
+            break
+        }
+    }
+}
+
+function cloudRunVersion(){
+    Write-Host ""
+    Write-Host "Cloud Run Revision Setup"
+    Write-Host ""
+    $project = Read-Host -Prompt "Enter project id: "
+    $service = Read-Host -Prompt "Enter name of the Cloud Run service: "
+    $revision = Read-Host -Prompt "Enter revision name/id: "
+    $location = Read-Host -Prompt "Enter the location_id of the service: "
+    Write-Host "Continue with these settings? "
+    Write-Host "    Project Id: $project"
+    Write-Host "    Service: $service"
+    Write-Host "    Revision: $revision"
+    Write-Host "    Location: $location"
+    $continue = Read-Host -Prompt "[y]es, [n]o or [c]ancel"
+    switch ($continue){
+        y{
+            git stash
+            $branch = "gcp-cloudrun-$revision"
+            if ([bool](git branch --list $branch))
+            {
+                git checkout $branch
+            } else {
+                git checkout -b $branch
+            }
+            cd terraform
+            terraform workspace new $branch
+            terraform init
+            try {
+                terraform import "module.mcp.google_cloud_run_service.self[\"${service}\"]" "$location"/"$project"/"$service"
+                terraform import "module.mcp.google_cloud_run_service_iam_policy.self[\"${service}\"]" projects/"$project"/locations/"$location"/services/"$service"
+            }
+            catch {
+                Write-Host "Import Failed"
+                exit
+            }
+            versionHelp
+            break
+        }
+        n{
+            cloudRunVersion
+            break
+        }
+        c{
+            Write-Host ""
+            Write-Host "Cancelled Version Setup"
+            Write-Host ""
+            entry
+            break
+        }
+        default{
+            cloudRunVersion
+            break
+        }
+    }
+}
+
+function versionHelp(){
+    Write-Host ""
+    Write-Host "Workspace Setup and Imports Completed"
+    Write-Host ""
+    Write-Host "To update the version for your services: "
+    Write-Host "  1. Update the version ID or revision name, as well as any other configuration changes, in the relevant yaml files"
+    Write-Host "  2. Run 'terraform apply' to deploy changes"
+    Write-Host "  3. Run 'git add -A && commit -m ""<commit message>""' to commit changes to yaml files and state files"
+    Write-Host ""
+    entry
+}
+
 function entry() {
     Write-Host "------------------------------------------------------"
     Write-Host "Multi-Cloud Plaform Setup"
     Write-Host ""
     Write-Host "Select Option:"
-    Write-Host "1: Setup     - Configure main.tf for services"
-    Write-Host "2: Deploy    - Deploy Services"
-    Write-Host "3: Destroy   - Destroy current infrastructure resources"
-    Write-Host "4: Get       - Get the current state of infrastructure"
-    Write-Host "5: Exit      - Exit Setup"
+    Write-Host "1: Setup       - Configure main.tf for services"
+    Write-Host "2: Deploy      - Deploy Services"
+    Write-Host "3: New version - Set up new version of deployment"
+    Write-Host "4: Destroy     - Destroy current infrastructure resources"
+    Write-Host "5: Get         - Get the current state of infrastructure"
+    Write-Host "6: Exit        - Exit Setup"
     Write-Host ""
     $choice = Read-Host -Prompt "Input Choice"
     switch ($choice)
@@ -169,14 +332,18 @@ function entry() {
             break
         }
         3{
+            runNewVersion
+            break
+        }       
+        4{
             runDestroy
             break
         }
-        4{
+        5{
             getState
             break
         }
-        5{
+        6{
             exit
         }
         default{

@@ -242,7 +242,7 @@ runDeploy() {
 
 runNewVersion(){
   echo ""
-  echo "Checking for repository"
+  echo "Checking for repository ..."
   echo ""
   if [ $(command -v git) ]
   then
@@ -280,8 +280,8 @@ appEngineVersion(){
   echo ""
   echo "App Engine Version Setup"
   echo ""
-  read -r -p "What is the project id: " project
-  read -r -p "What is the version name/id: " version
+  read -r -p "Enter project id: " project
+  read -r -p "Enter the version name/id: " version
   echo ""
   echo "Continue with these settings? "
   echo "    Project ID: $project"
@@ -321,9 +321,9 @@ cloudRunVersion(){
   echo "Cloud Run Revision Setup"
   echo ""
   read -r -p "Enter project id: " project
-  read -r -p "Enter name of the cloudrun service? " service
+  read -r -p "Enter name of the Cloud Run service: " service
   read -r -p "Enter revision name/id: " revision
-  read -r -p "Enter the location_id of the service? " location
+  read -r -p "Enter the location_id of the service: " location
   echo "Continue with these settings? "
   echo "    Project ID: $project"
   echo "    Service: $service"
