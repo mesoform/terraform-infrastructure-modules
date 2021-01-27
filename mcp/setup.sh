@@ -3,12 +3,12 @@ set -o pipefail
 
 entry(){
   echo ""
-  echo "Multi-Cloud-Platform Setup"
+  echo "MCP Setup"
   echo ""
   echo "Select Option: "
 
   select choice in "setup" "deploy" "new-version" "get" "destroy" "help" "exit"; do
-    case $choice in 
+    case $choice in
       setup )
         echo ""
         echo "Starting setup ..."
@@ -291,11 +291,18 @@ appEngineVersion(){
   select item in "yes" "no" "cancel"; do
     case $item in
       yes )
-        git checkout -b gcp-ae-"$version"
+        git stash
+        BRANCH="gcp-ae-$version"
+        if [ $(git branch --list "$BRANCH") ]
+        then
+          git checkout "$BRANCH"
+        else
+          git checkout -b "$BRANCH"
+        fi
         cd terraform
-        terraform workspace new "gcp-ae-$version"
+        terraform workspace new "$BRANCH"
         terraform init
-        terraform import 'module.mcp.google_app_engine_application.self[0]' "$project"
+        terraform import 'module.mcp.google_app_engine_application.self[0]' "$project" || echo "Import failed /n" && exit
         versionHelp
         ;;
       cancel )
@@ -327,11 +334,19 @@ cloudRunVersion(){
   select item in "yes" "no" "cancel"; do
     case $item in
       yes )
-        git checkout -b gcp-cloudrun-"$revision"
+        git stash
+        BRANCH="gcp-cloudrun-$revision"
+        if [ $(git branch --list $BRANCH) ]
+        then
+          git checkout "$BRANCH"
+        else
+          git checkout -b "$BRANCH"
+        fi
         cd terraform
-        terraform workspace new "gcp-cloudrun-$revision"
-        terraform import "module.mcp.google_cloud_run_service.self[\"${service}\"]" "$location"/"$project"/"$service"
-        terraform import "module.mcp.google_cloud_run_service_iam_policy.self[\"${service}\"]" projects/"$project"/locations/"$location"/services/"$service"
+        terraform workspace new "$BRANCH"
+        terraform init
+        terraform import "module.mcp.google_cloud_run_service.self[\"${service}\"]" "$location"/"$project"/"$service" || (echo "Import failed" && exit)
+        terraform import "module.mcp.google_cloud_run_service_iam_policy.self[\"${service}\"]" projects/"$project"/locations/"$location"/services/"$service" || (echo "Import failed" && exit)
         versionHelp
         ;;
       cancel )
@@ -347,7 +362,7 @@ cloudRunVersion(){
 
 versionHelp(){
   echo ""
-  echo "Imports Complete"
+  echo "Workspace Setup and Imports Completed"
   echo ""
   echo "To update the version for your services: "
   echo "  1. Update the version ID or revision name, as well as any other configuration changes, in the relevant yaml files"
@@ -379,7 +394,7 @@ getState(){
 # Command selector
 # ####################################################
 OPTION=$1
-case $OPTION in 
+case $OPTION in
   "setup" | "-setup")
     runSetup
     ;;
@@ -392,6 +407,9 @@ case $OPTION in
     ;;
   "get" | "-get")
     getState
+    ;;
+  "new-version" | "-new-version")
+    runNewVersion
     ;;
   "destroy" | "-destroy")
     runDestroy
