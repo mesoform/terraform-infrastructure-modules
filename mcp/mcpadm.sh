@@ -75,7 +75,7 @@ help() {
         exit
         ;;
       new-version )
-        echo "new-version creates a new git repository and terraform workspace to setup deployment of a new version of the service."
+        echo "new-version creates a new terraform workspace to setup deployment of a new version of the service."
         echo ""
         echo "Usage: ${SCRIPT_NAME} new-version [options]"
         echo ""
@@ -113,7 +113,6 @@ help() {
 
 
 }
-
 
 installDependencies() {
   echo ""
@@ -308,57 +307,43 @@ runNewVersion(){
   then
     help "$1"
   else
-    echo ""
-    echo "Checking for repository ..."
-    echo ""
-    if [ $(command -v git) ]
+    if [ $# -lt 2 ]
     then
-      cd ..
-      git init
-      git add -A
-      git commit -m "Initial commit for service version management"
-      if [ $# -lt 2 ]
-      then
-        echo "New version of: "
-        select module in "AppEngine" "CloudRun"; do
-          case $module in
-            AppEngine )
-              appEngineVersion
-              ;;
-            CloudRun )
-              cloudRunVersion
-              entry
-              ;;
-            * )
-              echo ""
-              echo "Invalid Choice"
-              echo ""
-              entry
-              ;;
-          esac
-        done
-      else
-        platform=${2,,}
-        case $platform in
-          appengine )
+      echo "New version of: "
+      select module in "AppEngine" "CloudRun"; do
+        case $module in
+          AppEngine )
             appEngineVersion
             ;;
-          cloudrun )
+          CloudRun )
             cloudRunVersion
+            entry
             ;;
-          *)
+          * )
             echo ""
-            echo "Invalid Argument $2, must be one of 'appengine' or 'cloudrun'"
+            echo "Invalid Choice"
             echo ""
+            entry
             ;;
         esac
-      fi
+      done
     else
-      echo ""
-      echo "Git not installed, please install"
-      echo ""
-      entry
+      platform=${2,,}
+      case $platform in
+        appengine )
+          appEngineVersion
+          ;;
+        cloudrun )
+          cloudRunVersion
+          ;;
+        *)
+          echo ""
+          echo "Invalid Argument $2, must be one of 'appengine' or 'cloudrun'"
+          echo ""
+          ;;
+      esac
     fi
+
   fi
 
 }
@@ -368,8 +353,6 @@ runSetVersion(){
   then
     runGetVersion
     read -r -p "Enter version to switch to: " switch
-    git stash
-    git checkout "$switch" || echo "Not valid version branch, please enter valid version" && exit
     terraform workspace select "$switch" || echo "Not valid version workspcae, please enter valid version" && exit
     entry
   else
@@ -380,13 +363,9 @@ runSetVersion(){
     then
       runGetVersion "$@"
       read -r -p "Enter version to switch to: " switch
-      git stash
-      git checkout "$switch" || echo "Not a valid version branch, please enter valid version" && exit
       terraform workspace select "$switch" || echo "Not a valid version workspace, please enter valid version" && exit
       exit
     else
-      git stash
-      git checkout "$2" || echo "Not a valid version branch, please enter valid version" && exit
       terraform workspace select "$2" || echo "Not a valid version workspace, please enter valid version" && exit
       exit
     fi
@@ -430,15 +409,6 @@ appEngineVersion(){
   select item in "yes" "no" "cancel"; do
     case $item in
       yes )
-        git stash
-        BRANCH="gcp-ae-$version"
-        if [ $(git branch --list "$BRANCH") ]
-        then
-          git checkout "$BRANCH"
-        else
-          git checkout -b "$BRANCH"
-        fi
-        cd terraform
         terraform workspace new "$BRANCH"
         terraform init
         terraform import 'module.mcp.google_app_engine_application.self[0]' "$project" || echo "Import failed /n" && exit
@@ -473,15 +443,6 @@ cloudRunVersion(){
   select item in "yes" "no" "cancel"; do
     case $item in
       yes )
-        git stash
-        BRANCH="gcp-cloudrun-$revision"
-        if [ $(git branch --list $BRANCH) ]
-        then
-          git checkout "$BRANCH"
-        else
-          git checkout -b "$BRANCH"
-        fi
-        cd terraform
         terraform workspace new "$BRANCH"
         terraform init
         terraform import "module.mcp.google_cloud_run_service.self[\"${service}\"]" "$location"/"$project"/"$service" || (echo "Import failed" && exit)
@@ -506,7 +467,7 @@ versionHelp(){
   echo "To update the version for your services: "
   echo "  1. Update the version ID or revision name, as well as any other configuration changes, in the relevant yaml files"
   echo "  2. Run 'terraform apply' to deploy changes"
-  echo "  3. Run 'git add -A && commit -m \"<commit message>\"' to commit changes to yaml files and state files"
+  echo "  3. Commit changes to project to a VCS branch to maintain differences to version "
   echo ""
   entry
 }

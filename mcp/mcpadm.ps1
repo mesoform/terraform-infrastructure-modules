@@ -93,6 +93,7 @@ function gcsBackend() {
     "    prefix = ""$prefix""" >> main.tf
     "  }" >> main.tf
 }
+
 function s3Backend() {
     "  backend ""gcs""{" >> main.tf
     $bucket = Read-Host -Prompt "Enter bucket name"
@@ -103,6 +104,7 @@ function s3Backend() {
     "    region = ""$region""" >> main.tf
     "  }" >> main.tf
 }
+
 function httpBackend() {
     "  backend ""gcs""{" >> main.tf
     $address = Read-Host -Prompt "Enter address"
@@ -113,6 +115,7 @@ function httpBackend() {
     "    unlock_address = ""$unlock_address""" >> main.tf
     "  }" >> main.tf
 }
+
 function kubernetesBackend() {
     "  backend ""gcs""{" >> main.tf
     $secret_suffix = Read-Host -Prompt "Ebter secret suffix: "
@@ -121,7 +124,6 @@ function kubernetesBackend() {
     "    load_config_file = ""$load_config_file""" >> main.tf
     "  }" >> main.tf
 }
-
 
 function runDeploy() {
     Write-Host ""
@@ -150,43 +152,34 @@ function runNewVersion(){
     Write-Host ""
     Write-Host "Checking for repository ... "
     Write-Host ""
-    if ([bool](Get-Command -Name git -ErrorAction SilentlyContinue)) {
-        cd ..
-        git init
-        git add -A
-        git commit -m initial commit
-        Write-Host "New version of: 1) AppEngine   2) Cloudrun "
-        Write-Host "    1) App Engine  "
-        Write-Host "    2) Cloud Run "
-        Write-Host "    3) Cancel "
-        Write-Host ""
-        $choice = Read-Host
-        switch ($choice) {
-            1{
-                appEngineVersion
-                break
-            }
-            2{
-                cloudRunVersion
-                break
-            }
-            3{
-                entry
-                break
-            }
-            default{
-                Write-Host ""
-                Write-Host "Invalid Inupt"
-                Write-Host ""
-                runNewVersion
-                break
-            }
+    Write-Host "New version of: 1) AppEngine   2) Cloudrun "
+    Write-Host "    1) App Engine  "
+    Write-Host "    2) Cloud Run "
+    Write-Host "    3) Cancel "
+    Write-Host ""
+    $choice = Read-Host
+    switch ($choice) {
+        1{
+            appEngineVersion
+            break
         }
-    } else {
-        Write-Host ""
-        Write-Host "Git not installed, please install "
-        Write-Host ""
+        2{
+            cloudRunVersion
+            break
+        }
+        3{
+            entry
+            break
+        }
+        default{
+            Write-Host ""
+            Write-Host "Invalid Inupt"
+            Write-Host ""
+            runNewVersion
+            break
+        }
     }
+
 }
 
 function appEngineVersion(){
@@ -201,14 +194,6 @@ function appEngineVersion(){
     $continue = Read-Host -Prompt "[y]es, [n]o or [c]ancel"
     switch ($continue){
         y{
-            git stash
-            $branch = "gcp-ae-$revision"
-            if ([bool](git branch --list $branch))
-            {
-                git checkout $branch
-            } else {
-                git checkout -b $branch
-            }
             cd terraform
             terraform workspace new $branch
             terraform init
@@ -256,14 +241,6 @@ function cloudRunVersion(){
     $continue = Read-Host -Prompt "[y]es, [n]o or [c]ancel"
     switch ($continue){
         y{
-            git stash
-            $branch = "gcp-cloudrun-$revision"
-            if ([bool](git branch --list $branch))
-            {
-                git checkout $branch
-            } else {
-                git checkout -b $branch
-            }
             cd terraform
             terraform workspace new $branch
             terraform init
