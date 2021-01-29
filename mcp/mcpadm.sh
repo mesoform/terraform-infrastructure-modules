@@ -3,11 +3,11 @@ set -o pipefail
 
 entry(){
   echo ""
-  echo "MCP Setup"
+  echo "Multi-Cloud-Platform Setup"
   echo ""
   echo "Select Option: "
 
-  select choice in "setup" "deploy" "new-version" "get" "destroy" "help" "exit"; do
+  select choice in "setup" "deploy" "get" "destroy" "help" "new-version" "get-version" "set-version" "exit"; do
     case $choice in
       setup )
         echo ""
@@ -20,15 +20,18 @@ entry(){
         runDeploy
         ;;
       get )
-        installDependencies
         getState
         ;;
       destroy )
-        installDependencies
         runDestroy
         ;;
       new-version )
-        installDependencies
+        runNewVersion
+        ;;
+      set-version )
+        runNewVersion
+        ;;
+      get-version )
         runNewVersion
         ;;
 
@@ -41,14 +44,74 @@ entry(){
 }
 
 help() {
-  echo "Usage: ${SCRIPT_NAME} <command> [options]"
-  echo ""
-  echo "Commands:"
-  echo "  setup      Setup Terraform service deployment"
-  echo "  get        Get Terraform state for current direectory"
-  echo "  destroy    Destroy Terraform infrastructure"
-  echo ""
-  entry
+  if [ $# -lt 1 ]
+  then
+    echo "Usage: ${SCRIPT_NAME} <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  setup        -  Setup Terraform service deployment"
+    echo "  get          -  Get Terraform state for current directory"
+    echo "  deploy       -  Deploy configured infrastructure"
+    echo "  destroy      -  Destroy Terraform infrastructure"
+    echo "  new-version  -  Setup new branch and workspace for new version of service"
+    echo "  get-version  -  List all versions of a service "
+    echo "  set-version  -  Switch to version of service"
+    echo ""
+    entry
+  else
+    case $1 in
+      help )
+        echo "Usage: ${SCRIPT_NAME} <command> [options]"
+        echo ""
+        echo "Commands:"
+        echo "  setup        -  Setup Terraform service deployment"
+        echo "  get          -  Get Terraform state for current directory"
+        echo "  deploy       -  Deploy configured infrastructure"
+        echo "  destroy      -  Destroy Terraform infrastructure"
+        echo "  new-version  -  Setup new branch and workspace for new version of service"
+        echo "  get-version  -  List all versions of a service "
+        echo "  set-version  -  Switch to version of service"
+        echo ""
+        exit
+        ;;
+      new-version )
+        echo "new-version creates a new git repository and terraform workspace to setup deployment of a new version of the service."
+        echo ""
+        echo "Usage: ${SCRIPT_NAME} new-version [options]"
+        echo ""
+        echo "Options:"
+        echo "  appengine        -  New version of App Engine service"
+        echo "  cloudrun         -  New version of Cloud Run service"
+        echo ""
+        exit
+        ;;
+      get-version )
+        echo "list-version lists all versions of services in terraform infrastructure"
+        echo ""
+        echo "Usage: ${SCRIPT_NAME} get-version [options]"
+        echo ""
+        echo "Options:"
+        echo "  appengine        -  List versions of App Engine service"
+        echo "  cloudrun         -  List versions of Cloud Run service"
+        echo ""
+        exit
+        ;;
+      set-version )
+        echo "set-version changes to different version of service"
+        echo ""
+        echo "Usage: ${SCRIPT_NAME} set-version [options]"
+        echo ""
+        echo "Options:"
+        echo "  appengine        -  List versions of App Engine service and set version to choice"
+        echo "  cloudrun         -  List versions of Cloud Run service and set version to choice"
+        echo "  <version-name>   -  Set version as <version-name> if it exists"
+        echo ""
+        exit
+        ;;
+    esac
+  fi
+
+
 }
 
 
@@ -241,39 +304,115 @@ runDeploy() {
 }
 
 runNewVersion(){
-  echo ""
-  echo "Checking for repository ..."
-  echo ""
-  if [ $(command -v git) ]
+  if [ $# == 2 ] && [[ "$2" =~ (-)*(h)+(elp)? ]]
   then
-    cd ..
-    git init
-    git add -A
-    git commit -m "initial commit"
-    echo "New version of: "
-    select module in "AppEngine" "CloudRun"; do
-      case $module in
-        AppEngine )
-          appEngineVersion
-          ;;
-        CloudRun )
-          cloudRunVersion
-          entry
-          ;;
-        * )
-          echo ""
-          echo "Invalid Choice"
-          echo ""
-          entry
-          ;;
-      esac
-    done
+    help "$1"
   else
     echo ""
-    echo "Git not installed, please install"
+    echo "Checking for repository ..."
     echo ""
-    entry
+    if [ $(command -v git) ]
+    then
+      cd ..
+      git init
+      git add -A
+      git commit -m "Initial commit for service version management"
+      if [ $# -lt 2 ]
+      then
+        echo "New version of: "
+        select module in "AppEngine" "CloudRun"; do
+          case $module in
+            AppEngine )
+              appEngineVersion
+              ;;
+            CloudRun )
+              cloudRunVersion
+              entry
+              ;;
+            * )
+              echo ""
+              echo "Invalid Choice"
+              echo ""
+              entry
+              ;;
+          esac
+        done
+      else
+        platform=${2,,}
+        case $platform in
+          appengine )
+            appEngineVersion
+            ;;
+          cloudrun )
+            cloudRunVersion
+            ;;
+          *)
+            echo ""
+            echo "Invalid Argument $2, must be one of 'appengine' or 'cloudrun'"
+            echo ""
+            ;;
+        esac
+      fi
+    else
+      echo ""
+      echo "Git not installed, please install"
+      echo ""
+      entry
+    fi
   fi
+
+}
+
+runSetVersion(){
+  if [ $# -lt 2 ]
+  then
+    runGetVersion
+    read -r -p "Enter version to switch to: " switch
+    git stash
+    git checkout "$switch" || echo "Not valid version branch, please enter valid version" && exit
+    terraform workspace select "$switch" || echo "Not valid version workspcae, please enter valid version" && exit
+    entry
+  else
+    if [[ "$2" =~ (-)*(h)+(elp)? ]]
+    then
+      help "$1"
+    elif [ "$2" == "cloudrun" ] || [ "$2" == "appengine" ]
+    then
+      runGetVersion "$@"
+      read -r -p "Enter version to switch to: " switch
+      git stash
+      git checkout "$switch" || echo "Not a valid version branch, please enter valid version" && exit
+      terraform workspace select "$switch" || echo "Not a valid version workspace, please enter valid version" && exit
+      exit
+    else
+      git stash
+      git checkout "$2" || echo "Not a valid version branch, please enter valid version" && exit
+      terraform workspace select "$2" || echo "Not a valid version workspace, please enter valid version" && exit
+      exit
+    fi
+  fi
+}
+
+runGetVersion(){
+  echo ""
+  echo "Versions:"
+  echo ""
+  if [ $# -lt 2 ]
+  then
+    terraform workspace list
+    entry
+  else
+    versions=($(terraform workspace list))
+    for version in "${versions[@]}"
+    do
+      if [[ "$version" == *$2* ]]
+      then
+        echo "$version"
+      fi
+    done
+  fi
+  echo ""
+  [ "$1" == "get-version" ] && exit
 }
 
 appEngineVersion(){
@@ -373,7 +512,6 @@ versionHelp(){
 }
 
 runDestroy() {
-
   echo ""
   echo "Creating plan for destroying resources..."
   echo ""
@@ -395,24 +533,30 @@ getState(){
 # ####################################################
 OPTION=$1
 case $OPTION in
-  "setup" | "-setup")
-    runSetup
+  setup )
+    runSetup "$@"
     ;;
-  "deploy" | "-deploy")
+  deploy )
     installDependencies
-    runDeploy
+    runDeploy "$@"
     ;;
   "help" | "-help")
     help
     ;;
   "get" | "-get")
-    getState
+    getState "$@"
     ;;
   "new-version" | "-new-version")
-    runNewVersion
+    runNewVersion "$@"
+    ;;
+  "set-version" | "-set-version")
+    runSetVersion "$@"
+    ;;
+  "get-version" | "-get-version")
+    runGetVersion "$@"
     ;;
   "destroy" | "-destroy")
-    runDestroy
+    runDestroy "$@"
     ;;
   *)
     entry
