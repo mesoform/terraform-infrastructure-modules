@@ -29,14 +29,14 @@ def test_src_files_manifest_format(query):
         "appengine-web.xml":
             "https://storage.googleapis.com/protean-buffer-230514/app1/build/exploded-app1/WEB-INF/appengine-web.xml",
         "DataServicesKt$mockProviders$1.class":
-             "https://storage.googleapis.com/protean-buffer-230514/app1/build/exploded-app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
+            "https://storage.googleapis.com/protean-buffer-230514/app1/build/exploded-app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
     }
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':

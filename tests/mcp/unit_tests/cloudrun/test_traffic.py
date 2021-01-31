@@ -6,6 +6,7 @@ try:
 except Exception as e:
     print(e, file=stderr)
 
+
 @python_validator
 def test_traffic_config(query):
     """
@@ -36,10 +37,9 @@ def test_traffic_config(query):
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
-
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':
