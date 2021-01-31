@@ -7,23 +7,12 @@ try:
     path.insert(1, '../../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
-    print(e, file=stderr)
+    print(e, stderr)
 
-
-@python_validator
-def test_pod_autoscaler(query):
-    expected_data = {
-        "kind": "Deployment",
-        "name": "MyApp"
-    }
-
-    if query == expected_data:
-        return {"result": "pass"}
-    else:
-        return {"result": "fail",
-                "expected": "{}".format(expected_data),
-                "received": "{}".format(query)}
-
+expected_data = {
+    "kind": "Deployment",
+    "name": "MyApp"
+}
 
 if __name__ == '__main__':
-    test_pod_autoscaler()
+    python_validator(expected_data)

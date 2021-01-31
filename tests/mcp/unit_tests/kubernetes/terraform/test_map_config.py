@@ -4,12 +4,9 @@ try:
     path.insert(1, '../../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
-    print(e, file=stderr)
+    print(e, stderr)
 
-
-@python_validator
-def test_map_config(query):
-    """
+"""
     Checks that the map configuration for k8s resources are configured correctly.
     Given a k8s_*.yml file in a dir /{dirname}, a map should be produced that takes the dirname as
     the key with the value being a map with the name of the resource, to all of the configuration settings.
@@ -26,19 +23,11 @@ def test_map_config(query):
     }
 
     This tests whether the correct file name, and service key is given
-    """
+"""
 
-    expected_data = {
-        "test_app_1": "service"
-    }
-
-    if query == expected_data:
-        return {"result": "pass"}
-    else:
-        return {"result": "fail",
-                "expected": "{}".format(expected_data),
-                "received": "{}".format(query)}
-
+expected_data = {
+    "test_app_1": "service"
+}
 
 if __name__ == '__main__':
-    test_map_config()
+    python_validator(expected_data)

@@ -7,7 +7,7 @@ try:
     path.insert(1, '../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
-    print(e, file=stderr)
+    print(e, stderr)
 
 
 @python_validator
