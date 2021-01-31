@@ -6,6 +6,7 @@ try:
 except Exception as e:
     print(e, file=stderr)
 
+
 @python_validator
 def test_map_config(query):
     """
@@ -28,16 +29,15 @@ def test_map_config(query):
     """
 
     expected_data = {
-        "test_app_1" : "service"
+        "test_app_1": "service"
     }
 
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
-
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':
