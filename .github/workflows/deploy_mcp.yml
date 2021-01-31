@@ -3,7 +3,8 @@ name: 'Deployment Tests'
 on:
   push:
     branches:
-      - master
+      - main
+      - develop
 
 # a comment
 jobs:

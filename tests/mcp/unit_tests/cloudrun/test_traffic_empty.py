@@ -4,7 +4,8 @@ try:
     path.insert(1, '../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
-    print(e, file=stderr)
+    print(e, stderr)
+
 
 @python_validator
 def test_traffic_config(query):
@@ -30,9 +31,9 @@ def test_traffic_config(query):
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':
