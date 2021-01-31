@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - master
-    types: [opened, synchonize, reopened, labeled]
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches:
       - master
@@ -45,14 +45,16 @@ jobs:
         cd unit_tests
         MESSAGE="PASSED: All unit tests passed"
         for dir in $(find $(pwd) \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
-          echo "Directory: ${dir}"
+          echo ""
           cd $dir
-          terraform init
-          terraform apply -auto-approve
+          adapter_name=$(find . -name "*locals*" | sed -e "s/^.\///" -e "s/_locals.tf$//")
+          echo -e "\033[1m${adapter_name^^} TESTS\033[0m"
+          terraform init > /dev/null
+          terraform apply -auto-approve > /dev/null
           for key in $(terraform output -json | jq -r 'keys[]'); do
             output=$(terraform output -json $key)
             result=$(echo $output | jq -r '.result')
-            echo ${result^^}
+            echo "${key}: ${result^^}"
             if [ "$result" != "pass" ]
             then
               MESSAGE="FAIL: There are failed unit tests"
@@ -61,8 +63,7 @@ jobs:
               EXIT_CODE=3
             fi
           done
+          echo ""
         done
-        echo $MESSAGE
+        echo ${MESSAGE^^}
         exit $EXIT_CODE
-
-    # TODO: Add steps for other infrastructure module unit tests

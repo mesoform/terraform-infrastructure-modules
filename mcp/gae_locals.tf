@@ -47,36 +47,29 @@ locals {
   as_paths = {
     for as, spec in local.as_all_specs:
       as => {
-        build_dir: format("../%s/%s", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build"))
-        manifest: format("../%s/%s/mmcf-manifest.json", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build"))
-      }
+        build_dir : format("%s/%s", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build"))
+        manifest : format("../%s/%s/mmcf-manifest.json", lookup(spec, "root_dir", as), lookup(spec, "build_dir", "build"))
+    }
   }
+
   manifests = {
-    for as, path in local.as_paths:
-      as => jsondecode(file(path.manifest))
+    for as, path in local.as_paths: as =>
+      jsondecode(file(path.manifest))
       if fileexists(path.manifest)
   }
 
-  //noinspection HILUnresolvedReference
-  file_sha1sums = {
-    for as, manifest in local.manifests:
-      as => {
-        for src_file in manifest.contents:
-          src_file => filesha1(format("%s/%s/%s", lookup(local.as_paths, as).build_dir, manifest.artifactDir, src_file))
-      }
+  src_files = {
+    for as, manifest in local.manifests : as => {
+      for path in manifest.contents: basename(path) =>
+        "https://storage.googleapis.com/${lookup(local.gae, "bucket_name", local.gae.project_id)}/${local.as_paths[as].build_dir}/${manifest.artifactDir}/${path}"
+    }
   }
 
-
-  //noinspection HILUnresolvedReference
-  src_files = local.manifests == [] ? [] : flatten([
-    for as, manifest in local.manifests:
-      formatlist("%s/%s/%s", lookup(local.as_paths, as).build_dir, manifest.artifactDir, manifest.contents)
-  ])
-
-  //noinspection HILUnresolvedReference
-  upload_manifest = local.src_files == [] ? {} : {
-    for src_file in local.src_files:
-      src_file => filesha1(src_file)
+  env_variables = {
+    for as, specs in local.as_all_specs: as => merge(
+      lookup(local.gae_components, "common", null ) == null ? {} : lookup(local.gae_components.common, "env_variables", {}),
+      lookup(specs, "env_variables", {}))
   }
+
 }
 
