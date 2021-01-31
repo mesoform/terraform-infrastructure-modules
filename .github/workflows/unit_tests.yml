@@ -3,11 +3,13 @@ name: 'Unit Tests'
 on:
   pull_request:
     branches:
-      - master
+      - main
+      - develop
     types: [opened, synchronize, reopened, labeled]
   push:
     branches:
-      - master
+      - main
+      - develop
 
 jobs:
   unit-tests:

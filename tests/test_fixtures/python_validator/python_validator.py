@@ -13,7 +13,7 @@ def error(message):
     Errors must create non-zero status codes and human-readable, ideally one-line, messages on
     stderr.
     """
-    print(message, file=sys.stderr)
+    print(message, sys.stderr)
     sys.exit(1)
 
 
@@ -39,6 +39,7 @@ def python_validator(function):
     def wrapper(*args, **kwargs):
         query = json.loads(sys.stdin.read())
         validate(query)
+        result = dict
         try:
             result = function(query, *args, **kwargs)
         except Exception as e:
