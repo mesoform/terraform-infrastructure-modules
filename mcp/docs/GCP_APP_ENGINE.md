@@ -1,8 +1,53 @@
 # Google App Engine  
 App Engine allows for building scalable applications on serverless platforms [(Documentation)](https://cloud.google.com/appengine)
 ### gcp_ae.yml
-#### Prerequisites
-##### IAM permission
+#### Prerequisites:
+#### Container/Files
+The build and delivery of the files/container for the application should be done prior to app engine deployment.   
+##### Containers
+Container image should be hosted in [artifact registry](https://cloud.google.com/artifact-registry/docs/docker), 
+or [google container registry](https://cloud.google.com/container-registry/docs/pushing-and-pulling) (deprecated).   
+##### Files  
+A `mmcf-manifest.json` manifest file should be included in the subdirectory for each application. By default it is found in `<app_dir>/build`.
+```
+    mesoform-service/
+        L project.yml
+        L gcp_ae.yml
+        L terraform/
+            L main.tf
+        L app1/
+            L build/
+                L mmcf-manifest.yml
+                L exploded-project-app/
+                    L ...
+```
+These files within the application directory should be stored in a [google cloud storage](https://cloud.google.com/storage/docs) bucket 
+following the same directory structure as described in the manifest. 
+All the files must be readable with the credentials supplied.  
+An example manifest for an app:  
+Example:
+```json
+{ 
+  "artifactDir": "exploded-project-app",
+  "contents": [
+    "META-INF/MANIFEST.MF",
+    "WEB-INF/logging.properties",
+    "WEB-INF/classes/logback.xml",
+    "WEB-INF/classes/application.conf",
+    "WEB-INF/lib/annotations-4.1.1.4.jar",
+    "WEB-INF/lib/commons-logging-1.2.jar",
+    "WEB-INF/lib/gson-2.8.6.jar",
+    "WEB-INF/lib/api-common-1.9.0.jar",
+    "WEB-INF/lib/ktor-network-1.3.2.jar",
+    "WEB-INF/lib/ktor-utils-jvm-1.3.2.jar",
+    "WEB-INF/web.xml"
+  ]
+}
+```
+In cloud storage the locations of these `MANIFEST.MF` would be: `"https://storage.googleapis.com/<bucket>/<service name>/exploded-project-app/META-INF/MANIFEST.MF"`.
+The key `bucket_name` is the name of the bucket which holds the services files. 
+
+#### IAM permission
 * If creating a project from scratch, you must have a seed project on Google Cloud Platform that
  will be used as the build project and as a place for identity and access management. "Cloud
  Resource Manager", "App Engine Admin, and "Cloud Billing" APIs need to be enabled on the
@@ -39,6 +84,7 @@ App Engine allows for building scalable applications on serverless platforms [(D
 |:----|:----:|:--------:|:------------|:-------:|
 | `project_id` | string | true | The GCP project identifier. https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project | none |
 | `project_name` | string | false | more descriptive and human understandable identifier for the project. | value of `project_id` |
+| `bucket_name` | string | true if deploying using files | name of the google storage bucket storing the AS files | value of `project_id` |
 | `create_google_project` | boolean | false | whether or not to create a new project with the details provided. implies the project will be deleted with the deployment when asked to delete.| `false` |
 | `billing_account` | string | true if `create_google_project` is true | The alphanumeric ID of the billing account this project belongs to. | none |
 | `organization_name` | string | true if `create_google_project` is true | [MUTUALLY EXCLUSIVE WITH `folder_id`] The name of the organization this project belongs to. Only one of organization_name or folder_id may be specified. To specify an organization for the project to be part of, the account performing the deployment | none |
@@ -60,20 +106,23 @@ App Engine allows for building scalable applications on serverless platforms [(D
 Example:
 ```yamlex
 create_google_project: true
-project_id: &project_id protean-buffer-230514
+project_id: &project_id <google project id>
+bucket_name: <cloud storage bucket name>
 organization_name: mesoform.com
-folder_id: 320337270566
+folder_id: 0000000000
 billing_account: "1234-5678-2345-7890"
 location_id: "europe-west"
 project_labels: &google_project_labels
   type: frontend
 
-
 components:
   common:
     entrypoint: java -cp "WEB-INF/lib/*:WEB-INF/classes/." io.ktor.server.jetty.EngineMain
     runtime: java11
-    env: flex
+    threadsafe: True
+    auto_id_policy: default
+    derived_file_type:
+      - java_precompiled
     env_variables:
       GCP_ENV: true
       GCP_PROJECT_ID: *project_id
@@ -87,9 +136,9 @@ components:
     experiences-sidecar:
       env: standard
     default:
-      root_dir: experiences-service
       runtime: java8
 ```
+
 
 #### Google App Engine common attributes
 Below is a list of attributes which are available to both GAE standard and GAE flexible apps (this
@@ -102,7 +151,7 @@ Below is a list of attributes which are available to both GAE standard and GAE f
 | `runtime` | string | true | GAE available runtime. This differs between environment. Check the GAE docs for details | none |
 | `entrypoint` | string | true | command to run to start the app/service when deployed to GAE | none |
 
-#### Google App Engine Standard component configuration
+#### Google App Engine Standard component configuration  
 attributes specific to only GAE standard  
 
 | Key | Type | Required | Description | Default |
@@ -111,30 +160,53 @@ attributes specific to only GAE standard
 | `static_files.path` | string | true within static_files context only | | none |
 | `upload_path_regex` | string |  true within static_files context only | | none |
 
-#### Manifest Files
-For GAE deployments with a deployment type of `files`, a `mmcf-manifest.json` manifest file should be included.
-
-By default this file is located in the `<root_dir>/build` directory for the AS, and will contain the keys `artifactDir` and `contents`.
-
-Example:
-```json
-{ 
-  "artifactDir": "exploded-project-app",
-  "contents": [
-    "META-INF/MANIFEST.MF",
-    "WEB-INF/logging.properties",
-    "WEB-INF/classes/logback.xml",
-    "WEB-INF/classes/application.conf",
-    "WEB-INF/lib/annotations-4.1.1.4.jar",
-    "WEB-INF/lib/commons-logging-1.2.jar",
-    "WEB-INF/lib/gson-2.8.6.jar",
-    "WEB-INF/lib/api-common-1.9.0.jar",
-    "WEB-INF/lib/ktor-network-1.3.2.jar",
-    "WEB-INF/lib/ktor-utils-jvm-1.3.2.jar",
-    "WEB-INF/web.xml"
-  ]
-}
+#### Google App Engine Flexible component Configuration  
+An example flexible app engine configuration:  
+```yaml
+project_id: &project_id ae-flex-test
+create_google_project: false
+location_id: "europe-west2"
+components:
+  common:
+    entrypoint: python main.py
+    runtime: python38
+    env: flex
+    env_variables:
+      GCP_PROJECT_ID: *project_id
+  specs:
+    default:
+      version_id: v3
+      deployment:
+        container:
+          image: "europe-west2-docker.pkg.dev/<project_id>/<repository_name>/helloworld:latest" 
+      automatic_scaling: {} #Will use the default automatic_scaling settings
+      resources: 
+        memory_gb: 2
+      readiness_check: 
+        success_threshold: 3
 ```
+***NOTE***: For the container image ensure that the tag or digest is included on the full URI  
+
+#### Deployment Versioning  
+Multiple versions of a service can be deployed at once. 
+* `gcp_ae.yml` will only contain the specifications for one version of each service.  
+* Updating the container version or manifest will not produce a new app engine version, but will update the current deployment
+* If the version key is updated in `gcp_ae.yml` a new deployment version will be made. Terraform will attempt to destroy the previous version, but this will result in: 
+  ```
+    Error when reading or editing AppVersion: googleapi: Error 400: Cannot delete a version with a non-zero traffic allocation. 
+    Please update your traffic split to remove the allocation for this version and try again.
+  ```
+  After this error has occurred, reallocate the traffic from the previous version to the new version. This ensures that the version to be destroyed has 0 traffic. 
+  Running `terraform apply` will then have a plan to destroy the previous version, which should be successful. 
+* To run multiple versions, [terraform workspaces](https://www.terraform.io/docs/state/workspaces.html) should be used.  
+  E.g. to deploy a new version of an application:
+    1. Make a new branch using VCS and make version and configuratio changes to `gcp_ae.yml` 
+    2. Make a new terraform workspace by running: `terraform workspace new <version name>` 
+    3. Import google app engine configuration to state file by running `terraform import 'module.mcp.google_app_engine_application.self[0]' <project-id>`
+    Without this step terraform will try to create a new `google_app_engine_application` resource, when only one per project is allowed, resulting in an error.
+    4. Apply changes with `terraform apply`
+    5. Commit terraform configuraton and statefiles to VCS
+
 
 #### Requirements.txt
 

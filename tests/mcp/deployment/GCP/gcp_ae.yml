@@ -5,9 +5,11 @@ components:
   common:
     entrypoint: python main.py
     runtime: python38
-    env: standard
+    env: flex
   specs:
     default:
-      src_path: app
-      skip_files: DOCKERFILE
-      root_dir: app
+      automatic_scaling: {}
+      deployment:
+        container:
+          image: <image_uri>
+

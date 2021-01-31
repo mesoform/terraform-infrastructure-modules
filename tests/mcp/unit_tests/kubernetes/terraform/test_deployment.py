@@ -12,17 +12,16 @@ except Exception as e:
 
 @python_validator
 def test_deployment(query):
-
     expected_data = {
-        "app":"mosquitto"
+        "app": "mosquitto"
     }
 
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':

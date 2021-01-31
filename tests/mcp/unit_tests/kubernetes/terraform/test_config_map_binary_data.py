@@ -6,6 +6,7 @@ try:
 except Exception as e:
     print(e, file=stderr)
 
+
 @python_validator
 def test_config_map_data(query):
     """
@@ -20,16 +21,15 @@ def test_config_map_data(query):
 
     expected_data = {
         "bar": "L3Jvb3QvMTAw",
-        "binary.bin" : "SGVsbG8gV29ybGQ="
+        "binary.bin": "SGVsbG8gV29ybGQ="
     }
 
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
-
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':

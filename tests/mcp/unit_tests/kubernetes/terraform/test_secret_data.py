@@ -6,6 +6,7 @@ try:
 except Exception as e:
     print(e, file=stderr)
 
+
 @python_validator
 def test_secret_data(query):
     """
@@ -20,18 +21,17 @@ def test_secret_data(query):
     """
 
     expected_data = {
-        "secret.file" : "c29tZXN1cGVyc2VjcmV0IGZpbGUgY29udGVudHMgbm9ib2R5IHNob3VsZCBzZWU=",
-        "login" : "login",
-        "password" : "password"
+        "secret.file": "c29tZXN1cGVyc2VjcmV0IGZpbGUgY29udGVudHMgbm9ib2R5IHNob3VsZCBzZWU=",
+        "login": "login",
+        "password": "password"
     }
 
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
-
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':
