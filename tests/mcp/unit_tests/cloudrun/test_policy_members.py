@@ -6,11 +6,7 @@ try:
 except Exception as e:
     print(e, stderr)
 
-
-
-@python_validator
-def test_policy_members(query):
-    """
+"""
     Tests that members and their roles are accessible.
     The result shows the roles and how many members are assigned to that role.
     Roles and members are defined like:
@@ -23,20 +19,12 @@ def test_policy_members(query):
       members:
         -{type}
 
-    """
+"""
 
-    expected_data = {
-        'viewer': '2',
-        'admin': '1'
-    }
-
-    if query == expected_data:
-        return {"result": "pass"}
-    else:
-        return {"result": "fail",
-                "expected": "{}".format(expected_data),
-                "received": "{}".format(query)}
-
+expected_data = {
+    'viewer': '2',
+    'admin': '1'
+}
 
 if __name__ == '__main__':
-    test_policy_members()
+    python_validator(expected_data)

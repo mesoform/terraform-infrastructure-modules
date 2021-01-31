@@ -28,24 +28,27 @@ def validate(data):
             error('Values must be strings.')
 
 
-def python_validator(function):
+def python_validator(expected_data: dict):
     """
     Query data is received on stdin as a JSON object.
     Result data must be returned on stdout as a JSON object and string values
     The wrapped function must expect its first positional argument to be a dictionary of the query
     data.
     """
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        query = json.loads(sys.stdin.read())
-        validate(query)
-        result = dict
-        try:
-            result = function(query, *args, **kwargs)
-        except Exception as e:
-            # Terraform wants one-line errors so we catch all exceptions and trim down to just the
-            # message (no trace).
-            error(f'{type(e).__name__}: {e}')
-        validate(result)
-        sys.stdout.write(json.dumps(result))
-    return wrapper
+    query: dict = json.loads(sys.stdin.read())
+    result: dict = dict()
+    validate(query)
+    try:
+        if query == expected_data:
+            result = {"result": "pass"}
+        else:
+            result = {"result": "fail",
+                      "expected": "{}".format(expected_data),
+                      "received": "{}".format(query)}
+        # result = function(query, *args, **kwargs)
+    except Exception as e:
+        # Terraform wants one-line errors so we catch all exceptions and trim down to just the
+        # message (no trace).
+        error(f'{type(e).__name__}: {e}')
+    validate(result)
+    sys.stdout.write(json.dumps(result))

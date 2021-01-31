@@ -6,11 +6,7 @@ try:
 except Exception as e:
     print(e, stderr)
 
-
-
-@python_validator
-def test_traffic_with_revision(query):
-    """
+"""
     checks that the data given to the test function is in the correct format
     for the google_cloud_run_service.traffic setting.
 
@@ -32,19 +28,11 @@ def test_traffic_with_revision(query):
     }
     """
 
-    expected_data = {
-        "latest_revision": "false",
-        "percent": "25",
-        "revision_name": "old"
-    }
-
-    if query == expected_data:
-        return {"result": "pass"}
-    else:
-        return {"result": "fail",
-                "expected": "{}".format(expected_data),
-                "received": "{}".format(query)}
-
+expected_data = {
+    "latest_revision": "false",
+    "percent": "25",
+    "revision_name": "old"
+}
 
 if __name__ == '__main__':
-    test_traffic_with_revision()
+    python_validator(expected_data)
