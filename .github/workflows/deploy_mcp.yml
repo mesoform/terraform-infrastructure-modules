@@ -82,6 +82,7 @@ jobs:
           cd GCP
           echo "name: ${{env.GCP_PROJECT_ID}}_app_bucket" > project.yml
           sed -i "s/<project_id>/${{env.GCP_PROJECT_ID}}/" gcp_ae.yml
+          sed -i "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" gcp_ae.yml
           sed -i "s/<project_id>/${{env.GCP_PROJECT_ID}}/" gcp_cloudrun.yml
           sed -i "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" gcp_cloudrun.yml
 
@@ -121,3 +122,4 @@ jobs:
       - name: delete project
         if : ${{ always() }}
         run: gcloud projects delete ${{env.GCP_PROJECT_ID}}
+        
