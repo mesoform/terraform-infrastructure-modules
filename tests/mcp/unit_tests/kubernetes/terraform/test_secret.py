@@ -12,7 +12,6 @@ except Exception as e:
 
 @python_validator
 def test_secret(query):
-
     expected_data = {
 
         "login": "login",
@@ -23,9 +22,9 @@ def test_secret(query):
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':

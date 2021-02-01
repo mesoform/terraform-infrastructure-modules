@@ -12,18 +12,17 @@ except Exception as e:
 
 @python_validator
 def test_pod(query):
-
     expected_data = {
-        "name" : "environment",
-        "value" : "test"
+        "name": "environment",
+        "value": "test"
     }
 
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':

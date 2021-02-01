@@ -1,3 +1,6 @@
+"""
+Terraform external provider just handles strings in maps, so tests need to consider this
+"""
 from sys import path, stderr
 
 try:
@@ -8,14 +11,13 @@ except Exception as e:
 
 
 @python_validator
-def test_job(query):
+def test_env_variables(query):
     """
-    Checks the data specified in the required metadata
-
+    Tests the merging of environment variables from `common` and `specs`.
     """
-
     expected_data = {
-        "name": "pi"
+        "env": "dev",
+        "IS_GAE": "true"
     }
 
     if query == expected_data:
@@ -27,4 +29,4 @@ def test_job(query):
 
 
 if __name__ == '__main__':
-    test_job()
+    test_env_variables()

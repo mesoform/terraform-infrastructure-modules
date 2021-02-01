@@ -12,18 +12,17 @@ except Exception as e:
 
 @python_validator
 def test_ingress(query):
-
     expected_data = {
-        "service_name" : "service",
-        "service_port" : "8080"
+        "service_name": "service",
+        "service_port": "8080"
     }
 
     if query == expected_data:
         return {"result": "pass"}
     else:
-        return {"result" : "fail",
-                "expected" : "{}".format(expected_data),
-                "received" : "{}".format(query)}
+        return {"result": "fail",
+                "expected": "{}".format(expected_data),
+                "received": "{}".format(query)}
 
 
 if __name__ == '__main__':
