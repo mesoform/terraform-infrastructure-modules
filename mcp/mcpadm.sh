@@ -29,10 +29,10 @@ entry(){
         runNewVersion
         ;;
       set-version )
-        runNewVersion
+        runSetVersion
         ;;
       get-version )
-        runNewVersion
+        runGetVersion
         ;;
 
       help) help;;
@@ -77,11 +77,21 @@ help() {
       new-version )
         echo "new-version creates a new terraform workspace to setup deployment of a new version of the service."
         echo ""
-        echo "Usage: ${SCRIPT_NAME} new-version [options]"
+        echo "Usage: ${SCRIPT_NAME} new-version [service] [options]"
         echo ""
-        echo "Options:"
+        echo "Services:"
         echo "  appengine        -  New version of App Engine service"
         echo "  cloudrun         -  New version of Cloud Run service"
+        echo ""
+        echo "Options:"
+        echo "  App Engine:"
+        echo "    -project=<PROJECT_ID>     - ID of project containing App Engine Application"
+        echo "    -version=<VERSION_ID>        - Version number for new App Engine version"
+        echo "  Cloud Run:"
+        echo "    -location=<LOCATION_ID>      - Location ID for Cloud Run service, e.g. 'europe-west2'"
+        echo "    -project=<PROJECT_ID>     - Id of project containing Cloud Run Application"
+        echo "    -revision=<REVISION_ID>      - Revision number for the new Cloud Run revision"
+        echo "    -service=<PROJECT_ID>        - Name of the Cloud Run service being updated"
         echo ""
         exit
         ;;
@@ -331,10 +341,10 @@ runNewVersion(){
       platform=${2,,}
       case $platform in
         appengine )
-          appEngineVersion
+          appEngineVersion "$@"
           ;;
         cloudrun )
-          cloudRunVersion
+          cloudRunVersion "$@"
           ;;
         *)
           echo ""
@@ -398,15 +408,35 @@ appEngineVersion(){
   echo ""
   echo "App Engine Version Setup"
   echo ""
-  read -r -p "Enter project id: " project
-  read -r -p "Enter the version name/id: " version
+
+  for i in "$@"
+  do
+    case $i in
+      --project=*)
+        project="${i#*=}"
+        ;;
+      --version=*)
+        version="${i#*=}"
+        ;;
+      *)
+        ;;
+    esac
+  done
+  if [ -z ${project+x} ]
+  then
+    read -r -p "Enter project id: " project
+  fi
+  if [ -z ${version+x} ]
+  then
+    read -r -p "Enter the version name/id: " version
+  fi
   echo ""
   echo "Continue with these settings? "
   echo "    Project ID: $project"
   echo "    Version: $version "
   echo ""
 
-  select item in "yes" "no" "cancel"; do
+  select item in "yes" "no" ; do
     case $item in
       yes )
         terraform workspace new "$BRANCH"
@@ -414,12 +444,17 @@ appEngineVersion(){
         terraform import 'module.mcp.google_app_engine_application.self[0]' "$project" || echo "Import failed /n" && exit
         versionHelp
         ;;
-      cancel )
-        echo "Cancelling setup"
-        entry
+      no )
+        echo "Cancelled version setup"
+        if [ $# -gt 2 ]
+        then
+          exit
+        else
+          entry
+        fi
         ;;
       * )
-        appEngineVersion
+        exit
         ;;
     esac
   done
@@ -429,10 +464,41 @@ cloudRunVersion(){
   echo ""
   echo "Cloud Run Revision Setup"
   echo ""
-  read -r -p "Enter project id: " project
-  read -r -p "Enter name of the Cloud Run service: " service
-  read -r -p "Enter revision name/id: " revision
-  read -r -p "Enter the location_id of the service: " location
+  for i in "$@"
+  do
+    case $i in
+      --project=*)
+        project="${i#*=}"
+        ;;
+      --revision=*)
+        revision="${i#*=}"
+        ;;
+      --service=*)
+        service="${i#*=}"
+        ;;
+      --location=*)
+        location="${i#*=}"
+        ;;
+      *)
+        ;;
+    esac
+  done
+  if [ -z ${project+x} ]
+  then
+    read -r -p "Enter project id: " project
+  fi
+  if [ -z ${service+x} ]
+  then
+    read -r -p "Enter name of the Cloud Run service: " service
+  fi
+  if [ -z ${revision+x} ]
+  then
+    read -r -p "Enter revision name/id: " revision
+  fi
+  if [ -z ${location+x} ]
+  then
+    read -r -p "Enter the location_id of the service: " location
+  fi
   echo "Continue with these settings? "
   echo "    Project ID: $project"
   echo "    Service: $service"
@@ -440,7 +506,7 @@ cloudRunVersion(){
   echo "    Location: $location "
   echo ""
 
-  select item in "yes" "no" "cancel"; do
+  select item in "yes" "no"; do
     case $item in
       yes )
         terraform workspace new "$BRANCH"
@@ -449,12 +515,17 @@ cloudRunVersion(){
         terraform import "module.mcp.google_cloud_run_service_iam_policy.self[\"${service}\"]" projects/"$project"/locations/"$location"/services/"$service" || (echo "Import failed" && exit)
         versionHelp
         ;;
-      cancel )
-        echo "Cancelling setup"
-        entry
+      no )
+        echo "Cancelled version setup"
+        if [ $# -gt 2 ]
+        then
+          exit
+        else
+          entry
+        fi
         ;;
       * )
-        cloudRunVersion
+        exit
         ;;
     esac
   done
