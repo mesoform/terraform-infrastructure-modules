@@ -54,12 +54,14 @@ jobs:
           terraform init > /dev/null
           terraform apply -auto-approve > /dev/null
           for test in $(terraform output -json | jq -r 'keys[]'); do
-            echo "${test}: $(terraform output -json $test | jq -r '.result|ascii_upcase')"
+            test_output=$(terraform output -json $test)
+            result=$(echo $test_output | jq -r '.result')
+            echo "${test}: ${result^^}"
             if [ "$result" != "pass" ]
             then
               MESSAGE="FAIL: There are failed unit tests"
-              echo "    Expected data: $(echo $output | jq -r '.expected')"
-              echo "    Received data: $(echo $output | jq -r '.received')"
+              echo "    Expected data: $(echo $test_output | jq -r '.expected')"
+              echo "    Received data: $(echo $test_output | jq -r '.received')"
               EXIT_CODE=3
             fi
           done
