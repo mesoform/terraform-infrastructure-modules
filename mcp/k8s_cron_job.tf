@@ -209,13 +209,12 @@ resource "kubernetes_cron_job" "self" {
               }
             }
             dynamic "container" {
-              for_each = lookup(each.value.cron_job.spec.job_template.spec.template.spec, "container", []) == [] ? [] : [for container in each.value.cron_job.spec.job_template.spec.template.spec.container : {
+              for_each = [for container in lookup(each.value.cron_job.spec.job_template.spec.template.spec, "container", []) : {
                 image             = lookup(container, "image", null)
                 name              = lookup(container, "name", null)
                 args              = lookup(container, "args", null)
                 command           = lookup(container, "command", null)
                 image_pull_policy = lookup(container, "image_pull_policy", null)
-                //security_context  = lookup(container, "security_context", null)
                 //startup_probe = lookup(container, "startup_probe", null)
                 stdin                    = lookup(container, "stdin", null)
                 stdin_once               = lookup(container, "stdin_once", null)
@@ -230,15 +229,14 @@ resource "kubernetes_cron_job" "self" {
                 liveness_probe           = lookup(container, "liveness_probe", null)
                 readiness_probe          = lookup(container, "readiness_probe", null)
                 volume_mount             = lookup(container, "volume_mount", [])
-
-              }]
+              }
+              if lookup(each.value.cron_job.spec.job_template.spec.template.spec, "container", []) != []]
               content {
                 image             = lookup(container.value, "image", null)
                 name              = lookup(container.value, "name", null)
                 args              = lookup(container.value, "args", null)
                 command           = lookup(container.value, "command", null)
                 image_pull_policy = lookup(container.value, "image_pull_policy", null)
-                //security_context  = lookup(container.value, "security_context", null)
                 //startup_probe = lookup(container.value, "startup_probe", null)
                 stdin                    = lookup(container.value, "stdin", null)
                 stdin_once               = lookup(container.value, "stdin_once", null)
