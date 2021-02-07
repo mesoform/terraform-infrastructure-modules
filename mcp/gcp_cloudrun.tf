@@ -1,4 +1,4 @@
-provider "google" {}
+
 //noinspection HILUnresolvedReference
 data "google_project" "default" {
   count      = local.cloudrun == {} || lookup(local.cloudrun, "create_google_project", false) ? 0 : 1
