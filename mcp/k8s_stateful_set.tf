@@ -218,7 +218,7 @@ resource "kubernetes_stateful_set" "self" {
               liveness_probe           = lookup(container, "liveness_probe", null)
               readiness_probe          = lookup(container, "readiness_probe", null)
               volume_mount             = lookup(container, "volume_mount", [])
-              }
+            }
             if lookup(spec.value, "container", []) != []]
             content {
               image             = lookup(container.value, "image", null)
@@ -386,20 +386,8 @@ resource "kubernetes_stateful_set" "self" {
               dynamic "resources" {
                 for_each = lookup(container.value, "resources", null) == null ? {} : { resources : container.value.resources }
                 content {
-                  dynamic "limits" {
-                    for_each = lookup(resources.value, "limits", null) == null ? {} : { limits : resources.value.limits }
-                    content {
-                      cpu    = lookup(limits.value, "cpu", null)
-                      memory = lookup(limits.value, "memory", null)
-                    }
-                  }
-                  dynamic "requests" {
-                    for_each = lookup(resources.value, "requests", null) == null ? {} : { requests : resources.value.requests }
-                    content {
-                      cpu    = lookup(requests.value, "cpu", null)
-                      memory = lookup(requests.value, "memory", null)
-                    }
-                  }
+                  limits = lookup(resources.value, "limits", {})
+                  requests = lookup(resources.value, "requests", {})
                 }
               }
               dynamic "liveness_probe" {
@@ -553,20 +541,8 @@ resource "kubernetes_stateful_set" "self" {
               dynamic "resources" {
                 for_each = lookup(init_container.value, "resources", null) == null ? {} : { resources : init_container.value.resources }
                 content {
-                  dynamic "limits" {
-                    for_each = lookup(resources.value, "limits", null) == null ? {} : { limits : resources.value.limits }
-                    content {
-                      cpu    = lookup(limits.value, "cpu", null)
-                      memory = lookup(limits.value, "memory", null)
-                    }
-                  }
-                  dynamic "requests" {
-                    for_each = lookup(resources.value, "requests", null) == null ? {} : { requests : resources.value.requests }
-                    content {
-                      cpu    = lookup(requests.value, "cpu", null)
-                      memory = lookup(requests.value, "memory", null)
-                    }
-                  }
+                  limits = lookup(resources.value, "limits", {})
+                  requests = lookup(resources.value, "requests", {})
                 }
               }
               dynamic "volume_mount" {

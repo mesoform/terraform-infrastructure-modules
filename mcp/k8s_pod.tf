@@ -364,20 +364,8 @@ resource "kubernetes_pod" "self" {
         dynamic "resources" {
           for_each = lookup(container.value, "resources", null) == null ? {} : { resources : container.value.resources }
           content {
-            dynamic "limits" {
-              for_each = lookup(resources.value, "limits", null) == null ? {} : { limits : resources.value.limits }
-              content {
-                cpu    = lookup(limits.value, "cpu", null)
-                memory = lookup(limits.value, "memory", null)
-              }
-            }
-            dynamic "requests" {
-              for_each = lookup(resources.value, "requests", null) == null ? {} : { requests : resources.value.requests }
-              content {
-                cpu    = lookup(requests.value, "cpu", null)
-                memory = lookup(requests.value, "memory", null)
-              }
-            }
+            limits = lookup(resources.value, "limits", {})
+            requests = lookup(resources.value, "requests", {})
           }
         }
         dynamic "liveness_probe" {
