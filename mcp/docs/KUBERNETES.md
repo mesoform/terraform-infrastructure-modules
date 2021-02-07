@@ -7,9 +7,9 @@ Linux:
 ```bash
  export KUBE_CONFIG_PATH=~/.kube/config
  ```
-Windows Command Prompt:
-```commandline
-setx KUBE_CONFIG_PATH ~/.kube.config
+Windows Power Shell:
+```powershell
+ $Env:KUBE_CONFIG_PATH=~/.kube/config
 ```
 NOTE: replace `~/.kube/config` with custom path if not using the default. Or set multiple paths with `KUBE_CONFIG_PATHS`
 
