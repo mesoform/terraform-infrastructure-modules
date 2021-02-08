@@ -95,7 +95,7 @@ function gcsBackend() {
 }
 
 function s3Backend() {
-    "  backend ""gcs""{" >> main.tf
+    "  backend ""s3""{" >> main.tf
     $bucket = Read-Host -Prompt "Enter bucket name"
     "    bucket = ""$bucket""" >> main.tf
     $key = Read-Host -Prompt "Enter key name"
@@ -106,7 +106,7 @@ function s3Backend() {
 }
 
 function httpBackend() {
-    "  backend ""gcs""{" >> main.tf
+    "  backend ""http""{" >> main.tf
     $address = Read-Host -Prompt "Enter address"
     "    address = ""$address""" >> main.tf
     $lock_address = Read-Host -Prompt "Enter lock address"
@@ -117,7 +117,7 @@ function httpBackend() {
 }
 
 function kubernetesBackend() {
-    "  backend ""gcs""{" >> main.tf
+    "  backend ""kubernetes""{" >> main.tf
     $secret_suffix = Read-Host -Prompt "Ebter secret suffix: "
     "    secret_suffix = ""$secret_suffix""" >> main.tf
     $load_config_file = Read-Host -Prompt "Load config file?"
