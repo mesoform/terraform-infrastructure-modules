@@ -67,4 +67,5 @@ Temporary Items
 /.idea/
 
 #Python
+**/__pycache/
 *.pyc
