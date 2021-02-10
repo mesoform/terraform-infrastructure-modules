@@ -6,6 +6,7 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
+**/.terraform.lock.hcl
 
 # .tfvars files
 secrets.tfvars
@@ -62,4 +63,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+#Intellij settings
 /.idea/
+
+#Python
+*.pyc
