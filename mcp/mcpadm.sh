@@ -251,7 +251,7 @@ runSetup(){
   then
     help "$1"
   else
-    echo "terraform{" > main.tf
+    echo "terraform{" > main.tf.temp
     if [ $# -lt 2 ]
     then
       echo "Which backend will you use?"
@@ -277,7 +277,8 @@ runSetup(){
         break
       done
     else
-      backend=${2,,}
+      backend=$(echo "$2" | tr [:upper:] [:lower:])
+#      backend=${2,,}
       case $backend in
         gcs )
           gcsBackend "$@"
@@ -304,52 +305,49 @@ runSetup(){
           ;;
       esac
     fi
-    echo "}" >> main.tf
+    echo "}" >> main.tf.temp
     {
       echo "module mcp{"
       echo "  source = \"github.com/mesoform/terraform-infrastructure-modules//mcp\""
       echo "}"
-    } >> main.tf
+    } >> main.tf.temp
 
-    cat main.tf
+    cat main.tf.temp
     echo ""
     if ! [[ "$*" =~ "-auto-approve" ]]
     then
       echo "$*"
       read -r -p "Are you happy with this configuration? [y]es or [n]o: " accept
-        case $accept in
-          y )
-            echo ""
-            echo "Setup Complete"
-            echo ""
-            [ $# -gt 2 ] && exit
+      if [[ "$accept" =~ ([yY][eE][sS]|[yY])$ ]]
+      then
+        echo ""
+        echo "Setup Complete"
+        echo ""
+        cat main.tf.temp > main.tf
+        rm main.tf.temp
+        [ $# -gt 2 ] && exit
+        entry
+      else
+        echo ""
+        echo "Configuration rejected"
+        echo ""
+        rm main.tf.temp
+        [ $# -gt 2 ] && exit
+        read -r -p "Restart setup? [y]es or [n]o: " restart
+        if [[ "$restart" =~ ([yY][eE][sS]|[yY])$ ]]
+        then
+          echo ""
+          echo "Restarting setup ..."
+          echo ""
+          runSetup
+        else
+            rm main.tf.temp
             entry
-            ;;
-          n)
-            echo ""
-            echo "Configuration rejected"
-            echo ""
-            read -r -p "Restart setup? [y]es or [n]o: " restart
-              case $restart in
-              y )
-                echo ""
-                echo "Restarting setup ..."
-                echo ""
-                runSetup
-                ;;
-              *)
-                echo ""
-                echo "Deleting main.tf..."
-                echo ""
-                rm main.tf
-                entry
-                ;;
-              esac
-            ;;
-          *)
-        esac
-      entry
+        fi
+      fi
     else
+      cat main.tf.temp > main.tf
+      rm main.tf.temp
       echo ""
       echo "Setup Complete"
       echo ""
@@ -373,18 +371,18 @@ gcsBackend(){
         ;;
     esac
   done
-  echo "  backend \"gcs\"{" >> main.tf
+  echo "  backend \"gcs\"{" >> main.tf.temp
   if [ -z ${bucket+x} ]
   then
     read -r -p "Enter bucket name: " bucket
   fi
-  echo "    bucket = \"${bucket}\"" >> main.tf
+  echo "    bucket = \"${bucket}\"" >> main.tf.temp
   if [ -z ${prefix+x} ]
   then
     read -r -p "Enter gcs prefix: " prefix
   fi
-  echo "    prefix = \"${prefix}\""  >> main.tf
-  echo "  }" >> main.tf
+  echo "    prefix = \"${prefix}\""  >> main.tf.temp
+  echo "  }" >> main.tf.temp
 }
 
 s3Backend(){
@@ -405,23 +403,23 @@ s3Backend(){
         ;;
     esac
   done
-  echo "  backend \"s3\"{" >> main.tf
+  echo "  backend \"s3\"{" >> main.tf.temp
   if [ -z ${bucket+x} ]
   then
     read -r -p "Enter bucket name: " bucket
   fi
-  echo "    bucket = \"${bucket}\"" >> main.tf
+  echo "    bucket = \"${bucket}\"" >> main.tf.temp
   if [ -z ${key+x} ]
   then
     read -r -p "Enter key: " key
   fi
-  echo "    key = \"${key}\""  >> main.tf
+  echo "    key = \"${key}\""  >> main.tf.temp
   if [ -z ${region+x} ]
   then
     read -r -p "Enter region: " region
   fi
-  echo "    region = \"${region}\""  >> main.tf
-  echo "  }" >> main.tf
+  echo "    region = \"${region}\""  >> main.tf.temp
+  echo "  }" >> main.tf.temp
 }
 
 httpBackend(){
@@ -442,23 +440,23 @@ httpBackend(){
         ;;
     esac
   done
-  echo "  backend \"http\"{" >> main.tf
+  echo "  backend \"http\"{" >> main.tf.temp
   if [ -z ${address+x} ]
   then
     read -r -p "Enter address: " address
   fi
-  echo "    address = \"${address}\"" >> main.tf
+  echo "    address = \"${address}\"" >> main.tf.temp
   if [ -z ${lock_address+x} ]
   then
     read -r -p "Enter lock address: " lock_address
   fi
-  echo "    lock_address = \"${lock_address}\""  >> main.tf
+  echo "    lock_address = \"${lock_address}\""  >> main.tf.temp
   if [ -z ${unlock_address+x} ]
   then
     read -r -p "Enter unlock address: " unlock_address
   fi
-  echo "    unlock_address = \"${unlock_address}\""  >> main.tf
-  echo "  }" >> main.tf
+  echo "    unlock_address = \"${unlock_address}\""  >> main.tf.temp
+  echo "  }" >> main.tf.temp
 }
 
 kubernetesBackend(){
@@ -476,18 +474,18 @@ kubernetesBackend(){
         ;;
     esac
   done
-  echo "  backend \"kubernetes\"{" >> main.tf
+  echo "  backend \"kubernetes\"{" >> main.tf.temp
   if [ -z ${secret_suffix+x} ]
   then
     read -r -p "Enter secret suffix: " secret_suffix
   fi
-  echo "    secret_suffix = \"${secret_suffix}\"" >> main.tf
+  echo "    secret_suffix = \"${secret_suffix}\"" >> main.tf.temp
   if [ -z ${config+x} ]
   then
     read -r -p "Load config file? (true or false): " config
   fi
-  echo "    load_config_file = ${config}"  >> main.tf
-  echo "  }" >> main.tf
+  echo "    load_config_file = ${config}"  >> main.tf.temp
+  echo "  }" >> main.tf.temp
 }
 
 localBackend() {
@@ -502,13 +500,13 @@ localBackend() {
         ;;
     esac
   done
-  echo "  backend \"local\"{" >> main.tf
+  echo "  backend \"local\"{" >> main.tf.temp
   if [ -z ${path+x} ]
   then
     read -r -p "Enter file path: " path
   fi
-  echo "    secret_suffix = \"${path}\"" >> main.tf
-  echo "  }" >> main.tf
+  echo "    secret_suffix = \"${path}\"" >> main.tf.temp
+  echo "  }" >> main.tf.temp
 }
 
 runDeploy() {
@@ -549,7 +547,8 @@ runNewVersion(){
         esac
       done
     else
-      platform=${2,,}
+      platform=$(echo "$2" | tr [:upper:] [:lower:])
+#      platform=${2,,}
       case $platform in
         appengine )
           appEngineVersion "$@"
