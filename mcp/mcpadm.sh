@@ -63,7 +63,7 @@ help() {
     entry
   else
     case $1 in
-      help )
+      help | -help | --help )
         echo "MCPADM HELP:"
         echo ""
         echo "Usage: ${SCRIPT_NAME} <command> [options]"
@@ -89,6 +89,7 @@ help() {
         echo "Usage: ${SCRIPT_NAME} setup [backend] [options]"
         echo ""
         echo "Backends:"
+        echo "  default    -  Store terraform state in current directory"
         echo "  gcs        -  Store terraform state in Google Cloud Storage"
         echo "  s3         -  Store terraform state in AWS s3 bucket"
         echo "  http       -  Store terraform state using REST client"
@@ -97,13 +98,13 @@ help() {
         echo ""
         echo "Options:"
         echo "  gcs:"
-        echo "    -bucket=<BUCKET_NAME>              - Name of existing Google Storage Bucket to store state file in"
-        echo "    -prefix=<PATH>                     - Prefix of path inside the bucket to store state file in"
+        echo "    -bucket=<BUCKET_NAME> - Name of existing Google Storage Bucket to store state file in"
+        echo "    -prefix=<PATH>        - Prefix of path inside the bucket to store state file in"
         echo ""
         echo "  s3"
-        echo "    -bucket=<BUCKET_NAME>              - Name of existing AWS S3 bucket to store state file in"
-        echo "    -key=<KEY_PATH>                    - Path to state file within bucket "
-        echo "    -region=<AWS_REGION>               - AWS Region for specified S2 bucket "
+        echo "    -bucket=<BUCKET_NAME> - Name of existing AWS S3 bucket to store state file in"
+        echo "    -key=<KEY_PATH>       - Path to state file within bucket "
+        echo "    -region=<AWS_REGION>  - AWS Region for specified S2 bucket "
         echo ""
         echo "  http"
         echo "    -address=<REST_ENDPOINT>           - Address of the REST endpoint"
@@ -115,7 +116,7 @@ help() {
         echo "    -load_config_file=<true or false>  - If set to true it will attempt to use a kubeconfig file to access cluster"
         echo ""
         echo "  local"
-        echo "    -path=<PATH>                       - Path to state file, E.g. 'path/to/state/file/terraform.tfstate'"
+        echo "    -path=<PATH>  - Path to state file, E.g. 'path/to/state/file/terraform.tfstate'"
         echo ""
         exit
         ;;
@@ -255,7 +256,7 @@ runSetup(){
     if [ $# -lt 2 ]
     then
       echo "Which backend will you use?"
-      select choice in "gcs" "s3" "http" "kubernetes" "local"; do
+      select choice in "gcs" "s3" "http" "kubernetes" "local" "default"; do
         case $choice in
           gcs )
             gcsBackend
@@ -269,9 +270,10 @@ runSetup(){
           kubernetes )
             kubernetesBackend
             ;;
-          local)
+          local )
             localBackend
             ;;
+          default);;
           *);;
         esac
         break
@@ -295,6 +297,7 @@ runSetup(){
         local)
           localBackend "$@"
           ;;
+        default);;
         -auto-approve) ;;
         *)
           echo ""
@@ -312,16 +315,18 @@ runSetup(){
       echo "}"
     } >> main.tf.temp
 
-    cat main.tf.temp
+#    cat main.tf.temp
     echo ""
     if ! [[ "$*" =~ "-auto-approve" ]]
     then
-      echo "$*"
+      cat main.tf.temp
       read -r -p "Are you happy with this configuration? [y]es or [n]o: " accept
       if [[ "$accept" =~ ([yY][eE][sS]|[yY])$ ]]
       then
         echo ""
         echo "Setup Complete"
+        echo ""
+        echo "To make any changes, update the main.tf found at $PWD/main.tf"
         echo ""
         cat main.tf.temp > main.tf
         rm main.tf.temp
@@ -348,8 +353,12 @@ runSetup(){
     else
       cat main.tf.temp > main.tf
       rm main.tf.temp
+      echo "main.tf: "
+      cat main.tf | sed 's/^/  /'
       echo ""
       echo "Setup Complete"
+      echo ""
+      echo "To make any changes, update the main.tf found at $PWD/main.tf"
       echo ""
       exit
     fi
@@ -505,7 +514,7 @@ localBackend() {
   then
     read -r -p "Enter file path: " path
   fi
-  echo "    secret_suffix = \"${path}\"" >> main.tf.temp
+  echo "    Path = \"${path}\"" >> main.tf.temp
   echo "  }" >> main.tf.temp
 }
 
@@ -778,25 +787,26 @@ case $OPTION in
     installDependencies
     runDeploy "$@"
     ;;
-  "help" | "-help")
-    help
+  help | -help | --help )
+    help "$@"
     ;;
-  "get" | "-get")
+  get | -get)
     getState "$@"
     ;;
-  "new-version" | "-new-version")
+  new-version | -new-version)
     runNewVersion "$@"
     ;;
-  "set-version" | "-set-version")
+  set-version | -set-version )
     runSetVersion "$@"
     ;;
-  "get-version" | "-get-version")
+  get-version | -get-version)
     runGetVersion "$@"
     ;;
-  "destroy" | "-destroy")
+  destroy | -destroy)
     runDestroy "$@"
     ;;
   *)
     entry
     ;;
 esac
+
