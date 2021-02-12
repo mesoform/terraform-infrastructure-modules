@@ -51,7 +51,7 @@ Similarly, if there are existing role bindings, which you would like to add a me
 
 More information can be found in the terraform [documentation](https://www.terraform.io/docs/providers/google/r/cloud_run_service_iam.html).
 
-#### Multiple Versions
+## Multiple Versions
 By default the revision name for a Cloud Run deployment is auto-generated. 
 To specify a revision name for the Cloud Run deployment, the key `components.specs.<app_name>.template.metadata.name` must be set, 
 following the format of `<app_name>-<revision_id>`. 
@@ -65,30 +65,38 @@ The specs for multiple revisions can be managed:
   E.g. to deploy a new version of an application:
     1. Make a new branch using VCS and make revision and configuration changes to `gcp_cloudrun.yml` 
     2. Make a new terraform workspace by running: `terraform workspace new <version name>` 
-    3. Import Cloud Run configuration to state file by running `terraform import 'module.mcp.google_cloud_run_service[\"<name>\"]' <location_id>/<project-id>/<name>` (`<name>` being the name of the service)
+    3. Import Cloud Run configuration to state file by running :
+       * `terraform import 'module.mcp.google_cloud_run_service.self["<service>"]' <location_id>/<project-id>/<service>` 
+       * `terraform import 'module.mcp.google_cloud_run_service_iam_policy.self[\"<service>\"]' projects/<project_id>/locations/<location>/services/<service>`
     4. Apply terraform changes, and commit changes to VCS
 
 **NOTE**: Running `terraform destroy` will destroy the whole Cloud Run Service, not just that revision 
 
-##### Traffic
+### Traffic
 By default, 100% of traffic is allocated to the latest revision. If managing multiple revisions traffic should be specified for each revision receiving traffic.
 Revision specified must be an existing revision, and if no revision is specified, the traffic will be allocated to the latest revision.  
 
+Traffic can either be allocated by specifying a `gcp_cloudrun_traffic.yml` file or by setting the envicornment variable `TF_VAR_gcp_cloudrun_traffic` to a map of traffic allocations.  
+Traffic should be a mapping of `<service>;<revision_id>` to a percentage of traffic to send. 
 Notes:
 * Only one traffic allocation can be to the latest revision
 * Traffic must always add up to 100%
+* To use environment variable ensure `variable gcp_cloudrun_traffic {}` is in `main.tf` and the `module` block includes the line `gcp_cloudrun_traffic=var.gcp_cloudrun_traffic`
 
-Example of traffic block within `components.specs.<app>`:
-```yaml
-traffic:
-  - percent: 20 #would go to latest revision
-  - revision_name: default-0
-    percentage: 40
-  - revision_name: default-1
-    percentage: 40
+Example of traffic assignment using environment variables:
+```shell
+export TF_VAR_gcp_cloudrun_traffic='{"app1;v1" = 60, "app1;v2" = 40, "app1-service;v3" = 90, "app1-service;v4" = 10}'
 ```
 
-#### Example Configuration
+Example of `gcp_cloudrun_traffic.yml`:
+```yaml
+app1;v1: 60
+app1;v2: 40
+app1-service;v3: 90
+app1-service;v4: 10 
+```
+
+### Example Cloud Run Configuration
 ```yaml
 project_id: <id>
 location_id: "europe-west1"
@@ -128,10 +136,6 @@ components:
           member: 'user: admin@example.com'
       domain_name: "domain.com"
       #Use hyphens to separate traffic configurations, making a list of configurations
-      traffic:
-        - percent: 25
-        - revision_name: "default-2"
-          percent: 75
-         
+
 
 ```

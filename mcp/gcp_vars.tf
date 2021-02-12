@@ -37,3 +37,15 @@ variable gcp_cloudrun_yml {
   type        = string
   default     = "../gcp_cloudrun.yml"
 }
+
+variable gcp_cloudrun_traffic {
+  description = "Map of traffic for each revision in format {'revision_name` = percent}"
+  type        = map
+  default     = null
+}
+
+variable gcp_ae_traffic {
+  description = "Map of traffic for each revision in format {'revision_name` = percent}"
+  type        = map
+  default     = null
+}

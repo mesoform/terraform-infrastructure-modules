@@ -120,12 +120,14 @@ resource "google_cloud_run_service" "self" {
     }
   }
   dynamic "traffic" {
-    for_each = local.cloudrun_traffic[each.key] == [] ? local.cloudrun_default.traffic : local.cloudrun_traffic[each.key]
+    for_each = lookup(local.cloudrun_traffic, each.key, {}) == {} ? local.cloudrun_default.traffic: local.cloudrun_traffic[each.key]
+//    for_each = lookup(local.cloudrun_traffic, each.key, local.cloudrun_default.traffic)
+//    for_each = local.cloudrun_traffic[each.key] == {} ? local.cloudrun_default.traffic : local.cloudrun_traffic[each.key]
     //noinspection HILUnresolvedReference
     content {
-      percent         = traffic.value.percent
-      revision_name   = lookup(traffic.value, "revision_name", null)
-      latest_revision = lookup(traffic.value, "revision_name", null) == null ? true : false
+      percent         = traffic.value
+      revision_name   = traffic.key == "latest" ? null: traffic.key
+      latest_revision = traffic.key == "latest" ? true: false
     }
   }
 
