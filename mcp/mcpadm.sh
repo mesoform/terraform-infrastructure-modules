@@ -381,12 +381,12 @@ gcsBackend(){
     esac
   done
   echo "  backend \"gcs\"{" >> main.tf.temp
-  if [ -z ${bucket+x} ]
+  if [ -z ${bucket} ]
   then
     read -r -p "Enter bucket name: " bucket
   fi
   echo "    bucket = \"${bucket}\"" >> main.tf.temp
-  if [ -z ${prefix+x} ]
+  if [ -z ${prefix} ]
   then
     read -r -p "Enter gcs prefix: " prefix
   fi
@@ -413,17 +413,17 @@ s3Backend(){
     esac
   done
   echo "  backend \"s3\"{" >> main.tf.temp
-  if [ -z ${bucket+x} ]
+  if [ -z "${bucket}" ]
   then
     read -r -p "Enter bucket name: " bucket
   fi
   echo "    bucket = \"${bucket}\"" >> main.tf.temp
-  if [ -z ${key+x} ]
+  if [ -z "${key}" ]
   then
     read -r -p "Enter key: " key
   fi
   echo "    key = \"${key}\""  >> main.tf.temp
-  if [ -z ${region+x} ]
+  if [ -z "${region}" ]
   then
     read -r -p "Enter region: " region
   fi
@@ -450,17 +450,18 @@ httpBackend(){
     esac
   done
   echo "  backend \"http\"{" >> main.tf.temp
-  if [ -z ${address+x} ]
+  if [ -z "${address}" ]
   then
     read -r -p "Enter address: " address
   fi
   echo "    address = \"${address}\"" >> main.tf.temp
-  if [ -z ${lock_address+x} ]
+  if [ -z "${lock_address}" ]
   then
     read -r -p "Enter lock address: " lock_address
   fi
   echo "    lock_address = \"${lock_address}\""  >> main.tf.temp
-  if [ -z ${unlock_address+x} ]
+
+  if [ -z "${unlock_address}" ]
   then
     read -r -p "Enter unlock address: " unlock_address
   fi
@@ -484,12 +485,12 @@ kubernetesBackend(){
     esac
   done
   echo "  backend \"kubernetes\"{" >> main.tf.temp
-  if [ -z ${secret_suffix+x} ]
+  if [ -z "${secret_suffix}" ]
   then
     read -r -p "Enter secret suffix: " secret_suffix
   fi
   echo "    secret_suffix = \"${secret_suffix}\"" >> main.tf.temp
-  if [ -z ${config+x} ]
+  if [ -z "${config}" ]
   then
     read -r -p "Load config file? (true or false): " config
   fi
@@ -510,7 +511,7 @@ localBackend() {
     esac
   done
   echo "  backend \"local\"{" >> main.tf.temp
-  if [ -z ${path+x} ]
+  if [ -z ${path} ]
   then
     read -r -p "Enter file path: " path
   fi
@@ -644,11 +645,11 @@ appEngineVersion(){
         ;;
     esac
   done
-  if [ -z ${project+x} ]
+  if [ -z "${project}" ]
   then
     read -r -p "Enter project id: " project
   fi
-  if [ -z ${version+x} ]
+  if [ -z "${version}" ]
   then
     read -r -p "Enter the version name/id: " version
   fi
@@ -704,19 +705,19 @@ cloudRunVersion(){
         ;;
     esac
   done
-  if [ -z ${project+x} ]
+  if [ -z "${project}" ]
   then
     read -r -p "Enter project id: " project
   fi
-  if [ -z ${service+x} ]
+  if [ -z "${service}" ]
   then
     read -r -p "Enter name of the Cloud Run service: " service
   fi
-  if [ -z ${revision+x} ]
+  if [ -z "${revision}" ]
   then
     read -r -p "Enter revision name/id: " revision
   fi
-  if [ -z ${location+x} ]
+  if [ -z "${location}" ]
   then
     read -r -p "Enter the location_id of the service: " location
   fi
