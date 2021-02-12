@@ -31,15 +31,12 @@ Terraform external provider just handles strings in maps, so tests need to consi
 from sys import path, stderr
 
 try:
-    path.insert(1, '/../test_fixtures/python_validator')
+    path.insert(1, '../../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
-    print(e, file=stderr)
+    print(e, stderr)
 
-
-@python_validator
-def test_src_files_manifest_format(query):
-    """
+"""
     checks that the data given to the test function is as expected to be used in
     google_storage_object.
 
@@ -58,34 +55,19 @@ def test_src_files_manifest_format(query):
     3. when different AS definitions have a reference to a file of the same name and the same
     content
 
-    manifest files for this test should include
-    {
-        "artifactDir": "exploded-app1",
-        "contents": [
-            "WEB-INF/appengine-web.xml",
-            "WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
-        ]
-    }
+
     for both app1 and app2 (default) but with slightly different content in appengine-web.xml
-    """
-    expected_data = {
-        "../app2/build/exploded-app2/WEB-INF/appengine-web.xml":
-            "3c7a18e3d3b8be3afd75d7a4823d6aca43d65123",
-        "../app2/build/exploded-app2/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class":
-            "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f",
-        "../app1/build/exploded-app1/WEB-INF/appengine-web.xml":
-            "b3fc24644f48f686b0757a6b70973accbcbdee70",
-        "../app1/build/exploded-app1/WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class":
-            "bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f"
-    }
-    if query == expected_data:
-        return {"result": "pass"}
-    else:
-        return {"result": "fail"}
+"""
+
+expected_data = {
+    "env": "flex",
+    "name": "app1"
+}
 
 
 if __name__ == '__main__':
-    test_src_files_manifest_format()
+    python_validator(expected_data)
+
 
 ```
 

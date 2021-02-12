@@ -3,7 +3,8 @@ name: 'Deployment Tests'
 on:
   push:
     branches:
-      - master
+      - main
+      - develop
 
 # a comment
 jobs:
@@ -14,6 +15,7 @@ jobs:
     env:
       working-directory: ./tests/mcp/deployment
       GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-${GITHUB_RUN_NUMBER}"
+      KUBE_CONFIG_PATH: ~/.kube/config
 
     defaults:
       run:

@@ -7,26 +7,17 @@ try:
     path.insert(1, '../../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
-    print(e, file=stderr)
+    print(e, stderr)
 
-
-@python_validator
-def test_env_variables(query):
-    """
+"""
     Tests the merging of environment variables from `common` and `specs`.
-    """
-    expected_data = {
-        "env": "dev",
-        "IS_GAE": "true"
-    }
+"""
 
-    if query == expected_data:
-        return {"result": "pass"}
-    else:
-        return {"result": "fail",
-                "expected": "{}".format(expected_data),
-                "received": "{}".format(query)}
+expected_data = {
+    "env": "dev",
+    "IS_GAE": "true"
+}
 
 
 if __name__ == '__main__':
-    test_env_variables()
+    python_validator(expected_data)

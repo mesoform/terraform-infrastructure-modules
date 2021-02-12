@@ -7,12 +7,9 @@ try:
     path.insert(1, '../../../../test_fixtures/python_validator')
     from python_validator import python_validator
 except Exception as e:
-    print(e, file=stderr)
+    print(e, stderr)
 
-
-@python_validator
-def test_src_files_manifest_format(query):
-    """
+"""
     checks that the data given to the test function is as expected to be used in
     google_storage_object.
 
@@ -33,18 +30,12 @@ def test_src_files_manifest_format(query):
 
 
     for both app1 and app2 (default) but with slightly different content in appengine-web.xml
-    """
-    #  If the default app has `env: standard` set which should override common, then the result for
-    #  the flex list should not include the default app
-    expected_data = {}
+"""
 
-    if query == expected_data:
-        return {"result": "pass"}
-    else:
-        return {"result": "fail",
-                "expected": "{}".format(expected_data),
-                "received": "{}".format(query)}
+# If the default app has `env: standard` set which should override common, then the result for
+#  the flex list should not include the default app
+expected_data = {}
 
 
 if __name__ == '__main__':
-    test_src_files_manifest_format()
+    python_validator(expected_data)
