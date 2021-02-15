@@ -69,3 +69,4 @@ jobs:
         done
         echo ${MESSAGE^^}
         exit $EXIT_CODE
+

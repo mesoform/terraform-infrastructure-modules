@@ -44,7 +44,3 @@ data external test_traffic_empty{
 output test_traffic_empty {
   value = data.external.test_traffic_empty.result
 }
-
-
-
-

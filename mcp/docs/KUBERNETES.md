@@ -19,7 +19,6 @@ The configuration is done within a `k8s.yml` file which defines the kubernetes r
 
 Structure is as shown below:
 ```yaml
-config_path: <path to kubernetes config file>
 components:
   specs:
     app_1: 
