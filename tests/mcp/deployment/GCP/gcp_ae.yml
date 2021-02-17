@@ -1,6 +1,7 @@
 project_id: &project_id <project_id>
 create_google_project: false
 location_id: "europe-west2"
+terraform_delay: "2m"
 components:
   common:
     entrypoint: python main.py
@@ -8,7 +9,8 @@ components:
     env: flex
   specs:
     default:
-      automatic_scaling: {}
+      manual_scaling:
+        instance: 1
       deployment:
         container:
           image: <image_uri>
