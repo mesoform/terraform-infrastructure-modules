@@ -14,7 +14,7 @@ jobs:
 
     env:
       working-directory: ./tests/mcp/deployment
-      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}"
+      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-${GITHUB_RUN_NUMBER}"
       KUBE_CONFIG_PATH: ~/.kube/config
 
     defaults:
@@ -59,7 +59,7 @@ jobs:
           gcloud services enable appengineflex.googleapis.com
           gcloud services enable artifactregistry.googleapis.com
           gcloud services enable run.googleapis.com
-          gcloud config set compute/zone europe-west2
+          gcloud config set compute/zone europe-west2-a
           gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_bucket
           gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_cloudbuild
 
