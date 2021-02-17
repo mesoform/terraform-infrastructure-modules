@@ -29,35 +29,6 @@ resource "google_project" "self" {
 }
 
 
-//noinspection HILUnresolvedReference
-resource "google_storage_bucket" "self" {
-  count = local.gae == {} ? 0 : 1
-  force_destroy = true # code should be transient in GCS and maintained in version control
-  project = lookup(local.gae, "create_google_project", false) ? google_project.self.0.project_id : data.google_project.self.0.project_id
-  name = local.project.name
-  uniform_bucket_level_access = true
-  default_event_based_hold = false
-  labels = lookup(local.project, "labels", {})
-  # ToDo handle region better between app engine and cloud storage
-  location = local.gae.location_id
-  requester_pays = false
-  storage_class = "REGIONAL"
-  versioning {
-    enabled = true
-  }
-}
-
-
-//noinspection HILUnresolvedReference
-resource "google_storage_bucket_object" "self" {
-  for_each = local.upload_manifest
-
-  name   = each.value
-  bucket = google_storage_bucket.self[0].name
-  source = each.key
-}
-
-
 resource "google_project_service" "flex" {
   count = length(local.as_flex_specs) > 0 ? 1 : 0
 
@@ -79,7 +50,7 @@ resource "google_project_service" "std" {
 //noinspection HILUnresolvedReference
 resource "google_app_engine_application" "self" {
   count = local.gae == {} ? 0 : 1
-  project = length(local.as_flex_specs) > 0 ? google_project_service.flex.0.project : google_project_service.std.0.project
+  project = length(local.as_flex_specs) > 0 ? google_project_iam_member.gae_api.0.project : google_project_service.std.0.project
   location_id = lookup(local.gae, "location_id", null)
   auth_domain = lookup(local.gae, "auth_domain", null)
   serving_status = lookup(local.gae, "serving_status", null)
@@ -108,6 +79,14 @@ resource "google_app_engine_application" "self" {
 }
 
 
+resource "time_sleep" "flex_sa_propagation" {
+  count = length(local.as_flex_specs) > 0 ? 1: 0
+  create_duration = lookup(local.gae, "flex_delay", "30s")
+  triggers ={
+    project_id = google_project_iam_member.gae_api.0.project
+  }
+}
+
 resource "google_project_iam_member" "gae_api" {
   count = length(local.as_flex_specs) > 0 ? 1 : 0
   # force dependency on the APIs being enabled
@@ -120,11 +99,12 @@ resource "google_project_iam_member" "gae_api" {
 
 //noinspection HILUnresolvedReference
 resource "google_app_engine_flexible_app_version" "self" {
+  provider = google-beta
   for_each = local.as_flex_specs
   # force dependency on the required service account being created and given permission to operate
 
-  project = google_project_iam_member.gae_api.0.project
-  version_id = lookup(each.value, "version_id", local.project.version)
+  project = time_sleep.flex_sa_propagation.0.triggers["project_id"]
+  version_id = lookup(each.value, "version_id", lookup(local.project, "version", "v1"))
   service = lookup(each.value, "service", each.key)
   runtime = lookup(each.value, "runtime", null)
   default_expiration = lookup(each.value, "default_expiration", null)
@@ -135,10 +115,7 @@ resource "google_app_engine_flexible_app_version" "self" {
   runtime_channel = lookup(each.value, "runtime_channel", null)
   runtime_main_executable_path = lookup(each.value, "runtime_main_executable_path", null)
   serving_status = lookup(each.value, "serving_status", null)
-  env_variables = merge(
-  lookup(local.gae.components.common, "env_variables", {}),
-  lookup(each.value, "env_variables", {})
-  )
+  env_variables = local.env_variables[each.key]
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
@@ -165,12 +142,10 @@ resource "google_app_engine_flexible_app_version" "self" {
       }
 
       dynamic "files" {
-        for_each = lookup(local.file_sha1sums, each.key, {})
-
+        for_each = lookup(local.src_files, each.key, {})
         content {
           name = files.key
-          source_url = "https://storage.googleapis.com/${google_storage_bucket.self[0].name}/${files.value}"
-          sha1_sum = files.value
+          source_url = files.value
         }
       }
     }
@@ -211,14 +186,13 @@ resource "google_app_engine_flexible_app_version" "self" {
       min_idle_instances = lookup(automatic_scaling.value, "min_idle_instances", null)
       min_pending_latency = lookup(automatic_scaling.value, "min_pending_latency", null)
       min_total_instances = lookup(automatic_scaling.value, "min_total_instances", null)
-
-      dynamic "cpu_utilization" {
-        # cpu_utilization is a required block so doesn't need a condition like other dynamic blocks
-        for_each = lookup(automatic_scaling.value, "cpu_utilization", {cpu_utilization: {target_utilization: local.default.automatic_scaling.target_utilization}})  # required default. Also see attribute below
-
+      //noinspection HILUnresolvedReference
+      dynamic "cpu_utilization"{
+        for_each = lookup(automatic_scaling.value, "cpu_utilization", null) == null ? {cpu_utilization: {target_utilization: local.default.automatic_scaling.target_utilization}} : {cpu_utilization: automatic_scaling.value.cpu_utilization}
+        //noinspection HILUnresolvedReference
         content {
-          target_utilization = lookup(cpu_utilization.value, "target_utilization", local.default.automatic_scaling.target_utilization)
-          aggregation_window_length = lookup(cpu_utilization.value, "aggregation_window_length", null)
+          target_utilization        = lookup(cpu_utilization.value, "target_utilization",local.default.automatic_scaling.target_utilization)
+          aggregation_window_length = lookup(cpu_utilization.value, "aggregation_window_length", null )
         }
       }
 
@@ -264,7 +238,7 @@ resource "google_app_engine_flexible_app_version" "self" {
     for_each = lookup(each.value, "manual_scaling", null) == null ? {} : {manual_scaling: each.value.manual_scaling}
 
     content {
-      instances = lookup(manual_scaling.value, "instances", null)
+      instances = lookup(manual_scaling.value, "instances", 1)
     }
   }
 
@@ -377,10 +351,7 @@ resource "google_app_engine_standard_app_version" "self" {
   instance_class = lookup(each.value, "instance_class", null)
   runtime_api_version = lookup(each.value, "runtime_api_version", null)
   threadsafe = lookup(each.value, "threadsafe", null)
-  env_variables = merge(
-  lookup(local.gae.components.common, "env_variables", {}),
-  lookup(each.value, "env_variables", {})
-  )
+  env_variables = local.env_variables[each.key]
 
   //noinspection HILUnresolvedReference
   dynamic "deployment" {
@@ -388,12 +359,10 @@ resource "google_app_engine_standard_app_version" "self" {
 
     content {
       dynamic "files" {
-        for_each = lookup(local.file_sha1sums, each.key, {})
-
+        for_each = lookup(local.src_files, each.key, {})
         content {
           name = files.key
-          source_url = "https://storage.googleapis.com/${google_storage_bucket.self[0].name}/${files.value}"
-          sha1_sum = files.value
+          source_url = files.value
         }
       }
     }

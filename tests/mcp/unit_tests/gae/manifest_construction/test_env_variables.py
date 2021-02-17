@@ -1,3 +1,6 @@
+"""
+Terraform external provider just handles strings in maps, so tests need to consider this
+"""
 from sys import path, stderr
 
 try:
@@ -7,13 +10,14 @@ except Exception as e:
     print(e, stderr)
 
 """
-    Checks the data specified in the required metadata
-
+    Tests the merging of environment variables from `common` and `specs`.
 """
 
 expected_data = {
-    "name": "www-data"
+    "env": "dev",
+    "IS_GAE": "true"
 }
+
 
 if __name__ == '__main__':
     python_validator(expected_data)
