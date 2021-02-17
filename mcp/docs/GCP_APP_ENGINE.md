@@ -93,7 +93,7 @@ The key `bucket_name` is the name of the bucket which holds the services files.
 | `location_id` | string | true | The geographical location to serve the app from | none |
 | `auth_domain` | string | false | The domain to authenticate users with when using App Engine's User API | none |
 | `serving_status` | enum | false | The serving status of the app. Options are SERVING and STOPPED | none |
-| `sa_delay` | string | false | Delay creation of flexible app after creation of service account to avoid propagation error | "30s" |
+| `flex_delay` | string | false | Delay creation of flexible app after creation of service account to avoid propagation error | "30s" |
 | `iap` | map | false | Settings for enabling Cloud Identity Aware Proxy. If iap map exists, the `oauth2_client_id` and `oauth2_client_secret` fields must be non-empty.  | none |
 | `iap.enabled` | boolean | true within IAP context only | IAP enabled or not. | `false` |
 | `iap.oauth2_client_id` | string | true within IAP context only | OAuth2 client ID to use for the authentication flow | none |
@@ -264,13 +264,13 @@ P4SA (Per-Product Per-Project Service Account) refers to the google managed serv
 The error means that a GAIA (Google Account and ID Administration) ID has not yet been associated with the service account for this project.   
 A default of 30s has been added between the creation of the service account and creation of flexible app service, 
 to ensure the service account has been created before app engine attempts to use it.  
-If this error occurs set `sa_delay` to `"2m"` or more. E.g.
+If this error occurs set `flex_delay` to `"2m"` or more. E.g.
 
 ```yaml
 project_id: project
 create_google_project: false
 location_id: "europe-west2"
-sa_delay: "2m"     
+flex_delay: "2m"     
 components:
   specs:
     default:

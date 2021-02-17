@@ -81,7 +81,7 @@ resource "google_app_engine_application" "self" {
 
 resource "time_sleep" "flex_sa_propagation" {
   count = length(local.as_flex_specs) > 0 ? 1: 0
-  create_duration = lookup(local.gae, "sa_delay", "30s")
+  create_duration = lookup(local.gae, "flex_delay", "30s")
   triggers ={
     project_id = google_project_iam_member.gae_api.0.project
   }
