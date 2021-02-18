@@ -312,7 +312,22 @@ runSetup(){
     {
       echo "module mcp{"
       echo "  source = \"github.com/mesoform/terraform-infrastructure-modules//mcp\""
+      echo "  gcp_ae_traffic = var.gcp_ae_traffic"
+      echo "  gcp_cloudrun_traffic = var.gcp_cloudrun_traffic"
       echo "}"
+      echo ""
+      echo "variable gcp_ae_traffic{"
+      echo "  description = \"Map of App Engine traffic allocations, in format of '<service>;<version> = <percent>'\""
+      echo "  type        = map"
+      echo "  default     = null"
+      echo "}"
+      echo ""
+      echo "variable gcp_cloudrun_traffic{"
+      echo "  description = \"Map of Cloud Run traffic allocations, in format of '<service>;<version> = <percent>'\""
+      echo "  type        = map"
+      echo "  default     = null"
+      echo "}"
+
     } >> main.tf.temp
 
 #    cat main.tf.temp
@@ -759,6 +774,14 @@ versionHelp(){
   entry
 }
 
+runImport(){
+#  TODO: Import all services. Have structure be if all or cloudrun, if all or app engine, for each import thing.
+  local location project service version
+  echo "Importing current GCP configuration"
+
+}
+
+
 runDestroy() {
   echo ""
   echo "Creating plan for destroying resources..."
@@ -805,6 +828,9 @@ case $OPTION in
     ;;
   destroy | -destroy)
     runDestroy "$@"
+    ;;
+  import | -import)
+    runImport "$@"
     ;;
   *)
     entry

@@ -103,6 +103,7 @@ The key `bucket_name` is the name of the bucket which holds the services files.
 | `components` | map | true | map of app/service specifications and defaults for those specifications | none |
 | `components.spec` | map | true | a set of key:value pairs where the keys are unique IDs for each components and at least one must be named `default`. The value for each key is another map, of which the format depends on the App Engine version (Flexible or standard) and is described below. | none |
 | `components.common` | map | false | all attributes which can be specified for any service in components spec can be specified here as defaults which all services will use or chose to override | none |
+| `components.spec.<app>.migrate_traffic` | bool | false | will migrate all traffic to a new version of the deployed app | false |
 
 Example:
 ```yamlex
@@ -188,7 +189,7 @@ components:
 ```
 ***NOTE***: For the container image ensure that the tag or digest is included on the full URI  
 
-#### Deployment Versioning  
+### Deployment Versioning  
 Multiple versions of a service can be deployed at once. 
 * `gcp_ae.yml` will only contain the specifications for one version of each service.  
 * Updating the container version or manifest will not produce a new app engine version, but will update the current deployment

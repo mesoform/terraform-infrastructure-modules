@@ -70,6 +70,14 @@ locals {
       lookup(local.gae_components, "common", null ) == null ? {} : lookup(local.gae_components.common, "env_variables", {}),
       lookup(specs, "env_variables", {}))
   }
+  //If environment variables exist, use tha, otherwise use traffic fil
+  gae_traffic_config   = try(var.gcp_ae_traffic != null? var.gcp_ae_traffic : yamldecode(var.gcp_ae_traffic) , yamldecode(file("../gae_traffic.yml")), {})
+  gae_traffic = {
+    for as, specs in local.as_all_specs: as => {
+      for version, percent in local.gae_traffic_config: element(regex(";(.*)", version),0) => percent/100
+      if length(regexall("^${as};", version)) > 0
+    }
+  }
 
 }
 

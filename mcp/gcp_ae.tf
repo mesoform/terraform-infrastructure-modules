@@ -469,3 +469,36 @@ resource "google_app_engine_standard_app_version" "self" {
     create_before_destroy = true
   }
 }
+
+
+resource "google_app_engine_service_split_traffic" "std-split" {
+  for_each = {
+    for service, specs in local.as_std_specs: service =>
+  lookup(local.gae_traffic, service, {}) == {} ? {(google_app_engine_standard_app_version.self[service].version_id) = 1} : local.gae_traffic[service]
+    if lookup(specs, "migrate_traffic", false) || length(lookup(local.gae_traffic, service, {} )) > 0
+  }
+  project = google_app_engine_application.self.0.project
+  migrate_traffic = lookup(local.as_std_specs[each.key], "migrate_traffic", false)
+  service = each.key
+  split {
+    shard_by = lookup(local.as_std_specs[each.key], shard_by, "IP")
+    allocations = each.value
+  }
+}
+
+
+resource "google_app_engine_service_split_traffic" "flex-split"{
+  for_each = {
+    for service, specs in local.as_flex_specs: service =>
+      lookup(local.gae_traffic, service, {}) == {} ? {(google_app_engine_flexible_app_version.self[service].version_id) = 1} : local.gae_traffic[service]
+    if lookup(specs, "migrate_traffic", false) || length(lookup(local.gae_traffic, service, {})) > 0
+  }
+  project = google_app_engine_application.self.0.project
+  service = each.key
+  migrate_traffic = false
+  split {
+    shard_by = lookup(local.as_flex_specs[each.key], shard_by, "IP")
+    allocations = each.value
+  }
+
+}
