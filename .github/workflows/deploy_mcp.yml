@@ -14,7 +14,7 @@ jobs:
 
     env:
       working-directory: ./tests/mcp/deployment
-      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}"
+      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-${GITHUB_RUN_NUMBER}"
       KUBE_CONFIG_PATH: ~/.kube/config
 
     defaults:
@@ -59,16 +59,9 @@ jobs:
           gcloud services enable appengineflex.googleapis.com
           gcloud services enable artifactregistry.googleapis.com
           gcloud services enable run.googleapis.com
-          gcloud config set compute/zone europe-west2
+          gcloud config set compute/zone europe-west2-a
           gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_bucket
           gsutil mb -l europe-west2 gs://${{env.GCP_PROJECT_ID}}_cloudbuild
-
-      # Deploy app image to Artifact Repository
-      - name: Build App
-        run: |
-          cd GCP/app/build/helloworld
-          gcloud artifacts repositories create app-repo --repository-format=docker --location=europe-west2 --description="Repository for storing app"
-          gcloud builds submit --tag europe-west2-docker.pkg.dev/${{env.GCP_PROJECT_ID}}/app-repo/helloworld
 
       # Create a new service account to be used for deployment
       - name: Create New SA
@@ -80,14 +73,13 @@ jobs:
           gcloud auth activate-service-account --key-file=sa-key.json
 
       # Configure yaml files to contain relevant project info
-      - name: Configure GCP Files
+      - name: Add project ID to GCP Files
         run: |
           cd GCP
           echo "name: ${{env.GCP_PROJECT_ID}}_app_bucket" > project.yml
           sed -i "s/<project_id>/${{env.GCP_PROJECT_ID}}/" gcp_ae.yml
           sed -i "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" gcp_ae.yml
           sed -i "s/<project_id>/${{env.GCP_PROJECT_ID}}/" gcp_cloudrun.yml
-          sed -i "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" gcp_cloudrun.yml
 
 
       # Install kubectl and create gke cluster
@@ -110,6 +102,20 @@ jobs:
           terraform plan -destroy -out="./destroy.tfplan"
           terraform apply destroy.tfplan
 
+      # Deploy app image to Artifact Repository
+      - name: Build App
+        run: |
+          cd GCP/app/build/helloworld
+          gcloud artifacts repositories create app-repo --repository-format=docker --location=europe-west2 --description="Repository for storing app"
+          gcloud builds submit --tag europe-west2-docker.pkg.dev/${{env.GCP_PROJECT_ID}}/app-repo/helloworld
+
+      # Configure yaml files to contain relevant project info
+      - name: Add image URI to GCP Files
+        run: |
+          cd GCP
+          sed -i "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" gcp_ae.yml
+          sed -i "s/<image_uri>/europe-west2-docker.pkg.dev\/${{env.GCP_PROJECT_ID}}\/app-repo\/helloworld:latest/" gcp_cloudrun.yml
+
       # Setup main.tf and deploy gcp modules. Also plan destroy but don't apply due to app engine issues.
       - name: Deploy GCP modules
         run: |
@@ -125,3 +131,4 @@ jobs:
       - name: delete project
         if : ${{ always() }}
         run: gcloud projects delete ${{env.GCP_PROJECT_ID}}
+        
