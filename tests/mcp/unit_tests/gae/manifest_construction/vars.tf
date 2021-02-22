@@ -7,3 +7,13 @@ variable user_project_config_yml {
   type = string
   default = "resources/project.yml"
 }
+
+variable "gcp_ae_traffic" {
+  type = map
+  default = null
+}
+
+variable gcp_ae_traffic_yml {
+  type = string
+  default = "resources/gcp_ae_traffic.yml"
+}

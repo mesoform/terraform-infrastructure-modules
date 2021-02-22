@@ -44,8 +44,19 @@ variable gcp_cloudrun_traffic {
   default     = null
 }
 
+variable gcp_cloudrun_traffic_yml {
+  description = "Path to YAML file containing traffic configuration for Cloud Run "
+  type        = string
+  default     = "../gcp_cloudrun_traffic.yml"
+}
+
 variable gcp_ae_traffic {
   description = "Map of traffic for each revision in format {'revision_name` = percent}"
   type        = map
   default     = null
+}
+variable gcp_ae_traffic_yml {
+  description = "Path to YAML file containing traffic configuration for App engine "
+  type        = string
+  default     = "../gcp_ae_traffic.yml"
 }

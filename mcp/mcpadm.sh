@@ -774,14 +774,6 @@ versionHelp(){
   entry
 }
 
-runImport(){
-#  TODO: Import all services. Have structure be if all or cloudrun, if all or app engine, for each import thing.
-  local location project service version
-  echo "Importing current GCP configuration"
-
-}
-
-
 runDestroy() {
   echo ""
   echo "Creating plan for destroying resources..."
@@ -828,9 +820,6 @@ case $OPTION in
     ;;
   destroy | -destroy)
     runDestroy "$@"
-    ;;
-  import | -import)
-    runImport "$@"
     ;;
   *)
     entry

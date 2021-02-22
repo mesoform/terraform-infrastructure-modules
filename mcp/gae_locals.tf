@@ -14,6 +14,9 @@ locals {
   gae                     = try(yamldecode(local.user_gae_config_yml), {})
   gae_components          = lookup(local.gae, "components", {})
   gae_components_specs    = lookup(local.gae_components, "specs", {})
+  // If environment variables exist, use that, otherwise use traffic file.
+  //`yamldecode`var.gcp_ae_traffic` is to make tha condition fail if not met, as there is no exit function in terraform
+  gae_traffic_config   = try(var.gcp_ae_traffic != null? var.gcp_ae_traffic : yamldecode(var.gcp_ae_traffic) , yamldecode(file(var.gcp_ae_traffic_yml)), {})
 
   //noinspection HILUnresolvedReference
   as_all_map = {
@@ -70,8 +73,7 @@ locals {
       lookup(local.gae_components, "common", null ) == null ? {} : lookup(local.gae_components.common, "env_variables", {}),
       lookup(specs, "env_variables", {}))
   }
-  //If environment variables exist, use tha, otherwise use traffic fil
-  gae_traffic_config   = try(var.gcp_ae_traffic != null? var.gcp_ae_traffic : yamldecode(var.gcp_ae_traffic) , yamldecode(file("../gae_traffic.yml")), {})
+
   gae_traffic = {
     for as, specs in local.as_all_specs: as => {
       for version, percent in local.gae_traffic_config: element(regex(";(.*)", version),0) => percent/100

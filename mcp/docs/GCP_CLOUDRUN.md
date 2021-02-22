@@ -76,7 +76,7 @@ The specs for multiple revisions can be managed:
 By default, 100% of traffic is allocated to the latest revision. If managing multiple revisions traffic should be specified for each revision receiving traffic.
 Revision specified must be an existing revision, and if no revision is specified, the traffic will be allocated to the latest revision.  
 
-Traffic can either be allocated by specifying a `gcp_cloudrun_traffic.yml` file or by setting the envicornment variable `TF_VAR_gcp_cloudrun_traffic` to a map of traffic allocations.  
+Traffic can either be allocated by specifying a `gcp_cloudrun_traffic.yml` file or by setting the environment variable `TF_VAR_gcp_cloudrun_traffic` to a map of traffic allocations.  
 Traffic should be a mapping of `<service>;<revision_id>` to a percentage of traffic to send. 
 Notes:
 * Only one traffic allocation can be to the latest revision
