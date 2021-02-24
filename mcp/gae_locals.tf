@@ -14,6 +14,9 @@ locals {
   gae                     = try(yamldecode(local.user_gae_config_yml), {})
   gae_components          = lookup(local.gae, "components", {})
   gae_components_specs    = lookup(local.gae_components, "specs", {})
+  // If environment variables exist, use that, otherwise use traffic file.
+  //`yamldecode`var.gcp_ae_traffic` is to make tha condition fail if not met, as there is no exit function in terraform
+  gae_traffic_config   = try(var.gcp_ae_traffic != null ? var.gcp_ae_traffic : yamldecode(var.gcp_ae_traffic) , yamldecode(file(var.gcp_ae_traffic_yml)), {})
 
   //noinspection HILUnresolvedReference
   as_all_map = {
@@ -70,6 +73,26 @@ locals {
       lookup(local.gae_components, "common", null ) == null ? {} : lookup(local.gae_components.common, "env_variables", {}),
       lookup(specs, "env_variables", {}))
   }
+
+  gae_traffic = {
+    for as, specs in local.as_all_specs: as => {
+      for version, percent in local.gae_traffic_config: element(regex(";(.*)", version),0) => percent/100
+      if length(regexall("^${as};", version)) > 0
+    }
+  }
+
+  gae_traffic_std = {
+    for service, specs in local.as_std_specs: service =>
+      lookup(local.gae_traffic, service, {}) == {} ? {lookup(specs, "version_id", "v1") = 1} : local.gae_traffic[service]
+    if lookup(specs, "migrate_traffic", true) || length(lookup(local.gae_traffic, service, {} )) > 0
+  }
+
+  gae_traffic_flex = {
+    for service, specs in local.as_flex_specs: service =>
+      lookup(local.gae_traffic, service, {}) == {} ? {lookup(specs, "version_id", "v1") = 1} : local.gae_traffic[service]
+    if lookup(specs, "migrate_traffic", true) || length(lookup(local.gae_traffic, service, {} )) > 0
+  }
+
 
 }
 

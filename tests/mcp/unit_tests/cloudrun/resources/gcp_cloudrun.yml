@@ -3,8 +3,8 @@ location_id: "europe-west1"
 
 components:
   specs:
-    default:
-      name: "default"
+    app1:
+      name: "app1"
       template:
         containers:
           image: gcr.io/google-containers/nginx
@@ -25,33 +25,15 @@ components:
         add_member:
           role: 'admin'
           member: 'user:user@gmail.com'
-      traffic:
-        -
-          percent: 75
-        -
-          percent: 25
-          revision_name: 'old'
 
-    empty:
-      name: "default"
+    app1-service:
+      name: "app1-service"
       template:
         containers:
           image: gcr.io/google-containers/nginx
         metadata:
           annotations:
             "run.googleapis.com/client-name": "terraform"
-      auth: true
-      iam:
-        replace_policy: false
-        bindings:
-          'viewer':
-            members:
-              - 'user:user@gmail.com'
-              - 'group:user@gmail.com'
-          'admin':
-            members:
-              - 'domain:domain.com'
-        add_member:
-          role: 'admin'
-          member: 'user:user@gmail.com'
-      traffic:
+      auth: false
+    app2:
+      name: "app2"
