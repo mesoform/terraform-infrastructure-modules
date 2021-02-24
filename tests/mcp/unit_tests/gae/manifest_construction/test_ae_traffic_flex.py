@@ -11,7 +11,7 @@ except Exception as e:
 
 """
     Tests the retrieval and formatting of traffic maps for app engine.
-    Should return the main
+    Should return the traffic percentages specified in the traffic configuration file.
 """
 
 expected_data = {

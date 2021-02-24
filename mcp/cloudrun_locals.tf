@@ -25,7 +25,7 @@ locals {
   cloudrun_components_specs = lookup(local.cloudrun_components, "specs", {})
 
   // Makes error for var.gcp_cloudrun_traffic if not configured so it is skipped and the traffic file is used
-  cloudrun_traffic_config   = try(var.gcp_cloudrun_traffic != null? var.gcp_cloudrun_traffic : yamldecode(var.gcp_cloudrun_traffic) , yamldecode(file(var.gcp_cloudrun_traffic_yml)), {})
+  cloudrun_traffic_config   = try(var.gcp_cloudrun_traffic != null ? var.gcp_cloudrun_traffic : yamldecode(var.gcp_cloudrun_traffic) , yamldecode(file(var.gcp_cloudrun_traffic_yml)), {})
 
   cloudrun_specs = {
     for key, specs in local.cloudrun_components_specs:

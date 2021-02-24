@@ -233,7 +233,7 @@ This will result in:
     Error when reading or editing AppVersion: googleapi: Error 400: Cannot delete a version with a non-zero traffic allocation. 
     Please update your traffic split to remove the allocation for this version and try again.
   ```
-This due to attempting to destroy the previous version which still has traffic. The previous version will not be destroyed, and will still be serving the set traffic amount. 
+This is due to attempting to destroy the previous version which still has traffic. The previous version will not be destroyed, and will still be serving the set traffic amount. 
 To resolve this, traffic for that version must be set to 0 before being destroyed.
 
 ### Requirements.txt

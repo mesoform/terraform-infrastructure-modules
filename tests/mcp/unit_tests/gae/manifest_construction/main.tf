@@ -55,10 +55,18 @@ output test_env_variables {
   value = data.external.test_env_variables.result
 }
 
-data external test_ae_traffic {
-  query = lookup(local.gae_traffic, "app1", {})
-  program = ["python", "${path.module}/test_ae_traffic.py"]
+data external test_ae_traffic_flex {
+  query = lookup(local.gae_traffic_flex, "app1", {})
+  program = ["python", "${path.module}/test_ae_traffic_flex.py"]
 }
-output test_ae_traffic {
-  value = data.external.test_ae_traffic.result
+output test_ae_traffic_flex {
+  value = data.external.test_ae_traffic_flex.result
+}
+
+data external test_ae_traffic_std{
+  query = lookup(local.gae_traffic_std, "app2", {})
+  program = ["python", "${path.module}/test_ae_traffic_std.py"]
+}
+output test_ae_traffic_std {
+  value = data.external.test_ae_traffic_std.result
 }
