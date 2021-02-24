@@ -15,14 +15,18 @@ locals {
         "run.googleapis.com/client-name" = "terraform"
       }
     }
-    traffic = [
-      { percent = 100 }
-    ]
+    traffic = {
+      latest = 100
+    }
   }
   user_cloudrun_config_yml  = fileexists(var.gcp_cloudrun_yml) ? file(var.gcp_cloudrun_yml) : null
   cloudrun                  = try(yamldecode(local.user_cloudrun_config_yml), {})
   cloudrun_components       = lookup(local.cloudrun, "components", {})
   cloudrun_components_specs = lookup(local.cloudrun_components, "specs", {})
+
+  // Makes error for var.gcp_cloudrun_traffic if not configured so it is skipped and the traffic file is used
+  cloudrun_traffic_config   = try(var.gcp_cloudrun_traffic != null ? var.gcp_cloudrun_traffic : yamldecode(var.gcp_cloudrun_traffic) , yamldecode(file(var.gcp_cloudrun_traffic_yml)), {})
+
   cloudrun_specs = {
     for key, specs in local.cloudrun_components_specs:
       key => merge(lookup(local.cloudrun_components, "common", {}), specs)
@@ -35,12 +39,13 @@ locals {
     for key, specs in local.cloudrun_iam:
       key => lookup(local.cloudrun_iam[key], "bindings", {})
   }
-  cloudrun_traffic = {
-    for key, specs in local.cloudrun_specs:
-      key => lookup(local.cloudrun_specs[key], "traffic", null) == null ? [] : [
-        for setting in lookup(local.cloudrun_specs[key], "traffic", {}) :
-          merge(setting, {latest_revision = lookup(setting, "revision_name", null) == null ? true: false})
-    ]
-  }
 
+//  cloudrun_traffic = local.cloudrun_traffic_config == {} ? {} : {
+  cloudrun_traffic = {
+    for service, specs in local.cloudrun_specs: service => {
+      for revision, percent in local.cloudrun_traffic_config: replace(revision, ";", "-") => percent
+      if length(regexall("^${service};", revision)) > 0
+    }
+  }
 }
+

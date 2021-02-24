@@ -188,7 +188,6 @@ resource "kubernetes_persistent_volume" "self" {
           quobyte : each.value.persistent_volume.spec.persistent_volume_source.quobyte
         }
         content {
-          //TODO documentation specifying Quotbyte Registry Services
           registry = quobyte.value.registry
           volume   = quobyte.value.volume
           group    = lookup(quobyte.value, "group", null )

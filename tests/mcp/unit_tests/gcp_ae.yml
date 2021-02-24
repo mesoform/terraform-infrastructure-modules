@@ -53,6 +53,7 @@ components:
     app2:
       name: default
       runtime: java8
+      version_id: v2
       src_path: app2
       manual_scaling:
         instances: 1

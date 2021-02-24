@@ -103,6 +103,7 @@ The key `bucket_name` is the name of the bucket which holds the services files.
 | `components` | map | true | map of app/service specifications and defaults for those specifications | none |
 | `components.spec` | map | true | a set of key:value pairs where the keys are unique IDs for each components and at least one must be named `default`. The value for each key is another map, of which the format depends on the App Engine version (Flexible or standard) and is described below. | none |
 | `components.common` | map | false | all attributes which can be specified for any service in components spec can be specified here as defaults which all services will use or chose to override | none |
+| `components.spec.<app>.migrate_traffic` | bool | false | will migrate all traffic to a new version of the deployed app | false |
 
 Example:
 ```yamlex
@@ -188,28 +189,54 @@ components:
 ```
 ***NOTE***: For the container image ensure that the tag or digest is included on the full URI  
 
-#### Deployment Versioning  
+### Deployment Versioning  
 Multiple versions of a service can be deployed at once. 
 * `gcp_ae.yml` will only contain the specifications for one version of each service.  
 * Updating the container version or manifest will not produce a new app engine version, but will update the current deployment
-* If the version key is updated in `gcp_ae.yml` a new deployment version will be made. Terraform will attempt to destroy the previous version, but this will result in: 
-  ```
-    Error when reading or editing AppVersion: googleapi: Error 400: Cannot delete a version with a non-zero traffic allocation. 
-    Please update your traffic split to remove the allocation for this version and try again.
-  ```
-  After this error has occurred, reallocate the traffic from the previous version to the new version. This ensures that the version to be destroyed has 0 traffic. 
-  Running `terraform apply` will then have a plan to destroy the previous version, which should be successful. 
+* If the version key is updated in `gcp_ae.yml` a new deployment version will be made. 
+  By default, 100% of traffic will be sent to this new version, and the old version will be destroyed. 
 * To run multiple versions, [terraform workspaces](https://www.terraform.io/docs/state/workspaces.html) should be used.  
   E.g. to deploy a new version of an application:
-    1. Make a new branch using VCS and make version and configuratio changes to `gcp_ae.yml` 
+    1. Make a new branch using VCS and make version and configuration changes to `gcp_ae.yml` 
     2. Make a new terraform workspace by running: `terraform workspace new <version name>` 
     3. Import google app engine configuration to state file by running `terraform import 'module.mcp.google_app_engine_application.self[0]' <project-id>`
     Without this step terraform will try to create a new `google_app_engine_application` resource, when only one per project is allowed, resulting in an error.
     4. Apply changes with `terraform apply`
-    5. Commit terraform configuraton and statefiles to VCS
+    5. Commit terraform configuration and state files to VCS
 
+#### Traffic
+By default, 100% of traffic will be migrated to a newly declared version of app engine. 
+If managing traffic for multiple versions, traffic percent should be specified for each version receiving traffic.  
+Traffic can either be allocated by specifying a `gcp_ae_traffic.yml` file or by setting the environment variable `TF_VAR_gcp_ae_traffic` to a map of traffic allocations.  
+Traffic should be a mapping of `<service>;<revision_id>` to a percentage of traffic to send.
 
-#### Requirements.txt
+Example of traffic assignment using environment variables:
+```shell
+export TF_VAR_gcp_ae_traffic='{"app1;v1" = 60, "app1;v2" = 40, "app1-service;v3" = 90, "app1-service;v4" = 10}'
+```
+
+Example of `gcp_ae_traffic.yml`:
+```yaml
+app1;v1: 60
+app1;v2: 40
+app1-service;v3: 90
+app1-service;v4: 10 
+```
+
+If creating a new version in a new workspace, and not wanting to migrate or split traffic, set the variable `migrate_traffic` to `false` within the app specs in `gcp_ae.yml`.
+This will make have the new version serving 0 traffic, and keep the original traffic split.
+
+##### NOTE:
+If replacing updating a version in place with `migrate_traffic` set to false, a new version will be created with 0% traffic, and Terraform will attempt to destroy the previous version. 
+This will result in:
+  ```
+    Error when reading or editing AppVersion: googleapi: Error 400: Cannot delete a version with a non-zero traffic allocation. 
+    Please update your traffic split to remove the allocation for this version and try again.
+  ```
+This is due to attempting to destroy the previous version which still has traffic. The previous version will not be destroyed, and will still be serving the set traffic amount. 
+To resolve this, traffic for that version must be set to 0 before being destroyed.
+
+### Requirements.txt
 
 For applications that are dependent on third party libraries, define a `requirements.txt` file. 
 For example a python web app using flask would need:

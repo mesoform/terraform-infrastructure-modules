@@ -312,7 +312,22 @@ runSetup(){
     {
       echo "module mcp{"
       echo "  source = \"github.com/mesoform/terraform-infrastructure-modules//mcp\""
+      echo "  gcp_ae_traffic = var.gcp_ae_traffic"
+      echo "  gcp_cloudrun_traffic = var.gcp_cloudrun_traffic"
       echo "}"
+      echo ""
+      echo "variable gcp_ae_traffic{"
+      echo "  description = \"Map of App Engine traffic allocations, in format of '<service>;<version> = <percent>'\""
+      echo "  type        = map"
+      echo "  default     = null"
+      echo "}"
+      echo ""
+      echo "variable gcp_cloudrun_traffic{"
+      echo "  description = \"Map of Cloud Run traffic allocations, in format of '<service>;<version> = <percent>'\""
+      echo "  type        = map"
+      echo "  default     = null"
+      echo "}"
+
     } >> main.tf.temp
 
 #    cat main.tf.temp

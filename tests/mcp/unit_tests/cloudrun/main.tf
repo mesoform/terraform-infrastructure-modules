@@ -1,6 +1,6 @@
 data external test_policy_members{
   query = {
-    for role, members in local.cloudrun_iam_bindings["default"]:
+    for role, members in local.cloudrun_iam_bindings["app1"]:
       role => length(lookup(members, "members", []))
   }
 
@@ -10,37 +10,27 @@ output test_policy_members {
   value = data.external.test_policy_members.result
 }
 
-//tests traffic block without revision
-data external test_traffic{
-  query = local.cloudrun_traffic["default"] == [] ? {} : {
-    for key, value in element(local.cloudrun_traffic["default"], 0) :
-      tostring(key) => tostring(value)
-  }
-  program = ["python", "${path.module}/test_traffic.py"]
+data external test_ae_traffic_extended {
+  query = lookup(local.cloudrun_traffic, "app1-service", {})
+  program = ["python", "${path.module}/test_cloudrun_traffic_extended.py"]
+}
+output test_ae_traffic_1 {
+  value = data.external.test_ae_traffic_extended.result
 }
 
-output test_traffic {
-  value = data.external.test_traffic.result
+data external test_ae_traffic {
+  query = lookup(local.cloudrun_traffic, "app1", {})
+  program = ["python", "${path.module}/test_cloudrun_traffic.py"]
 }
 
-//tests traffic block with revision
-data external test_traffic_with_revision{
-  query = local.cloudrun_traffic["default"] == [] ? {} : {
-    for key, value in element(local.cloudrun_traffic["default"], 1) :
-      tostring(key) => tostring(value)
-    }
-  program = ["python", "${path.module}/test_traffic_with_revision.py"]
+output test_ae_traffic {
+  value = data.external.test_ae_traffic.result
+}
+data external test_ae_traffic_empty {
+  query = lookup(local.cloudrun_traffic, "app2", {})
+  program = ["python", "${path.module}/test_cloudrun_traffic.py"]
 }
 
-output test_traffic_config {
-  value = data.external.test_traffic_with_revision.result
-}
-
-data external test_traffic_empty{
-  query = local.cloudrun_traffic["empty"] == [] ? {} : {"format" = "not empty list"}
-  program = ["python", "${path.module}/test_traffic_empty.py"]
-}
-
-output test_traffic_empty {
-  value = data.external.test_traffic_empty.result
+output test_ae_traffic_empty {
+  value = data.external.test_ae_traffic.result
 }
