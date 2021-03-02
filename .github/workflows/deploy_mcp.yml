@@ -86,7 +86,7 @@ jobs:
       - name: setup kubectl
         run: |
           gcloud components install kubectl
-          gcloud container clusters create-auto mcpdeploytest-cluster --zone=europe-west2-a
+          gcloud container clusters create-auto mcpdeploytest-cluster --region=europe-west2
           gcloud container clusters get-credentials mcpdeploytest-cluster --zone=europe-west2-a
 
       # Setup main.tf, deploy and destroy k8s
