@@ -9,7 +9,7 @@ google_organization_iam_roles = {
   "roles/resourcemanager.organizationAdmin": {
     members = ["group:security@mesoform.com"]
     conditions = [
-      { title = "time_limited_access" expression = "request.time < timestamp(\"1977-07-08T00:00:00.00Z\")" }
+      { title = "time_limited_access", expression = "request.time < timestamp(\"1977-07-08T00:00:00.00Z\")" }
     ]
   }
 }
