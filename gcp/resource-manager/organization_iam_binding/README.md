@@ -26,7 +26,7 @@ variable google_organization_iam_roles {
 
 module org_iam_role {
   for_each = var.google_organization_iam_roles
-  source = "github.com/mesoform/terraform-infrastructure-modules/gcp/resource-manager/organization_iam_binding"
+  source = "github.com/mesoform/terraform-infrastructure-modules//gcp/resource-manager/organization_iam_binding"
   role = each.key
   iam_binding = each.value
   google_org_id = var.google_org_id
