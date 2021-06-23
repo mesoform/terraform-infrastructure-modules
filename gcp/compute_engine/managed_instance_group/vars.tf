@@ -26,27 +26,10 @@ variable "name" {
   type = string
 }
 
-variable "health_check_names" {
-  type    = set(string)
-  default = []
-
-}
-
-variable "health_check_config" {
-  description = "Health check to determine whether instances are responsive and able to do work"
+variable "auto_healing_policies" {
   type = set(object({
-    type                = string
-    initial_delay_sec   = number
-    check_interval_sec  = number
-    healthy_threshold   = number
-    timeout_sec         = number
-    unhealthy_threshold = number
-    response            = string
-    proxy_header        = string
-    port                = number
-    request             = string
-    request_path        = string
-    host                = string
+    health_check      = string
+    initial_delay_sec = number
   }))
   default = []
 }

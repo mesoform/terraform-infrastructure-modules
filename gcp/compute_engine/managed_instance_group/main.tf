@@ -1,8 +1,3 @@
-data "google_compute_health_check" "default" {
-  for_each = var.health_check_names
-  name     = each.value
-}
-
 resource "google_compute_instance_group_manager" "default" {
   for_each           = var.zones
   base_instance_name = var.base_instance_name
@@ -10,8 +5,9 @@ resource "google_compute_instance_group_manager" "default" {
   description        = var.description
   zone               = "${var.region}-${each.value}"
   target_size        = var.target_size
+  project            = var.project
   version {
-    name              = var.version_name == null ? formatdate("YYYMMDDhhmm", timestamp()) : var.version_name
+    name              = var.version_name == null ? formatdate("YYYYMMDDhhmm", timestamp()) : var.version_name
     instance_template = var.instance_template[each.value]
   }
   dynamic "named_port" {
@@ -22,10 +18,10 @@ resource "google_compute_instance_group_manager" "default" {
     }
   }
   dynamic "auto_healing_policies" {
-    for_each = var.health_check_names
+    for_each = var.auto_healing_policies
     content {
-      health_check      = data.google_compute_health_check.default[auto_healing_policies.value]
-      initial_delay_sec = lookup(auto_healing_policies.value, "initial_delay_sec", 30)
+      health_check      = auto_healing_policies.value.health_check
+      initial_delay_sec = auto_healing_policies.value.initial_delay_sec
     }
   }
   dynamic "stateful_disk" {
@@ -47,7 +43,15 @@ resource "google_compute_instance_group_manager" "default" {
       max_unavailable_percent      = lookup(update_policy.value, "max_unavailable_percent", null)
       min_ready_sec                = lookup(update_policy.value, "min_ready_sec", null)
       minimal_action               = update_policy.value.minimal_action
+//      type                         = "testing"
       type                         = update_policy.value.type
+    }
+  }
+  dynamic "named_port" {
+    for_each = var.named_ports
+    content {
+      name = named_port.value["name"]
+      port = named_port.value["port"]
     }
   }
 }

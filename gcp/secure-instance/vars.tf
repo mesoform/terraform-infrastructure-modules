@@ -18,21 +18,32 @@ variable "zones" {
   default = ["a", "b", "c"]
 }
 
-variable "disk_size" {
-  type    = number
-  default = 500
-}
-
 variable "labels" {
   type    = map(string)
   default = null
 }
 
+
+//Disk configuration
+variable "disk_size" {
+  type    = number
+  default = 500
+}
+
+variable "access_config" {
+  type = map(list(map(string)))
+  default = {}
+}
 variable "network" {
   type    = string
   default = "default"
 }
 variable "subnetwork" {
+  type    = string
+  default = null
+}
+
+variable "network_ip" {
   type    = string
   default = null
 }
@@ -63,7 +74,7 @@ variable "service_account_email" {
 
 variable "service_account_scopes" {
   type    = set(string)
-  default = ["Cloud Platform"]
+  default = ["cloud-platform"]
 }
 
 variable "service_account" {
@@ -74,40 +85,20 @@ variable "service_account" {
   default = { email : "terraform@test-secure-swarm.iam.gserviceaccount.com", scopes : ["Cloud Platform"] }
 }
 
-variable "health_check_config" {
-  description = "Health check to determine whether instances are responsive and able to do work"
+variable "health_check" {
   type = set(object({
-    type                = string
-    initial_delay_sec   = number
-    check_interval_sec  = number
-    healthy_threshold   = number
-    timeout_sec         = number
-    unhealthy_threshold = number
-    response            = string
-    proxy_header        = string
-    port                = number
-    request             = string
-    request_path        = string
-    host                = string
+    name              = string
+    initial_delay_sec = number
   }))
-  default = [{
-    type                = "https"
-    initial_delay_sec   = 30
-    check_interval_sec  = 30
-    healthy_threshold   = 1
-    timeout_sec         = 10
-    unhealthy_threshold = 5
-    response            = ""
-    proxy_header        = "NONE"
-    port                = 80
-    request             = ""
-    request_path        = "/"
-    host                = ""
-  }]
-}
-
-variable "health_check_names" {
-  type    = set(string)
   default = []
 }
+
+variable "named_ports" {
+  type = set(object({
+    name = string
+    port = number
+  }))
+  default = []
+}
+
 
