@@ -52,6 +52,11 @@ variable "machine_type" {
   default = "n2d-standard-2"
 }
 
+variable "version_name" {
+  type = string
+  default = null
+}
+
 variable "source_image" {
   description = "Source disk image. If neither source_image nor source_image_family is specified, defaults to the latest public Debian image."
   default     = "centos-8-v20210609"

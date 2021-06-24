@@ -2,9 +2,13 @@ variable "project" {
   type = string
 }
 
-variable "region" {}
+variable "region" {
+  type = string
+}
 
-variable "zones" {}
+variable "zones" {
+  type = set(string)
+}
 
 variable "version_name" {
   type    = string

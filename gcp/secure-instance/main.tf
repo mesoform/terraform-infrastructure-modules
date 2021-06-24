@@ -57,6 +57,7 @@ module "stateful_instance_group" {
   source             = "../compute_engine/managed_instance_group"
   description        = "Secure Swarm zone managed instance group"
   base_instance_name = var.name
+  version            = var.version_name
   disk_name          = module.secure_disk.disk_name
   initial_delay      = 180
   instance_template  = module.instance_template.id
@@ -72,7 +73,7 @@ module "stateful_instance_group" {
     device_name = module.secure_disk.disk_name
     delete_rule = "NEVER"
   }]
-  zones = var.zones
+  zones       = var.zones
   named_ports = var.named_ports
 }
 
