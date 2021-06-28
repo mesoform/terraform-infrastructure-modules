@@ -54,9 +54,8 @@ locals {
 ####################
 # Instance Template
 ####################
-resource "google_compute_instance_template" "tpl" {
-  for_each                = var.zones
-  name_prefix             = "${var.name_prefix}-${each.value}-"
+resource google_compute_instance_template self {
+  name_prefix             = var.name_prefix
   description             = var.description
   project                 = var.project_id
   machine_type            = var.machine_type
@@ -73,8 +72,8 @@ resource "google_compute_instance_template" "tpl" {
     content {
       auto_delete  = lookup(disk.value, "auto_delete", null)
       boot         = lookup(disk.value, "boot", null)
-      device_name  = lookup(disk.value, "device_name", null) != null ? lookup(disk.value.device_name, each.value, null) : lookup(disk.value, each.value, null)
-      disk_name    = lookup(disk.value, "disk_name", null) != null ? lookup(disk.value.disk_name, each.value, null) : lookup(disk.value, each.value, null)
+      device_name  = lookup(disk.value, "device_name", null)
+      disk_name    = lookup(disk.value, "disk_name", null)
       disk_size_gb = lookup(disk.value, "disk_size_gb", null)
       disk_type    = lookup(disk.value, "disk_type", null)
       interface    = lookup(disk.value, "interface", null)
@@ -106,7 +105,7 @@ resource "google_compute_instance_template" "tpl" {
     subnetwork_project = var.subnetwork_project
     network_ip         = var.network_ip
     dynamic "access_config" {
-      for_each = lookup(var.access_config, each.value, [])
+      for_each = lookup(var.access_config, var.zone, [])
       content {
         nat_ip       = lookup(access_config.value, "nat_ip", null)
         network_tier = lookup(access_config.value, "network_tier", null)
@@ -124,14 +123,20 @@ resource "google_compute_instance_template" "tpl" {
     automatic_restart = !var.preemptible
   }
 
+  //noinspection HCLUnknownBlockType
+  confidential_instance_config{
+    enable_confidential_compute = var.security_level == "confidential-1" ? true : false
+  }
+
   dynamic "shielded_instance_config" {
     for_each = local.shielded_vm_configs
     content {
-      enable_secure_boot          = lookup(var.shielded_instance_config, "enable_secure_boot", shielded_instance_config.value)
-      enable_vtpm                 = lookup(var.shielded_instance_config, "enable_vtpm", shielded_instance_config.value)
-      enable_integrity_monitoring = lookup(var.shielded_instance_config, "enable_integrity_monitoring", shielded_instance_config.value)
+      enable_secure_boot          = var.security_level == "standard" ? false : true
+      enable_vtpm                 = var.security_level == "standard" ? false : true
+      enable_integrity_monitoring = var.security_level == "standard" ? false : true
     }
   }
+
 
   dynamic "guest_accelerator" {
     for_each = {}

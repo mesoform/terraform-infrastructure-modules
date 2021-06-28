@@ -8,14 +8,13 @@ variable "project" {
   description = "GCP project"
 }
 
+variable "zone"{
+  type = string
+}
+
 variable "region" {
   type    = string
   default = "europe-west2"
-}
-
-variable "zones" {
-  type    = set(string)
-  default = ["a", "b", "c"]
 }
 
 variable "labels" {
@@ -105,5 +104,29 @@ variable "named_ports" {
   }))
   default = []
 }
+
+variable security_level {
+  type = string
+  validation {
+    condition = contains(["secure-1", "confidential-1"], var.security_level)
+    error_message = "Provided value not of a valid type."
+  }
+}
+
+variable "update_policy" {
+  description = "The rolling update policy. https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html#rolling_update_policy"
+  type = list(object({
+    max_surge_fixed              = number
+    instance_redistribution_type = string
+    max_surge_percent            = number
+    max_unavailable_fixed        = number
+    max_unavailable_percent      = number
+    min_ready_sec                = number
+    minimal_action               = string
+    type                         = string
+  }))
+  default = []
+}
+
 
 

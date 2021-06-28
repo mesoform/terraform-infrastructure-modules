@@ -17,10 +17,9 @@ variable "description" {
   type    = string
   default = null
 }
-variable "zones" {
-  type        = set(string)
-  description = "Zone to deploy to"
-  default     = ["a"]
+variable "zone" {
+  type = string
+  default = null
 }
 
 variable "project_id" {
@@ -106,8 +105,8 @@ variable "additional_disks" {
   type = list(object({
     auto_delete  = bool
     boot         = bool
-    device_name  = map(string)
-    disk_name    = map(string)
+    device_name  = string
+    disk_name    = string
     disk_size_gb = number
     disk_type    = string
   }))
@@ -187,6 +186,14 @@ variable "shielded_instance_config" {
   }
 }
 
+variable security_level {
+  type = string
+  validation {
+    condition = contains(["standard", "secure-1", "confidential-1"], var.security_level)
+    error_message = "Provided value not of a valid type."
+  }
+}
+
 ###########################
 # Public IP
 ###########################
@@ -195,3 +202,4 @@ variable "access_config" {
   type = map(list(map(string)))
   default = {}
 }
+
