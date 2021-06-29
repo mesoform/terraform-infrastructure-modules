@@ -44,10 +44,12 @@ variable domain {
 
 variable ingress_file_path {
   type = string
-  description = "Path to the YAML file containing the ingress/egress configuration"
+  description = "Path to the YAML file containing the ingress configuration"
+  default = null
 }
 
 variable egress_file_path {
   type = string
-  description = "Path to the YAML file containing the ingress/egress configuration"
+  description = "Path to the YAML file containing the egress configuration"
+  default = null
 }
