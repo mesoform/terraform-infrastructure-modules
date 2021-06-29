@@ -3,11 +3,6 @@ variable access_policy_name {
   description = "Name of the access policy retrieved from the google_access_context_policy_manager resource"
 }
 
-variable perimeter_name {
-  type = string
-  description = "Name of the perimeter"
-}
-
 variable vpc_accessible_services {
   type = list(string)
   default = [
