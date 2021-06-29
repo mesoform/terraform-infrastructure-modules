@@ -6,12 +6,68 @@ resource google_access_context_manager_service_perimeter self {
 
   status {
     restricted_services = var.restricted_services
-    access_levels = []
+    access_levels = var.access_levels
     vpc_accessible_services {
       enable_restriction = var.restricted_services == [] ? false : true
-      allowed_services   = var.restricted_services == [] ? null : var.restricted_services
+      allowed_services = var.restricted_services == [] ? null : var.restricted_services
+    }
+    dynamic ingress_policies {
+      for_each = local.ingress_policies
+      content {
+        ingress_from {
+          identity_type = lookup(ingress_policies.value, "ingressFrom", null) == null ? null : lookup(ingress_policies.value["ingressFrom"], "identityType", null)
+          identities = lookup(ingress_policies.value, "ingressFrom", null) == null ? [] : lookup(ingress_policies.value["ingressFrom"], "identities", [])
+          dynamic sources {
+            for_each = lookup(ingress_policies.value["ingressFrom"], "sources", [])
+            content {
+              access_level = lookup(sources.value, "accessLevel", null)
+              resource = lookup(sources.value, "resource", null)
+            }
+          }
+        }
+        ingress_to {
+          resources = lookup(ingress_policies.value, "ingressTo", null) == null ? [] : lookup(ingress_policies.value["ingressTo"], "resources", [])
+          dynamic operations {
+            for_each = lookup(ingress_policies.value, "ingressTo", null) == null ? [] : lookup(ingress_policies.value["ingressTo"], "operations", [])
+            content {
+              service_name = lookup(operations.value, "serviceName", null)
+              dynamic method_selectors {
+                for_each = lookup(operations.value, "methodSelectors", [])
+                content {
+                  method = lookup(method_selectors.value, "method", null)
+                  permission = lookup(method_selectors.value, "permission", null)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    dynamic egress_policies {
+      for_each = local.egress_policies
+      content {
+        egress_from {
+          identity_type = lookup(egress_policies.value, "egressFrom", null) == null ? null : lookup(egress_policies.value["egressFrom"], "identityType", null)
+          identities = lookup(egress_policies.value, "egressFrom", null) == null ? [] : lookup(egress_policies.value["egressFrom"], "identities", [])
+        }
+        egress_to {
+          resources = lookup(egress_policies.value, "egressTo", null) == null ? [] : lookup(egress_policies.value["egressTo"], "resources", [])
+          dynamic operations {
+            for_each = lookup(egress_policies.value, "egressTo", null) == null ? [] : lookup(egress_policies.value["egressTo"], "operations", [])
+            content {
+              service_name = lookup(operations.value, "serviceName", null)
+              dynamic method_selectors {
+                for_each = lookup(operations.value, "methodSelectors", [])
+                content {
+                  method = lookup(method_selectors.value, "method", null)
+                  permission = lookup(method_selectors.value, "permission", null)
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
-
   spec {}
 }

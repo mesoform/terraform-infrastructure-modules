@@ -13,6 +13,7 @@ variable vpc_accessible_services {
 variable restricted_services {
   type = list(string)
   description = "Services to restrict on perimeter"
+  default = []
 }
 
 variable name {
@@ -33,5 +34,22 @@ variable dry_run_mode {
 
 variable access_levels {
   type = list(string)
-  validation {}
+  default = []
+}
+
+variable domain {
+  type = string
+  default = null
+}
+
+variable ingress_file_path {
+  type = string
+  description = "Path to the YAML file containing the ingress configuration"
+  default = null
+}
+
+variable egress_file_path {
+  type = string
+  description = "Path to the YAML file containing the egress configuration"
+  default = null
 }
