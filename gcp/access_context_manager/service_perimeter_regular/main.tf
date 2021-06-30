@@ -1,5 +1,5 @@
 resource google_access_context_manager_service_perimeter self {
-  name = "accessPolicies/${var.access_policy_name}/service_perimeters/${var.name}"
+  name = "accessPolicies/${var.access_policy_name}/servicePerimeters/${var.name}"
   parent = "accessPolicies/${var.access_policy_name}"
   title = var.name
   perimeter_type = "PERIMETER_TYPE_REGULAR"
