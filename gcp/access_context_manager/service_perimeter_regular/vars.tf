@@ -1,6 +1,6 @@
 variable access_policy_name {
   type = string
-  description = "Name of the access policy retrieved from the google_access_context_policy_manager resource"
+  description = "Name of the access policy retrieved from the google_access_context_policy_manager which takes the format of the policy ID"
 }
 
 variable vpc_accessible_services {
