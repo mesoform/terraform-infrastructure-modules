@@ -6,7 +6,7 @@ resource google_access_context_manager_service_perimeter self {
 
   status {
     restricted_services = var.restricted_services
-    access_levels = var.access_levels
+    access_levels = [ for access_level in var.access_levels : "accessPolicies/${var.access_policy_name}/accessLevels/${access_level}"]
     vpc_accessible_services {
       enable_restriction = var.restricted_services == [] ? false : true
       allowed_services = var.restricted_services == [] ? null : var.restricted_services
@@ -20,7 +20,7 @@ resource google_access_context_manager_service_perimeter self {
           dynamic sources {
             for_each = lookup(ingress_policies.value["ingressFrom"], "sources", [])
             content {
-              access_level = lookup(sources.value, "accessLevel", null)
+              access_level = "accessPolicies/${var.access_policy_name}/accessLevels/${lookup(sources.value, "accessLevel", null)}"
               resource = lookup(sources.value, "resource", null)
             }
           }
