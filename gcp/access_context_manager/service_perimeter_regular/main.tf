@@ -8,8 +8,8 @@ resource google_access_context_manager_service_perimeter self {
     restricted_services = var.restricted_services
     access_levels = [ for access_level in var.access_levels : "accessPolicies/${var.access_policy_name}/accessLevels/${access_level}"]
     vpc_accessible_services {
-      enable_restriction = var.restricted_services == [] ? false : true
-      allowed_services = var.restricted_services == [] ? null : var.restricted_services
+      enable_restriction = contains(var.vpc_accessible_services, "ALL-SERVICES" ) ? false : true
+      allowed_services = var.vpc_accessible_services == [] || contains(var.vpc_accessible_services, "ALL-SERVICES") ? null : var.vpc_accessible_services
     }
     dynamic ingress_policies {
       for_each = local.ingress_policies
