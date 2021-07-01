@@ -29,7 +29,7 @@ variable description {
 variable dry_run_mode {
   type = bool
   description = "Whether to use explicit dry run spec"
-  default = null
+  default = false
 }
 
 variable access_levels {
