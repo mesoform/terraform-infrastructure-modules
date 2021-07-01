@@ -53,3 +53,9 @@ variable egress_file_path {
   description = "Path to the YAML file containing the egress configuration"
   default = "./egress_policies.yml"
 }
+
+variable resources {
+  type = list(string)
+  description = "List of project IDs to include within the perimeter"
+  default = []
+}

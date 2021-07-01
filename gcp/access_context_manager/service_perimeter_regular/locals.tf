@@ -1,15 +1,9 @@
 locals {
-  ingress_file      = fileexists(var.ingress_file_path) ? file(var.ingress_file_path) : null
-  ingress           = try(yamldecode(local.ingress_file), {})
-  ingress_status    = lookup(local.ingress, "status", {})
-  ingress_policies  = lookup(local.ingress_status, "ingressPolicies", [])
-  ingress_resources = lookup(local.ingress_status, "resources", {})
+  ingress_file      = try(fileexists(var.ingress_file_path), fileexists("./ingress_policies.yml")) ? file(var.ingress_file_path) : null
+  ingress_policies  = try(yamldecode(local.ingress_file), [])
 
-  egress_file      = fileexists(var.egress_file_path) ? file(var.egress_file_path) : null
-  egress           = try(yamldecode(local.egress_file), {})
-  egress_status    = lookup(local.egress, "status", {})
-  egress_policies  = lookup(local.egress_status, "egressPolicies", [])
-  egress_resources = lookup(local.egress_status, "resources", {})
+  egress_file      = try(fileexists(var.egress_file_path), fileexists("./egress_policies.yml")) ? file(var.egress_file_path) : null
+  egress_policies  = try(yamldecode(local.egress_file), [])
 
   requested_restricted_services = var.restricted_services == null ? ["ALL-SERVICES"] : var.restricted_services
   restricted_services = contains(local.requested_restricted_services, "ALL-SERVICES") ? local.vpc_sc_supported_services : var.restricted_services
@@ -99,4 +93,9 @@ locals {
                                 "vision.googleapis.com",
                                 "vpcaccess.googleapis.com"
                               ]
+  //noinspection HILUnresolvedReference
+  resources = [
+    for project in data.google_project.self:
+          "projects/${project.number}"
+  ]
 }
