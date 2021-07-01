@@ -5,6 +5,7 @@ resource google_access_context_manager_service_perimeter self {
   perimeter_type = "PERIMETER_TYPE_REGULAR"
 
   status {
+    resources = var.resources
     restricted_services = local.restricted_services
     access_levels = [ for access_level in var.access_levels : "accessPolicies/${var.access_policy_name}/accessLevels/${access_level}"]
     vpc_accessible_services {
