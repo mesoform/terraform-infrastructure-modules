@@ -9,7 +9,7 @@ resource google_access_context_manager_service_perimeter self {
     access_levels = [ for access_level in var.access_levels : "accessPolicies/${var.access_policy_name}/accessLevels/${access_level}"]
     vpc_accessible_services {
       enable_restriction = contains(local.vpc_accessible_services, "ALL-SERVICES" ) ? false : true
-      allowed_services = local.vpc_accessible_services == [] || contains(local.vpc_accessible_services, "ALL-SERVICES") ? null : local.vpc_accessible_services
+      allowed_services = local.vpc_accessible_services == [] || contains(local.vpc_accessible_services, "ALL-SERVICES") ? local.vpc_sc_supported_services : local.vpc_accessible_services
     }
     dynamic ingress_policies {
       for_each = local.ingress_policies
