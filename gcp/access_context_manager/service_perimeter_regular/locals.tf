@@ -1,8 +1,8 @@
 locals {
-  ingress_file      = fileexists(var.ingress_file_path) ? file(var.ingress_file_path) : null
+  ingress_file      = try(fileexists(var.ingress_file_path), fileexists("./ingress_policies.yml")) ? file(var.ingress_file_path) : null
   ingress_policies  = try(yamldecode(local.ingress_file), [])
 
-  egress_file      = fileexists(var.egress_file_path) ? file(var.egress_file_path) : null
+  egress_file      = try(fileexists(var.egress_file_path), fileexists("./egress_policies.yml")) ? file(var.egress_file_path) : null
   egress_policies  = try(yamldecode(local.egress_file), [])
 
   requested_restricted_services = var.restricted_services == null ? ["ALL-SERVICES"] : var.restricted_services
