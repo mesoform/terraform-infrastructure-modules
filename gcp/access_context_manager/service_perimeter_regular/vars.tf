@@ -13,7 +13,7 @@ variable vpc_accessible_services {
 variable restricted_services {
   type = list(string)
   description = "Services to restrict on perimeter"
-  default = [local.vpc_sc_supported_services]
+  default = null
 }
 
 variable name {
