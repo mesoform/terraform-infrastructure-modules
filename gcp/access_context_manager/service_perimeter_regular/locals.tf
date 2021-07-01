@@ -11,7 +11,7 @@ locals {
   egress_policies  = lookup(local.egress_status, "egressPolicies", [])
   egress_resources = lookup(local.egress_status, "resources", {})
 
-  vpc_accessible_services = var.vpc_accessible_services == null ? ["RESTRICTED-SERVICES"] : var.vpc_accessible_services
+  vpc_accessible_services = var.vpc_accessible_services == null || var.vpc_accessible_services == [] ? ["RESTRICTED-SERVICES"] : var.vpc_accessible_services
   vpc_sc_supported_services = [
                                 "accessapproval.googleapis.com",
                                 "adsdatahub.googleapis.com",
