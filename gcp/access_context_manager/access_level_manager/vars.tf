@@ -3,7 +3,7 @@ variable access_policy_name {
   description = "ID of the access policy retrieved from the google_access_context_policy_manager resource"
 }
 
-variable access_level_name {
+variable name {
   type = string
   description = "Short name for resource name"
 }

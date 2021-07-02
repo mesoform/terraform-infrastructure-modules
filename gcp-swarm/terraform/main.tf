@@ -15,13 +15,13 @@
  */
 
 provider "google" {
-  credentials = file("/home/juno/.ssh/mesotest3.json")
+
   region  = var.region
   version = "~> 3.0"
 }
 
 provider "google-beta" {
-  credentials = file("/home/juno/.ssh/mesotest3.json")
+
   region  = var.region
   version = "~> 3.0"
 }
@@ -74,7 +74,8 @@ locals {
             "2377",
             "5432",
             "7946",
-            "8080"]
+            "8080",
+            "30000-30010"]
         },
         {
           protocol = "udp"
