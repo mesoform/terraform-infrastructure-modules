@@ -88,7 +88,7 @@ jobs:
           adapter_name=$(find . -name "*locals*" | sed -e "s/^.\///" -e "s/_locals.tf$//")
           echo -e "\033[1m${adapter_name^^} TESTS\033[0m"
           terraform init > /dev/null
-          terraform apply -auto-approve -var-file="vars.tfvars" > /dev/null
+          terraform apply -auto-approve > /dev/null
           for test in $(terraform output -json | jq -r 'keys[]'); do
             test_output=$(terraform output -json $test)
             result=$(echo $test_output | jq -r '.result')
