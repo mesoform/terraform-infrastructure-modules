@@ -24,3 +24,9 @@ variable allowed_members {
   description = "List of allowed members (users or services accounts, not groups)"
   default = []
 }
+
+variable allowed_regions {
+  type = list(string)
+  description = "List of allowed regions. The request must originate from one of the provided countries/regions"
+  default = []
+}

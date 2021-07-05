@@ -7,6 +7,7 @@ resource google_access_context_manager_access_level self {
     conditions {
       ip_subnetworks = var.allowed_ip_subnetworks
       members = var.allowed_members
+      regions = var.allowed_regions
       }
     }
 }
