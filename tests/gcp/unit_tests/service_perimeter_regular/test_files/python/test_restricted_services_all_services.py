@@ -10,7 +10,7 @@ except Exception as e:
     Tests whether using the enum `ALL-SERVICES` will default restricted services to have all listed services
 """
 
-expected_data = expected_data = {
+expected_data = {
     "accessapproval.googleapis.com": "accessapproval.googleapis.com",
     "adsdatahub.googleapis.com": "adsdatahub.googleapis.com",
     "aiplatform.googleapis.com": "aiplatform.googleapis.com",
