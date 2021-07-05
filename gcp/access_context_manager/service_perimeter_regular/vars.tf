@@ -8,6 +8,7 @@ variable vpc_accessible_services {
   default = [
     "RESTRICTED-SERVICES"
   ]
+  description = "Services that can be accessed from within the perimeter"
 }
 
 variable restricted_services {
@@ -35,11 +36,6 @@ variable dry_run_mode {
 variable access_levels {
   type = list(string)
   default = []
-}
-
-variable domain {
-  type = string
-  default = null
 }
 
 variable ingress_file_path {
