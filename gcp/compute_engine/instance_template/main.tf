@@ -43,12 +43,6 @@ locals {
   ]
 
   all_disks = concat(local.boot_disk, var.additional_disks)
-
-  # NOTE: Even if all the shielded_instance_config values are false, if the
-  # config block exists and an unsupported image is chosen, the apply will fail
-  # so we use a single-value array with the default value to initialize the block
-  # only if it is enabled.
-  shielded_vm_configs = var.enable_shielded_vm ? [true] : []
 }
 
 ####################
@@ -128,13 +122,10 @@ resource google_compute_instance_template self {
     enable_confidential_compute = var.security_level == "confidential-1" ? true : false
   }
 
-  dynamic "shielded_instance_config" {
-    for_each = local.shielded_vm_configs
-    content {
-      enable_secure_boot          = var.security_level == "standard" ? false : true
-      enable_vtpm                 = var.security_level == "standard" ? false : true
-      enable_integrity_monitoring = var.security_level == "standard" ? false : true
-    }
+  shielded_instance_config {
+    enable_secure_boot          = var.security_level == "standard" ? false : true
+    enable_vtpm                 = var.security_level == "standard" ? false : true
+    enable_integrity_monitoring = var.security_level == "standard" ? false : true
   }
 
 

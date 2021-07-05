@@ -2,11 +2,12 @@ data google_project default {
   project_id = var.project
 }
 
-
-
-locals {
-  service_account_email = var.service_account_email == "" ? "${data.google_project.default.number}@-compute@developer.gserviceaccount.com" : var.service_account_email
+data google_compute_health_check self {
+  for_each = {for health_check in var.health_check : health_check.name => health_check}
+  name     = each.key
+  project  = var.project
 }
+
 
 resource google_compute_disk self {
   provider  = google-beta
@@ -47,12 +48,6 @@ module secure_instance_template {
     mode         = "READ_WRITE"
   }]
   security_level = var.security_level
-}
-
-data google_compute_health_check self {
-  for_each = {for health_check in var.health_check : health_check.name => health_check}
-  name     = each.key
-  project  = var.project
 }
 
 resource google_compute_instance_group_manager self {
