@@ -58,7 +58,7 @@ variable "version_name" {
 
 variable "source_image" {
   description = "Source disk image. If neither source_image nor source_image_family is specified, defaults to the latest public Debian image."
-  default     = "centos-8-v20210609"
+  default     = ""
 }
 
 variable "source_image_family" {
