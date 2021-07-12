@@ -81,13 +81,6 @@ variable "service_account_scopes" {
   default = ["cloud-platform"]
 }
 
-variable "service_account" {
-  type = object({
-    email  = string
-    scopes = set(string)
-  })
-  default = { email : "terraform@test-secure-swarm.iam.gserviceaccount.com", scopes : ["Cloud Platform"] }
-}
 
 variable "health_check" {
   type = set(object({
@@ -116,16 +109,57 @@ variable security_level {
 variable "update_policy" {
   description = "The rolling update policy. https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html#rolling_update_policy"
   type = list(object({
-    max_surge_fixed              = number
-    instance_redistribution_type = string
-    max_surge_percent            = number
-    max_unavailable_fixed        = number
-    max_unavailable_percent      = number
-    min_ready_sec                = number
+    max_surge_fixed              = optional(number)
+    max_surge_percent            = optional(number)
+    max_unavailable_fixed        = optional(number)
+    max_unavailable_percent      = optional(number)
+    min_ready_sec                = optional(number)
     minimal_action               = string
     type                         = string
+    replacement_method           = optional(string)
   }))
   default = []
+}
+
+variable target_size {
+  description = "Target Size of the Managed Instance Group"
+  default = 0
+}
+
+variable "deployment_version" {
+  validation {
+    condition = contains(["blue", "green"], var.deployment_version)
+    error_message = "Invalid deployment version."
+  }
+  type = string
+}
+
+variable blue_instance_template {
+  type = object({
+    machine_type = optional(string)
+    source_image = optional(string)
+    source_image_family = optional(string)
+    source_image_project = optional(string)
+    network = optional(string)
+    subnetwork = optional(string)
+    access_config = optional(map(list(map(string))))
+    security_level = optional(string)
+  })
+  default = {}
+}
+
+variable green_instance_template {
+  type = object({
+    machine_type = optional(string)
+    source_image = optional(string)
+    source_image_family = optional(string)
+    source_image_project = optional(string)
+    network = optional(string)
+    subnetwork = optional(string)
+    access_config = optional(map(list(map(string))))
+    security_level = optional(string)
+  })
+  default = {}
 }
 
 

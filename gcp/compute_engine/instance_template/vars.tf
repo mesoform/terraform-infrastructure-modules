@@ -55,6 +55,20 @@ variable "labels" {
   default     = {}
 }
 
+variable "node_affinities" {
+  type = list(object({
+    key = string
+    operator = string
+    values = list(string)
+  }))
+  default = []
+}
+
+variable "on_host_maintenance" {
+  type = string
+  default = "MIGRATE"
+}
+
 variable "preemptible" {
   type        = bool
   description = "Allow the instance to be preempted"
@@ -189,7 +203,7 @@ variable "shielded_instance_config" {
 variable security_level {
   type = string
   validation {
-    condition = contains(["standard", "secure-1", "confidential-1"], var.security_level)
+    condition = contains(["standard-1", "secure-1", "confidential-1"], var.security_level)
     error_message = "Provided value not of a valid type."
   }
 }

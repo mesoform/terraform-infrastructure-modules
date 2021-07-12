@@ -14,6 +14,11 @@ output "tags" {
 }
 
 output "id" {
-  description = "Tags that will be associated with instance(s)"
+  description = "ID of the instance(s)"
   value       = google_compute_instance_template.self.id
+}
+
+output "fingerprint" {
+  description = "unique metadata fingerprint of the instance"
+  value       = google_compute_instance_template.self.metadata_fingerprint
 }

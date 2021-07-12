@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 ###############
 # Data Sources
 ###############
@@ -27,6 +28,12 @@ data "google_compute_image" "image_family" {
   family  = var.source_image_family != "" ? var.source_image_family : "debian-10"
 }
 
+data "google_compute_subnetwork" "subnet" {
+  count = var.subnetwork == null ? 0: 1
+  name   = var.subnetwork
+  project = var.project_id
+  region = var.region
+}
 #########
 # Locals
 #########
@@ -59,6 +66,7 @@ resource google_compute_instance_template self {
   can_ip_forward          = var.can_ip_forward
   metadata_startup_script = var.startup_script
   region                  = var.region
+
 
   dynamic "disk" {
     for_each = local.all_disks
@@ -96,7 +104,7 @@ resource google_compute_instance_template self {
   network_interface {
     network            = var.network
     subnetwork         = var.subnetwork
-    subnetwork_project = var.subnetwork_project
+    subnetwork_project = var.subnetwork_project == null ? var.project_id : var.subnetwork_project
     network_ip         = var.network_ip
     dynamic "access_config" {
       for_each = lookup(var.access_config, var.zone, [])
@@ -115,6 +123,15 @@ resource google_compute_instance_template self {
   scheduling {
     preemptible       = var.preemptible
     automatic_restart = !var.preemptible
+    on_host_maintenance = var.on_host_maintenance
+    dynamic node_affinities {
+      for_each = var.node_affinities
+      content {
+        key = lookup(node_affinities.value, "key", null)
+        operator = lookup(node_affinities.value, "operator", null)
+        values = lookup(node_affinities.value, "values", [] )
+      }
+    }
   }
 
   //noinspection HCLUnknownBlockType
@@ -123,9 +140,9 @@ resource google_compute_instance_template self {
   }
 
   shielded_instance_config {
-    enable_secure_boot          = var.security_level == "standard" ? false : true
-    enable_vtpm                 = var.security_level == "standard" ? false : true
-    enable_integrity_monitoring = var.security_level == "standard" ? false : true
+    enable_secure_boot          = var.security_level == "standard-1" ? false : true
+    enable_vtpm                 = var.security_level == "standard-1" ? false : true
+    enable_integrity_monitoring = var.security_level == "standard-1" ? false : true
   }
 
 
