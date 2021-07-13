@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 0.14.0"
   experiments = [module_variable_optional_attrs]
 }
 
@@ -51,10 +52,10 @@ module secure_instance_template_blue {
   source_image_family  = var.blue_instance_template.source_image_family == null ?  var.source_image_family : var.blue_instance_template.source_image_family
   source_image_project = var.blue_instance_template.source_image_project == null ? var.source_image_project : var.blue_instance_template.source_image_project
   subnetwork_project   = var.blue_instance_template.subnetwork == null ? null : var.project
-  network              = var.blue_instance_template.network == null? var.network : var.blue_instance_template.network
-  subnetwork           = var.blue_instance_template.subnetwork == null? var.subnetwork : var.blue_instance_template.subnetwork
-  access_config        = var.blue_instance_template.access_config == null?  var.access_config: var.blue_instance_template.access_config
-  on_host_maintenance  = var.blue_instance_template.security_level == null? (var.security_level == "confidential-1" ? "TERMINATE" : "MIGRATE") : var.blue_instance_template.security_level  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  network              = var.blue_instance_template.network == null ? var.network : var.blue_instance_template.network
+  subnetwork           = var.blue_instance_template.subnetwork == null ? var.subnetwork : var.blue_instance_template.subnetwork
+  access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
+  on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
     boot         = false
     auto_delete  = false
@@ -64,7 +65,7 @@ module secure_instance_template_blue {
     disk_type    = "pd-standard"
     mode         = "READ_WRITE"
   }]
-  security_level = var.blue_instance_template.security_level == null ? var.security_level : var.blue_instance_template.security_level
+  security_level = local.blue_instance_template["security_level"]
 }
 
 
@@ -88,7 +89,7 @@ module secure_instance_template_green {
   network              = var.green_instance_template.network == null? var.network : var.green_instance_template.network
   subnetwork           = var.green_instance_template.subnetwork == null? var.subnetwork : var.green_instance_template.subnetwork
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
-  on_host_maintenance  = var.green_instance_template.security_level == null? (var.security_level == "confidential-1" ? "TERMINATE" : "MIGRATE") : var.green_instance_template.security_level  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
     boot         = false
     auto_delete  = false
@@ -98,7 +99,7 @@ module secure_instance_template_green {
     disk_type    = "pd-standard"
     mode         = "READ_WRITE"
   }]
-  security_level =var.green_instance_template.security_level == null?  var.security_level : var.green_instance_template.security_level
+  security_level = local.green_instance_template["security_level"]
 }
 
 resource google_compute_instance_group_manager self {

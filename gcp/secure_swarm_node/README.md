@@ -15,6 +15,9 @@ For specifying specs for the blue or green version of a deployment the variable 
 should be updated with the configuration for the specified version. 
 Not specifying configuration in those objects will default the values for that version to the `vars` that had been set
 
+Using the Terraform experimental feature `module_variable_optional_attrs`, the `update_policy`, `blue_instance_template` and `green_instance_template` have optional attributes in the object.
+To use this feature must be using terraform v.0.14.0+.
+
 Required Variables for the module are:
 * `project` - GCP project ID
 * `deployment_version` - `"blue"` or `"green"` representing the `instance_template` version the `instance_group_manager` will use for the deploymetn
@@ -39,7 +42,7 @@ module "secure_swarm_a" {
     initial_delay_sec = 180
   }]
   access_config = {
-    a = [{nat_ip = "0.0.0.2"}],
+    a = [{nat_ip = "10.0.0.2"}]
   }
   blue_instance_template = {}
   green_instance_template = {
