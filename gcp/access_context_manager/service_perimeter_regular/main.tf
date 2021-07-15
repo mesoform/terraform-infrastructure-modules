@@ -21,7 +21,7 @@ resource google_access_context_manager_service_perimeter self {
           dynamic sources {
             for_each = lookup(ingress_policies.value["ingressFrom"], "sources", [])
             content {
-              access_level = "accessPolicies/${var.access_policy_name}/accessLevels/${lookup(sources.value, "accessLevel", null)}"
+              access_level = lookup(sources.value, "accessLevel", null) != null ? "accessPolicies/${var.access_policy_name}/accessLevels/${lookup(sources.value, "accessLevel")}" : null
               resource = lookup(sources.value, "resource", null)
             }
           }
