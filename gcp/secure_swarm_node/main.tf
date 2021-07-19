@@ -55,6 +55,7 @@ module secure_instance_template_blue {
   network              = var.blue_instance_template.network == null ? var.network : var.blue_instance_template.network
   subnetwork           = var.blue_instance_template.subnetwork == null ? var.subnetwork : var.blue_instance_template.subnetwork
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
+  metadata             = var.blue_instance_template.metadata == null ?  var.metadata: var.blue_instance_template.metadata
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
     boot         = false
@@ -89,6 +90,7 @@ module secure_instance_template_green {
   network              = var.green_instance_template.network == null? var.network : var.green_instance_template.network
   subnetwork           = var.green_instance_template.subnetwork == null? var.subnetwork : var.green_instance_template.subnetwork
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
+  metadata             = var.green_instance_template.metadata == null ?  var.metadata: var.blue_instance_template.metadata
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
     boot         = false

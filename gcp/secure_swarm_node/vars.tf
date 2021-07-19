@@ -33,6 +33,12 @@ variable "access_config" {
   type = map(list(map(string)))
   default = {}
 }
+
+variable "metadata" {
+  type = map(string)
+  default = {}
+}
+
 variable "network" {
   type    = string
   default = "default"
@@ -143,6 +149,7 @@ variable blue_instance_template {
     network = optional(string)
     subnetwork = optional(string)
     access_config = optional(map(list(map(string))))
+    metadata = optional(map(string))
     security_level = optional(string)
   })
   default = {}
@@ -157,6 +164,7 @@ variable green_instance_template {
     network = optional(string)
     subnetwork = optional(string)
     access_config = optional(map(list(map(string))))
+    metadata = optional(map(string))
     security_level = optional(string)
   })
   default = {}
