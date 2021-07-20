@@ -126,7 +126,7 @@ variable target_size {
   default = 0
   validation {
     condition = var.target_size <= 1
-    error_message = "target_size cannot be more than 1 for stateful managed instance groups."
+    error_message = "Target size cannot be more than 1 for stateful managed instance groups."
   }
 }
 
