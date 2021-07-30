@@ -8,7 +8,8 @@ locals {
   requested_restricted_services = var.restricted_services == null ? ["ALL-SERVICES"] : var.restricted_services
   restricted_services = contains(local.requested_restricted_services, "ALL-SERVICES") ? local.vpc_sc_supported_services : var.restricted_services
   enable_vpc_accessible_services = contains(local.vpc_accessible_services, "ALL-SERVICES") ? false : true
-  vpc_accessible_services = var.vpc_accessible_services == null ? ["RESTRICTED-SERVICES"] : local.enable_vpc_accessible_services == false ? [] : var.vpc_accessible_services  vpc_enable_restriction = contains(local.vpc_accessible_services, "ALL-SERVICES" ) ? false : true
+  vpc_accessible_services = var.vpc_accessible_services == null ? ["RESTRICTED-SERVICES"] : local.enable_vpc_accessible_services == false ? [] : var.vpc_accessible_services
+  vpc_enable_restriction = contains(local.vpc_accessible_services, "ALL-SERVICES" ) ? false : true
   vpc_sc_supported_services = [
                                 "accessapproval.googleapis.com",
                                 "adsdatahub.googleapis.com",
