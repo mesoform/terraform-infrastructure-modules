@@ -8,7 +8,7 @@ locals {
   requested_restricted_services = var.restricted_services == null ? ["ALL-SERVICES"] : var.restricted_services
   restricted_services = contains(local.requested_restricted_services, "ALL-SERVICES") ? local.vpc_sc_supported_services : var.restricted_services
   // by default set VPC Accessible Services the same as restricted services for security
-  vpc_accessible_services = var.vpc_accessible_services == null ? ["RESTRICTED-SERVICES"] : contains(local.vpc_accessible_services, "ALL-SERVICES") ? null : var.vpc_accessible_services
+  vpc_accessible_services = var.vpc_accessible_services == null ? ["RESTRICTED-SERVICES"] : contains(var.vpc_accessible_services, "ALL-SERVICES") ? null : var.vpc_accessible_services
   vpc_accessible_services_enabled = contains(local.vpc_accessible_services, "ALL-SERVICES" ) ? false : true
   vpc_sc_supported_services = [
                                 "accessapproval.googleapis.com",
