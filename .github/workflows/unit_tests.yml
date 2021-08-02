@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{github.event.pull_requests.labels.*.name == 'feature'}} || ${{github.event.pull_requests.labels.*.name == 'bug'}} || ${{github.event.pull_requests.labels.*.name == 'patch'}}
     env:
-      working-directory: ./tests/mcp
+      working-directory: ./tests/
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -41,10 +41,17 @@ jobs:
       with:
         terraform_wrapper: false
 
+    # Install gcoud sdk and set the service account
+    - name: Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{secrets.GCP_SA_KEY}}
+        export_default_credentials: true
+
     # Run unit tests in MCP module
     - name: Run MCP unit tests
       run: |
-        cd unit_tests
+        cd mcp/unit_tests
         MESSAGE="PASSED: All unit tests passed"
         for dir in $(find $(pwd) \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
           echo ""
@@ -69,3 +76,34 @@ jobs:
         done
         echo ${MESSAGE^^}
         exit $EXIT_CODE
+
+    # Run unit tests in GCP module
+    - name: Run GCP unit tests
+      run: |
+        cd gcp/unit_tests
+        MESSAGE="PASSED: All unit tests passed"
+        for dir in $(find $(pwd) \( -type f -name 'main.tf' \) |  sed -r 's|/[^/]+$||'); do
+          echo ""
+          cd $dir
+          adapter_name=$(find . -name "*locals*" | sed -e "s/^.\///" -e "s/_locals.tf$//")
+          echo -e "\033[1m${adapter_name^^} TESTS\033[0m"
+          terraform init > /dev/null
+          terraform apply -auto-approve > /dev/null
+          for test in $(terraform output -json | jq -r 'keys[]'); do
+            test_output=$(terraform output -json $test)
+            result=$(echo $test_output | jq -r '.result')
+            echo "${test}: ${result^^}"
+            if [ "$result" != "pass" ]
+            then
+              MESSAGE="FAIL: There are failed unit tests"
+              echo "    Expected data: $(echo $test_output | jq -r '.expected')"
+              echo "    Received data: $(echo $test_output | jq -r '.received')"
+              EXIT_CODE=3
+            fi
+          done
+          echo ""
+        done
+        echo ${MESSAGE^^}
+        exit $EXIT_CODE
+
+
