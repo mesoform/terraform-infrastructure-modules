@@ -3,6 +3,7 @@ terraform {
   experiments = [module_variable_optional_attrs]
 }
 
+
 data google_project default {
   project_id = var.project
 }
@@ -11,6 +12,10 @@ data google_compute_health_check self {
   for_each = {for health_check in var.health_check : health_check.name => health_check}
   name     = each.key
   project  = var.project
+}
+
+locals {
+  service_account_email = var.service_account_email == "" ? "${data.google_project.default.number}@-compute@developer.gserviceaccount.com" : var.service_account_email
 }
 
 //Updates the time for the version when the template is updated or certain properties of MIG are updated

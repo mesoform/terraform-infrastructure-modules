@@ -1,0 +1,136 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "type": "object",
+    "properties": {
+        "ingressPolicies": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "ingressFrom": {
+                        "type": "object",
+                        "properties": {
+                            "identityType": {
+                                "type": "string"
+                            },
+                            "identities": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "sources": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "access_level": {
+                                            "type": "string"
+                                        },
+                                        "resource": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "ingressTo": {
+                        "type": "object",
+                        "properties": {
+                            "operations": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "serviceName": {
+                                            "type": "string"
+                                        },
+                                        "methodSelectors": {
+                                            "type": "object",
+                                            "properties": {
+                                                "method": {
+                                                    "type": "string"
+                                                },
+                                                "permission": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "resources": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "egressPolicies": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "egressFrom": {
+                        "type": "object",
+                        "properties": {
+                            "identityType": {
+                                "type": "string"
+                            },
+                            "identities": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "egressTo": {
+                        "type": "object",
+                        "properties": {
+                            "operations": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "serviceName": {
+                                            "type": "string"
+                                        },
+                                        "methodSelectors": {
+                                            "type": "object",
+                                            "properties": {
+                                                "method": {
+                                                    "type": "string"
+                                                },
+                                                "permission": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "resources": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
