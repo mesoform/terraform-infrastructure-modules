@@ -9,23 +9,23 @@ variable test_type {
 }
 
 //VPC Accessible Services - Allowed Services
-data external test_vpc_allowed_services{
-  query = local.vpc_allowed_services == null ? {service = "empty"} : {for service in local.vpc_allowed_services: service => service}
-  program = ["python", "${path.module}/python/test_vpc_allowed_services_${var.test_type}.py"]
+data external test_vpc_accessible_services {
+  query = local.vpc_accessible_services == null ? {service = "empty"} : {for service in local.vpc_accessible_services: service => service}
+  program = ["python", "${path.module}/python/test_vpc_accessible_services_${var.test_type}.py"]
 }
 
-output test_vpc_allowed_services {
-  value = data.external.test_vpc_allowed_services.result
+output test_vpc_accessible_services {
+  value = data.external.test_vpc_accessible_services.result
 }
 
 //VPC Accessible Services - Enable Restriction
-data external test_vpc_enable_restriction{
-  query = {enabled = local.vpc_enable_restriction}
-  program = ["python", "${path.module}/python/test_vpc_enable_restriction_${var.test_type}.py"]
+data external test_vpc_accessible_services_enabled {
+  query = {enabled = local.vpc_accessible_services_enabled}
+  program = ["python", "${path.module}/python/test_vpc_accessible_services_enabled_${var.test_type}.py"]
 }
 
-output test_vpc_enable_restriction{
-  value = data.external.test_vpc_enable_restriction.result
+output test_vpc_accessible_services_enabled {
+  value = data.external.test_vpc_accessible_services_enabled.result
 }
 
 // Restricted Services

@@ -5,11 +5,11 @@ module default_tests{
   name = "name"
 }
 output test_default_vpc_allowed_services {
-  value = module.default_tests.test_vpc_allowed_services
+  value = module.default_tests.test_vpc_accessible_services
 }
 
 output test_default_vpc_enabled_services {
-  value = module.default_tests.test_vpc_enable_restriction
+  value = module.default_tests.test_vpc_accessible_services_enabled
 }
 output test_default_restricted_services {
   value = module.default_tests.test_restricted_services
@@ -25,11 +25,11 @@ module specified_tests{
   vpc_accessible_services = ["storage.googleapis.com", "compute.googleapis.com"]
 }
 output test_specified_vpc_allowed_services {
-  value = module.specified_tests.test_vpc_allowed_services
+  value = module.specified_tests.test_vpc_accessible_services
 }
 
 output test_specified_vpc_enabled_services {
-  value = module.default_tests.test_vpc_enable_restriction
+  value = module.default_tests.test_vpc_accessible_services_enabled
 }
 output test_entered_restricted_services {
   value = module.specified_tests.test_restricted_services
@@ -45,11 +45,11 @@ module all_services_tests{
   vpc_accessible_services = ["ALL-SERVICES"]
 }
 output test_all_services_vpc_allowed_services {
-  value = module.specified_tests.test_vpc_allowed_services
+  value = module.specified_tests.test_vpc_accessible_services
 }
 
 output test_all_services_vpc_enabled_services {
-  value = module.default_tests.test_vpc_enable_restriction
+  value = module.default_tests.test_vpc_accessible_services_enabled
 }
 output test_all_services_restricted_services {
   value = module.specified_tests.test_restricted_services
@@ -67,11 +67,11 @@ module no_services_specified_tests{
   vpc_accessible_services = []
 }
 output test_no_service_vpc_allowed_services {
-  value = module.specified_tests.test_vpc_allowed_services
+  value = module.specified_tests.test_vpc_accessible_services
 }
 
 output test_no_service_vpc_enabled_services {
-  value = module.default_tests.test_vpc_enable_restriction
+  value = module.default_tests.test_vpc_accessible_services_enabled
 }
 output test_no_service_restricted_services {
   value = module.specified_tests.test_restricted_services
