@@ -1,12 +1,16 @@
 resource google_access_context_manager_service_perimeter self {
-  depends_on = [data.google_project.self]
+//  depends_on = [data.google_project.self]
   name = "accessPolicies/${var.access_policy_name}/servicePerimeters/${var.name}"
   parent = "accessPolicies/${var.access_policy_name}"
   title = var.name
   perimeter_type = "PERIMETER_TYPE_REGULAR"
 
   status {
-    resources = local.resources
+    //noinspection HILUnresolvedReference
+    resources = [
+      for project in data.google_project.self:
+        "projects/${project.number}"
+    ]
     restricted_services = local.restricted_services
     access_levels = [ for access_level in var.access_levels : "accessPolicies/${var.access_policy_name}/accessLevels/${access_level}"]
     dynamic vpc_accessible_services {
