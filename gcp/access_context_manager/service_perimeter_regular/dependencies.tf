@@ -1,4 +1,4 @@
 module resources {
-  source = "modules/project_details"
+  source = "../../data/resource-manager/projects"
   project_ids = var.resources
 }
