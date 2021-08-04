@@ -54,3 +54,26 @@ module "secure_swarm_a" {
   
 }
 ```
+
+
+Disk Snapshot schedule configuration takes one of the following fomats:
+```hcl
+data_disk_snapshot_schedule = {
+  frequency = "hourly" | "daily"
+  interval = number
+  start_time = time
+} 
+
+---------or----------
+
+data_disk_snapshot_schedule = {
+  frequency = "weekly"
+  weekly_snapshot_schedule = [
+    {
+      day = "MONDAY" | "TUESDAY" | ... | "SUNDAY"
+      start_time = time
+    },
+    ...
+  ]
+}
+```

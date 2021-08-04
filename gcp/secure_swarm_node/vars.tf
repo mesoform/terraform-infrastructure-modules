@@ -166,34 +166,28 @@ variable green_instance_template {
   default = {}
 }
 
-variable hourly_schedule {
-  description = "Hourly snapshot schedule"
+variable data_disk_snapshot_schedule {
+  description = "Hourly, Daily or Weekly snapshot schedule"
   type = object({
-    hours_in_cycle = number
-    start_time = string
+    frequency = string
+    start_time = optional(string)
+    interval = optional(number)
+    weekly_snapshot_schedule = optional(list(object({
+      day = string
+      start_time = string
+    })))
   })
-  default = null
-}
 
-variable daily_schedule {
-  description = "Daily snapshot schedule"
-  type = object({
-    days_in_cycle = number
-    start_time = string
-  })
   default = {
-    days_in_cycle = 1
-    start_time = "03:00"
+    frequency = "daily"
+    interval = 1
+    start_time = "3:00"
   }
-}
 
-variable weekly_schedule {
-  description = "Snapshot schedule for specified days of week."
-  type = list(object({
-    day = string
-    start_time = string
-  }))
-  default = null
+  validation {
+    condition = contains(["hourly", "daily", "weekly"], var.data_disk_snapshot_schedule.frequency)
+    error_message = "Frequency must be either 'hourly', 'daily', 'weekly'."
+  }
 }
 
 variable retention_policy {

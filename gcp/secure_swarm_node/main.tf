@@ -28,9 +28,7 @@ resource time_static self {
 resource time_static snapshot {
   triggers = {
     snapshot_properties = jsonencode(var.snapshot_properties)
-    daily_schedule = jsonencode(var.daily_schedule)
-    weekly_schedule = jsonencode(var.weekly_schedule)
-    hourly_schedule = jsonencode(var.hourly_schedule)
+    daily_schedule = jsonencode(var.data_disk_snapshot_schedule)
     retention_policy = jsonencode(var.retention_policy)
   }
 }
@@ -52,25 +50,25 @@ resource google_compute_resource_policy self {
   snapshot_schedule_policy {
     schedule{
       dynamic hourly_schedule {
-        for_each = var.hourly_schedule == null ? [] : [1]
+        for_each = var.data_disk_snapshot_schedule.frequency == "hourly" ? [1] : []
         content {
-          hours_in_cycle = var.hourly_schedule.hours_in_cycle
-          start_time = var.hourly_schedule.start_time
+          hours_in_cycle = var.data_disk_snapshot_schedule.interval
+          start_time = var.data_disk_snapshot_schedule.start_time
         }
       }
       dynamic daily_schedule {
         //If weekly or hourly schedule is specified ignore default daily schedule
-        for_each = var.weekly_schedule != null || var.hourly_schedule != null ? [] : [1]
+        for_each = var.data_disk_snapshot_schedule.frequency == "daily" ? [1] : []
         content {
-          days_in_cycle = var.daily_schedule.days_in_cycle
-          start_time = var.daily_schedule.start_time
+          days_in_cycle = var.data_disk_snapshot_schedule.interval
+          start_time = var.data_disk_snapshot_schedule.start_time
         }
       }
       dynamic weekly_schedule {
-        for_each = var.weekly_schedule == null ? [] : [1]
+        for_each = var.data_disk_snapshot_schedule.frequency == "weekly" ? [1] : []
         content {
           dynamic day_of_weeks{
-            for_each = var.weekly_schedule
+            for_each = var.data_disk_snapshot_schedule.weekly_snapshot_schedule
             content {
               day = day_of_weeks.value.day
               start_time = day_of_weeks.value.start_time
