@@ -166,5 +166,51 @@ variable green_instance_template {
   default = {}
 }
 
+variable hourly_schedule {
+  description = "Hourly snapshot schedule"
+  type = object({
+    hours_in_cycle = number
+    start_time = string
+  })
+  default = null
+}
 
+variable daily_schedule {
+  description = "Daily snapshot schedule"
+  type = object({
+    days_in_cycle = number
+    start_time = string
+  })
+  default = {
+    days_in_cycle = 1
+    start_time = "03:00"
+  }
+}
 
+variable weekly_schedule {
+  description = "Snapshot schedule for specified days of week."
+  type = list(object({
+    day = string
+    start_time = string
+  }))
+  default = null
+}
+
+variable retention_policy {
+  description = "Retention Policy Applied to snapshots"
+  type = object({
+    max_retention_days = number
+    on_source_disk_delete = optional(string)
+  })
+  default = null
+}
+
+variable snapshot_properties {
+  type = object({
+    labels = optional(map(string))
+    storage_locations = optional(list(string))
+    guest_flush = optional(string)
+
+  })
+  default = null
+}
