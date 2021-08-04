@@ -1,5 +1,4 @@
 resource google_access_context_manager_service_perimeter self {
-  depends_on = [data.google_project.self.number]
   name = "accessPolicies/${var.access_policy_name}/servicePerimeters/${var.name}"
   parent = "accessPolicies/${var.access_policy_name}"
   title = var.name
@@ -8,7 +7,7 @@ resource google_access_context_manager_service_perimeter self {
   status {
     //noinspection HILUnresolvedReference
     resources = [
-      for project in data.google_project.self:
+      for project in module.resources.list:
         "projects/${project.number}"
     ]
     restricted_services = local.restricted_services
