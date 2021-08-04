@@ -95,4 +95,9 @@ locals {
                                 "vision.googleapis.com",
                                 "vpcaccess.googleapis.com"
                               ]
+  //noinspection HILUnresolvedReference
+  resources = [
+    for project in data.google_project.self:
+          "projects/${project.number}"
+  ]
 }
