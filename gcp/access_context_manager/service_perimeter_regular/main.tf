@@ -1,5 +1,5 @@
 resource google_access_context_manager_service_perimeter self {
-  depends_on = [data.google_project.self.*.project_id]
+  depends_on = [data.google_project.self.number]
   name = "accessPolicies/${var.access_policy_name}/servicePerimeters/${var.name}"
   parent = "accessPolicies/${var.access_policy_name}"
   title = var.name
