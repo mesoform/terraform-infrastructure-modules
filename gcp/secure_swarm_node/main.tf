@@ -25,7 +25,7 @@ resource time_static self {
 }
 
 //Updates the google_compute_disk_resource_policy_attachment when google_compute_resource_policy is updated
-resource time_static snapshot {
+resource time_static resource_policy_time {
   triggers = {
     snapshot_properties = jsonencode(var.snapshot_properties)
     daily_schedule = jsonencode(var.data_disk_snapshot_schedule)
@@ -44,7 +44,7 @@ resource google_compute_disk self {
 }
 
 resource google_compute_resource_policy self {
-  name = "${var.name}-${var.zone}-${time_static.snapshot.unix}"
+  name = "${var.name}-${var.zone}-${time_static.resource_policy_time.unix}"
   region = var.region
   project = var.project
   snapshot_schedule_policy {
