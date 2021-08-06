@@ -28,7 +28,7 @@ resource time_static self {
 resource time_static resource_policy_time {
   triggers = {
     snapshot_properties = jsonencode(var.snapshot_properties)
-    daily_schedule = jsonencode(var.data_disk_snapshot_schedule)
+    data_disk_snapshot_schedule = jsonencode(var.data_disk_snapshot_schedule)
     retention_policy = jsonencode(var.retention_policy)
   }
 }
