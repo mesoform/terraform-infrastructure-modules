@@ -7,7 +7,7 @@ resource google_access_context_manager_service_perimeter self {
   status {
     //noinspection HILUnresolvedReference
     resources = [
-      for project in data.google_project.self:
+      for project in module.resources.list:
         "projects/${project.number}"
     ]
     restricted_services = local.restricted_services
