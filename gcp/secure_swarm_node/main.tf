@@ -35,7 +35,7 @@ resource time_static resource_policy_time {
 
 resource google_compute_disk self {
   provider  = google-beta
-  name      = "${var.name}-${var.zone}-disk"
+  name      = "${var.name}-${var.zone}-data"
   zone      = "${var.region}-${var.zone}"
   project   = var.project
   labels    = var.labels
