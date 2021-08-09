@@ -24,9 +24,18 @@ resource time_static self {
   }
 }
 
+//Updates the google_compute_disk_resource_policy_attachment when google_compute_resource_policy is updated
+resource time_static resource_policy_time {
+  triggers = {
+    snapshot_properties = jsonencode(var.snapshot_properties)
+    data_disk_snapshot_schedule = jsonencode(var.data_disk_snapshot_schedule)
+    retention_policy = jsonencode(var.retention_policy)
+  }
+}
+
 resource google_compute_disk self {
   provider  = google-beta
-  name      = "${var.name}-${var.zone}-disk"
+  name      = "${var.name}-${var.zone}-data"
   zone      = "${var.region}-${var.zone}"
   project   = var.project
   labels    = var.labels
@@ -34,6 +43,64 @@ resource google_compute_disk self {
   interface = "NVME"
 }
 
+resource google_compute_resource_policy self {
+  name = "${var.name}-${var.zone}-${time_static.resource_policy_time.unix}"
+  region = var.region
+  project = var.project
+  snapshot_schedule_policy {
+    schedule{
+      dynamic hourly_schedule {
+        for_each = var.data_disk_snapshot_schedule.frequency == "hourly" ? [1] : []
+        content {
+          hours_in_cycle = var.data_disk_snapshot_schedule.interval
+          start_time = var.data_disk_snapshot_schedule.start_time
+        }
+      }
+      dynamic daily_schedule {
+        //If weekly or hourly schedule is specified ignore default daily schedule
+        for_each = var.data_disk_snapshot_schedule.frequency == "daily" ? [1] : []
+        content {
+          days_in_cycle = var.data_disk_snapshot_schedule.interval
+          start_time = var.data_disk_snapshot_schedule.start_time
+        }
+      }
+      dynamic weekly_schedule {
+        for_each = var.data_disk_snapshot_schedule.frequency == "weekly" ? [1] : []
+        content {
+          dynamic day_of_weeks{
+            for_each = var.data_disk_snapshot_schedule.weekly_snapshot_schedule
+            content {
+              day = day_of_weeks.value.day
+              start_time = day_of_weeks.value.start_time
+            }
+          }
+        }
+      }
+    }
+    dynamic retention_policy {
+      for_each = var.retention_policy == null ? [] : [1]
+      content {
+        max_retention_days = var.retention_policy.max_retention_days
+        on_source_disk_delete = lookup(var.retention_policy, "on_source_disk_delete", null)
+      }
+    }
+    dynamic snapshot_properties {
+      for_each = var.snapshot_properties ==  null ? [] : [1]
+      content {
+        labels = lookup(var.snapshot_properties, "labels", null)
+        storage_locations =  lookup(var.snapshot_properties, "storage_locations", null)
+        guest_flush = lookup(var.snapshot_properties, "guest_flush", null)
+}
+    }
+  }
+}
+
+resource google_compute_disk_resource_policy_attachment self{
+  name = google_compute_resource_policy.self.name
+  disk = google_compute_disk.self.name
+  zone = "${var.region}-${var.zone}"
+  project = var.project
+}
 
 module secure_instance_template_blue {
   source      = "../compute_engine/instance_template"
@@ -114,8 +181,7 @@ resource google_compute_instance_group_manager self {
   version {
     name              = var.version_name == null ? formatdate("YYYYMMDDhhmm", time_static.self.rfc3339) : var.version_name
     instance_template = var.deployment_version == "blue" ? module.secure_instance_template_blue.self_link : module.secure_instance_template_green.self_link
-//    instance_template = module.secure_instance_template_blue.id
-  }
+}
 
   dynamic "auto_healing_policies" {
     for_each = [for health_check in var.health_check: {
@@ -154,4 +220,3 @@ resource google_compute_instance_group_manager self {
     }
   }
 }
-
