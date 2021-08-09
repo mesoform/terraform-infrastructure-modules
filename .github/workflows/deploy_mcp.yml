@@ -120,6 +120,7 @@ jobs:
       - name: Deploy GCP modules
         run: |
           cd GCP/terraform
+          sleep 5m
           sed -i "s/gcs-bucket-name/${{env.GCP_PROJECT_ID}}_bucket/" main.tf
           sed -i "s/source-path/..\/..\/..\/..\/..\/mcp/" main.tf
           cat main.tf
