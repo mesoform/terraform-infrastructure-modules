@@ -5,6 +5,8 @@ and optionally confidential computing enabled.
 
 Each node is configured with:
 * `google_compute_disk` -  persistent storage, with "NVME" as the interface
+* `google_compute_resource_policy` - Creates and attaches a snapshot schedule for the persistent disk.
+Defaults to being run daily at 3:00. See [Terraform Documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy) for more details.
 * `secure_instance_template` - Instance Template with shielded VM and optionally confidential computing enabled.
   Uses the previously created `google_compute_disk`
 * `google_compute_instance_manager` - Managed Instance Group, with stateful disk set to never delete
@@ -50,5 +52,28 @@ module "secure_swarm_a" {
     subnetwork = "subnet"
   }
   
+}
+```
+
+
+Disk Snapshot schedule configuration takes one of the following fomats:
+```hcl
+data_disk_snapshot_schedule = {
+  frequency = "hourly" | "daily"
+  interval = number
+  start_time = time
+} 
+
+---------or----------
+
+data_disk_snapshot_schedule = {
+  frequency = "weekly"
+  weekly_snapshot_schedule = [
+    {
+      day = "MONDAY" | "TUESDAY" | ... | "SUNDAY"
+      start_time = time
+    },
+    ...
+  ]
 }
 ```
