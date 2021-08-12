@@ -1,5 +1,5 @@
-project_id = "pk2m-testing"
-service_account = { email = "pk2m-service@pk2m-testing.iam.gserviceaccount.com", scopes = ["userinfo-email", "compute-ro", "storage-ro"] }
+project_id = "mesotest4"
+service_account = { email = "mesotest4@mesotest4.iam.gserviceaccount.com", scopes = ["userinfo-email", "compute-ro", "storage-ro"] }
 network_name = "gcp-swarm"
 region = "europe-west2"
 gcp_ssh_user = "debian"
