@@ -14,32 +14,32 @@ variable description {
 }
 
 variable "combining_function" {
+  type = string
+  default = "AND"
+
   validation {
     condition = contains(["AND", "OR"], var.combining_function)
-    error_message = "Invalid comgbining function. Possible values are AND and OR."
+    error_message = "Invalid combining function. Possible values are AND and OR."
   }
-  type = string
 }
 
-variable allowed_ip_subnetworks {
-  type = list(string)
-  description = "List of CIDR block IP subnetworks. May be IPv4 or IPv6"
+variable "conditions" {
+  type = list(object({
+    ip_subnetworks = optional(list(string))
+    required_access_levels = optional(list(string))
+    members = optional(list(string))
+    regions = optional(list(string))
+    negate = optional(bool)
+  }))
+
   default = []
-}
 
-variable allowed_members {
-  type = list(string)
-  description = "List of allowed members (users or services accounts, not groups)"
-  default = []
-}
-
-variable allowed_regions {
-  type = list(string)
-  description = "List of allowed regions. The request must originate from one of the provided countries/regions"
-  default = []
-}
-
-variable negate {
-  description = "Whether to negate the Condition"
-  default = false
+  validation {
+    condition = can(regex("(user|serviceAccount):.*@.*"), var.conditions.members)
+    error_message = "Allowed format for members (users/service accounts) is either user:{emailid} or serviceAccount:{emailid}"
+  }
+  validation {
+    condition = contains([true,false], var.conditions.negate)
+    error_message = "Boolean argument. Possible values are true or false."
+  }
 }
