@@ -167,7 +167,7 @@ variable green_instance_template {
 }
 
 variable data_disk_snapshot_schedule {
-  description = "Hourly, Daily or Weekly snapshot schedule"
+  description = "Hourly, Daily or Weekly snapshot schedule, must be 24hour format"
   type = object({
     frequency = string
     start_time = optional(string)
@@ -181,7 +181,7 @@ variable data_disk_snapshot_schedule {
   default = {
     frequency = "daily"
     interval = 1
-    start_time = "3:00"
+    start_time = "03:00"
   }
 
   validation {
