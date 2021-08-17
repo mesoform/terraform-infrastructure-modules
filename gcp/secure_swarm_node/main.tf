@@ -133,6 +133,7 @@ module secure_instance_template_blue {
     mode         = "READ_WRITE"
   }]
   security_level = local.blue_instance_template["security_level"]
+  network_ip = var.network_ip
 }
 
 
@@ -167,6 +168,7 @@ module secure_instance_template_green {
     mode         = "READ_WRITE"
   }]
   security_level = local.green_instance_template["security_level"]
+  network_ip = var.network_ip
 }
 
 resource google_compute_instance_group_manager self {
