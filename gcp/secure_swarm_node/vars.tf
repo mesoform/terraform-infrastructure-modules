@@ -212,3 +212,9 @@ variable snapshot_properties {
   })
   default = null
 }
+
+variable wait_for_instances {
+  description = "Whether to wait for instances to be created before returning"
+  type = bool
+  default = false
+}
