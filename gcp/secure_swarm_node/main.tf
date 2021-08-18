@@ -177,6 +177,7 @@ resource google_compute_instance_group_manager self {
   name               = "${var.name}-${var.zone}"
   zone               = "${var.region}-${var.zone}"
   project            = var.project
+  wait_for_instances = true
   wait_for_instances_status = "STABLE"
   target_size        = var.target_size
 
