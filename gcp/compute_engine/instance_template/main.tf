@@ -36,7 +36,7 @@ data "google_compute_subnetwork" "subnet" {
 locals {
   boot_disk = [
     {
-      source_image = var.source_image != "" ? data.google_compute_image.image.self_link : "projects/${var.project_id}/global/images/family/${var.source_image_family}"
+      source_image = var.source_image != "" ? data.google_compute_image.image.self_link : "projects/${var.source_image_project}/global/images/family/${var.source_image_family}"
       disk_size_gb = var.disk_size_gb
       disk_type    = var.disk_type
       auto_delete  = var.auto_delete
