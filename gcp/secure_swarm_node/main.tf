@@ -121,7 +121,7 @@ module secure_instance_template_blue {
   subnetwork_project   = var.blue_instance_template.subnetwork == null ? null : var.project
   network              = var.blue_instance_template.network == null ? var.network : var.blue_instance_template.network
   subnetwork           = var.blue_instance_template.subnetwork == null ? var.subnetwork : var.blue_instance_template.subnetwork
-  network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip
+  network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip[var.zone]
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
@@ -156,7 +156,7 @@ module secure_instance_template_green {
   subnetwork_project   = var.green_instance_template.subnetwork == null ? null : var.project
   network              = var.green_instance_template.network == null ? var.network : var.green_instance_template.network
   subnetwork           = var.green_instance_template.subnetwork == null? var.subnetwork : var.green_instance_template.subnetwork
-  network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip
+  network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip[var.zone]
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
@@ -221,5 +221,9 @@ resource google_compute_instance_group_manager self {
       name = named_port.value["name"]
       port = named_port.value["port"]
     }
+  }
+  timeouts {
+    create = "10m"
+    update = "10m"
   }
 }

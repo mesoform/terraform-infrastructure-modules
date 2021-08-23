@@ -63,12 +63,15 @@ module "secure_swarm_a" {
     initial_delay_sec = 180
   }]
   access_config = {
-    a = [{nat_ip = "10.0.0.2"}]
+    a = [{nat_ip = "35.0.0.2"}]
   }
   blue_instance_template = {}
   green_instance_template = {
     network = "network"
     subnetwork = "subnet"
+    network_ip = {
+      a = "10.0.0.2"
+    }
   }
 }
 
@@ -85,12 +88,15 @@ module "secure_swarm_b" {
     initial_delay_sec = 180
   }]
   access_config = {
-    b = [{nat_ip = "10.0.0.3"}]
+    b = [{nat_ip = "35.0.0.3"}]
   }
   blue_instance_template = {}
   green_instance_template = {
     network = "network"
     subnetwork = "subnet"
+    network_ip = {
+      b = "10.0.0.3"
+    }
   }
 }
 ```
