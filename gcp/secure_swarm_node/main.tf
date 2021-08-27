@@ -108,7 +108,7 @@ module secure_instance_template_blue {
   description = "Secure Swarm zone template"
   service_account = {
     email  = local.service_account_email
-    scopes = var.service_account_scopes
+    scopes = var.blue_instance_template.service_account_scopes == null ? var.service_account_scopes : var.blue_instance_template.service_account_scopes
   }
   region               = var.region
   zone                 = var.zone
@@ -121,6 +121,7 @@ module secure_instance_template_blue {
   subnetwork_project   = var.blue_instance_template.subnetwork == null ? null : var.project
   network              = var.blue_instance_template.network == null ? var.network : var.blue_instance_template.network
   subnetwork           = var.blue_instance_template.subnetwork == null ? var.subnetwork : var.blue_instance_template.subnetwork
+  network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip[var.zone]
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
@@ -133,7 +134,6 @@ module secure_instance_template_blue {
     mode         = "READ_WRITE"
   }]
   security_level = local.blue_instance_template["security_level"]
-  network_ip = var.network_ip
 }
 
 
@@ -143,7 +143,7 @@ module secure_instance_template_green {
   description = "Secure Swarm zone template"
   service_account = {
     email  = local.service_account_email
-    scopes = var.service_account_scopes
+    scopes = var.green_instance_template.service_account_scopes == null ? var.service_account_scopes : var.green_instance_template.service_account_scopes
   }
   region               = var.region
   zone                 = var.zone
@@ -154,8 +154,9 @@ module secure_instance_template_green {
   source_image_family  = var.green_instance_template.source_image_family == null ?  var.source_image_family : var.green_instance_template.source_image_family
   source_image_project = var.green_instance_template.source_image_project == null ? var.source_image_project : var.green_instance_template.source_image_project
   subnetwork_project   = var.green_instance_template.subnetwork == null ? null : var.project
-  network              = var.green_instance_template.network == null? var.network : var.green_instance_template.network
+  network              = var.green_instance_template.network == null ? var.network : var.green_instance_template.network
   subnetwork           = var.green_instance_template.subnetwork == null? var.subnetwork : var.green_instance_template.subnetwork
+  network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip[var.zone]
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   additional_disks = [{
@@ -168,7 +169,6 @@ module secure_instance_template_green {
     mode         = "READ_WRITE"
   }]
   security_level = local.green_instance_template["security_level"]
-  network_ip = var.network_ip
 }
 
 resource google_compute_instance_group_manager self {
@@ -177,6 +177,7 @@ resource google_compute_instance_group_manager self {
   name               = "${var.name}-${var.zone}"
   zone               = "${var.region}-${var.zone}"
   project            = var.project
+  wait_for_instances = var.wait_for_instances
   wait_for_instances_status = "STABLE"
   target_size        = var.target_size
 
@@ -220,5 +221,9 @@ resource google_compute_instance_group_manager self {
       name = named_port.value["name"]
       port = named_port.value["port"]
     }
+  }
+  timeouts {
+    create = "10m"
+    update = "10m"
   }
 }

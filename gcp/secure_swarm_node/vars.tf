@@ -146,8 +146,10 @@ variable blue_instance_template {
     source_image_project = optional(string)
     network = optional(string)
     subnetwork = optional(string)
+    network_ip = optional(map(string))
     access_config = optional(map(list(map(string))))
     security_level = optional(string)
+    service_account_scopes = optional(set(string))
   })
   default = {}
 }
@@ -160,8 +162,10 @@ variable green_instance_template {
     source_image_project = optional(string)
     network = optional(string)
     subnetwork = optional(string)
+    network_ip = optional(map(string))
     access_config = optional(map(list(map(string))))
     security_level = optional(string)
+    service_account_scopes = optional(set(string))
   })
   default = {}
 }
@@ -207,4 +211,10 @@ variable snapshot_properties {
 
   })
   default = null
+}
+
+variable wait_for_instances {
+  description = "Whether to wait for instances to be created before returning"
+  type = bool
+  default = false
 }
