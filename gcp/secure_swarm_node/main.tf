@@ -40,7 +40,6 @@ resource google_compute_disk self {
   project   = var.project
   labels    = var.labels
   size      = var.disk_size
-  interface = "NVME"
 }
 
 resource google_compute_resource_policy self {
@@ -124,6 +123,7 @@ module secure_instance_template_blue {
   network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip[var.zone]
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  disk_interface = "NVME"
   additional_disks = [{
     boot         = false
     auto_delete  = false
@@ -132,6 +132,7 @@ module secure_instance_template_blue {
     disk_size_gb = var.disk_size
     disk_type    = "pd-standard"
     mode         = "READ_WRITE"
+    interface    = "NVME"
   }]
   security_level = local.blue_instance_template["security_level"]
 }
@@ -159,6 +160,7 @@ module secure_instance_template_green {
   network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip[var.zone]
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  disk_interface = "NVME"
   additional_disks = [{
     boot         = false
     auto_delete  = false
@@ -167,6 +169,7 @@ module secure_instance_template_green {
     disk_size_gb = var.disk_size
     disk_type    = "pd-standard"
     mode         = "READ_WRITE"
+    interface    = "NVME"
   }]
   security_level = local.green_instance_template["security_level"]
 }

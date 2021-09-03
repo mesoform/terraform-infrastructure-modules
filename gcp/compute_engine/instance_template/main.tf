@@ -40,6 +40,7 @@ locals {
       disk_size_gb = var.disk_size_gb
       disk_type    = var.disk_type
       auto_delete  = var.auto_delete
+      interface    = var.disk_interface
       boot         = "true"
     },
   ]
@@ -108,10 +109,6 @@ resource google_compute_instance_template self {
         network_tier = lookup(access_config.value, "network_tier", null)
       }
     }
-  }
-
-  lifecycle {
-    create_before_destroy = "true"
   }
 
   # scheduling must have automatic_restart be false when preemptible is true.
