@@ -145,4 +145,8 @@ resource google_compute_instance_template self {
       type  = ""
     }
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

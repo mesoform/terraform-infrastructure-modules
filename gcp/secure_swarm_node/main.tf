@@ -33,13 +33,23 @@ resource time_static resource_policy_time {
   }
 }
 
+resource time_static disk_creation_time {
+  triggers = {
+    disk_size = var.disk_size
+    disk_type = var.disk_type
+  }
+}
+
 resource google_compute_disk self {
   provider  = google-beta
-  name      = "${var.name}-${var.zone}-data"
+  name      = "${var.name}-${var.zone}-data-${formatdate("YYYYMMDDhhmm", time_static.disk_creation_time.rfc3339)}"
   zone      = "${var.region}-${var.zone}"
   project   = var.project
   labels    = var.labels
   size      = var.disk_size
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource google_compute_resource_policy self {
@@ -130,7 +140,7 @@ module secure_instance_template_blue {
     device_name  = google_compute_disk.self.name
     disk_name    = google_compute_disk.self.name
     disk_size_gb = var.disk_size
-    disk_type    = "pd-standard"
+    disk_type    = var.disk_type
     mode         = "READ_WRITE"
     interface    = "NVME"
   }]
@@ -167,7 +177,7 @@ module secure_instance_template_green {
     device_name  = google_compute_disk.self.name
     disk_name    = google_compute_disk.self.name
     disk_size_gb = var.disk_size
-    disk_type    = "pd-standard"
+    disk_type    = var.disk_type
     mode         = "READ_WRITE"
     interface    = "NVME"
   }]
