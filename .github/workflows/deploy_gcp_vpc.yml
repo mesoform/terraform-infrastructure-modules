@@ -1,0 +1,81 @@
+  name: 'GCP VPC Deployment Tests'
+  on:
+    push:
+      branches:
+        - main
+        - develop
+  jobs:
+    deployment-tests:
+      name: 'Deployment tests'
+      runs-on: ubuntu-latest
+
+      env:
+        working-directory: ./tests/gcp/deployment
+        NEW_PROJECT_ID: "${GITHUB_REF##*/}-${GITHUB_SHA::*}"
+
+      defaults:
+        run:
+          shell: bash
+          working-directory: ${{env.working-directory}}
+
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+
+
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v1
+          with:
+            terraform_wrapper: false
+
+        # Install gcloud sdk and set the service account
+        - name: Setup Cloud SDK
+          uses: google-github-actions/setup-gcloud@master
+          with:
+            service_account_key: ${{secrets.GCP_SA_KEY}}
+            export_default_credentials: true
+
+        - name: Install Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: '3.x'
+
+        - name: Validate Yaml
+          run: |
+            python -m pip install --upgrade pip
+            pip install PyYAML jsonschema
+            cd access_context_manager/yaml_validation
+            python yaml_validation.py
+
+        - name: Setup GCP
+          run: |
+            gcloud projects create "${{env.NEW_PROJECT_ID}}-1" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
+            gcloud beta billing projects link ${{env.NEW_PROJECT_ID}}-1 --billing-account=${{secrets.GCP_BILLING_ID}}
+            gcloud services enable cloudresourcemanager.googleapis.com
+            gcloud projects create "${{env.NEW_PROJECT_ID}}-2" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
+            gcloud beta billing projects link ${{env.NEW_PROJECT_ID}}-2 --billing-account=${{secrets.GCP_BILLING_ID}}
+            gcloud services enable cloudresourcemanager.googleapis.com
+            gcloud config set compute/zone europe-west2-a
+
+        - name: Configure files
+          run: |
+            cd access_context_manager
+            sed -i "s/access-policy-name/${{secrets.ACCESS_POLICY}}/" main.tf
+            sed -i "s/resources-list/[${{secrets.ACCESS_POLICY}}-1,${{secrets.ACCESS_POLICY}}-2]/" main.tf
+            sed -i "s/source-path/..\/..\/..\/..\/..\/gcp\/access_context_manager\/service_perimeter_regular" main.tf
+            sed -i "s/project-1/${{env.NEW_PROJECT_ID}}-1/" ingressPolicies.yml
+            sed -i "s/project-2/${{env.NEW_PROJECT_ID}}-2/" ingressPolicies.yml
+
+        - name: Deploy perimeter
+          run: |
+            cd access_context_manager
+            terraform init
+            terraform plan -out="./plan.tfplan"
+            terraform apply plan.tfplan
+
+
+        - name: delete projects
+          if : ${{ always() }}
+          run: |
+            gcloud projects delete ${{env.GCP_PROJECT_ID}}-1
+            gcloud projects delete ${{env.GCP_PROJECT_ID}}-2
