@@ -33,14 +33,23 @@ resource time_static resource_policy_time {
   }
 }
 
+resource time_static disk_creation_time {
+  triggers = {
+    disk_size = var.disk_size
+    disk_type = var.disk_type
+  }
+}
+
 resource google_compute_disk self {
   provider  = google-beta
-  name      = "${var.name}-${var.zone}-data"
+  name      = "${var.name}-${var.zone}-data-${formatdate("YYYYMMDDhhmm", time_static.disk_creation_time.rfc3339)}"
   zone      = "${var.region}-${var.zone}"
   project   = var.project
   labels    = var.labels
   size      = var.disk_size
-  interface = "NVME"
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource google_compute_resource_policy self {
@@ -124,14 +133,16 @@ module secure_instance_template_blue {
   network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip[var.zone]
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  disk_interface = "NVME"
   additional_disks = [{
     boot         = false
     auto_delete  = false
     device_name  = google_compute_disk.self.name
     disk_name    = google_compute_disk.self.name
     disk_size_gb = var.disk_size
-    disk_type    = "pd-standard"
+    disk_type    = var.disk_type
     mode         = "READ_WRITE"
+    interface    = "NVME"
   }]
   security_level = local.blue_instance_template["security_level"]
 }
@@ -159,14 +170,16 @@ module secure_instance_template_green {
   network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip[var.zone]
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  disk_interface = "NVME"
   additional_disks = [{
     boot         = false
     auto_delete  = false
     device_name  = google_compute_disk.self.name
     disk_name    = google_compute_disk.self.name
     disk_size_gb = var.disk_size
-    disk_type    = "pd-standard"
+    disk_type    = var.disk_type
     mode         = "READ_WRITE"
+    interface    = "NVME"
   }]
   security_level = local.green_instance_template["security_level"]
 }

@@ -40,7 +40,8 @@ variable "machine_type" {
 
 variable "can_ip_forward" {
   description = "Enable IP forwarding, for NAT instances for example"
-  default     = "false"
+  type = bool
+  default     = false
 }
 
 variable "tags" {
@@ -86,32 +87,43 @@ variable "region" {
 #######
 variable "source_image" {
   description = "Source disk image. If neither source_image nor source_image_family is specified, defaults to the latest public Debian image."
+  type = string
   default     = ""
 }
 
 variable "source_image_family" {
   description = "Source image family. If neither source_image nor source_image_family is specified, defaults to the latest public Debian image."
+  type = string
   default     = "debian-10"
 }
 
 variable "source_image_project" {
   description = "Project where the source image comes from. The default project contains images that support Shielded VMs if desired"
+  type = string
   default     = "debian-cloud"
 }
 
 variable "disk_size_gb" {
   description = "Boot disk size in GB"
-  default     = "100"
+  type = number
+  default = 10
 }
 
 variable "disk_type" {
   description = "Boot disk type, can be either pd-ssd, local-ssd, or pd-standard"
+  type = string
   default     = "pd-standard"
+}
+
+variable "disk_interface" {
+  description = "Interface for the boot disk. Eiter SCSI (default) or NVME (confidential compute)"
+  type = string
+  default = "SCSI"
 }
 
 variable "auto_delete" {
   description = "Whether or not the boot disk should be auto-deleted"
-  default     = "true"
+  default     = true
 }
 
 variable "additional_disks" {
@@ -123,6 +135,7 @@ variable "additional_disks" {
     disk_name    = string
     disk_size_gb = number
     disk_type    = string
+    interface    = string
   }))
   default = []
 }

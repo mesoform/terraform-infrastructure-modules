@@ -29,6 +29,12 @@ variable "disk_size" {
   default = 500
 }
 
+variable "disk_type" {
+  description = "Type of disk to attach to instance, default is standard persistent disk"
+  type    = string
+  default = "pd-standard"
+}
+
 variable "access_config" {
   type = map(list(map(string)))
   default = {}
