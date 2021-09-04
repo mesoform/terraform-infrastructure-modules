@@ -106,7 +106,7 @@ variable "source_image_project" {
 variable "disk_size_gb" {
   description = "Boot disk size in GB"
   type = number
-  default = 100
+  default = 10
 }
 
 variable "disk_type" {
