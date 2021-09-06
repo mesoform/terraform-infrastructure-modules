@@ -50,7 +50,7 @@
 
         - name: Set constant variables
           id: vars
-          run: echo "::set-output name=GCP_PROJECT_ID::${{ env.NEW_PROJECT_ID }}
+          run: echo "::set-output name=GCP_PROJECT_ID::${{ env.NEW_PROJECT_ID }}"
 
 
         - name: Setup GCP
