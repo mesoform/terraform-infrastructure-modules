@@ -4,6 +4,7 @@
       branches:
         - main
         - develop
+        - bug/INFRA-45/GCP_Deployment_Test_Fail
   jobs:
     deployment-tests:
       name: 'Deployment tests'
@@ -11,7 +12,7 @@
 
       env:
         working-directory: ./tests/gcp/deployment
-        NEW_PROJECT_ID: "${GITHUB_REF##*/}-${GITHUB_SHA::*}"
+        NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date+%s)"
 
       defaults:
         run:
@@ -47,13 +48,18 @@
             cd access_context_manager/yaml_validation
             python yaml_validation.py
 
+        - name: Set constant variables
+          id: vars
+          run: echo "::set-output name=GCP_PROJECT_ID::${{ env.NEW_PROJECT_ID }}
+
+
         - name: Setup GCP
           run: |
-            gcloud projects create "${{env.NEW_PROJECT_ID}}-1" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
-            gcloud beta billing projects link ${{env.NEW_PROJECT_ID}}-1 --billing-account=${{secrets.GCP_BILLING_ID}}
+            gcloud projects create "${{ steps.vars.outputs.GCP_PROJECT_ID }}-1" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
+            gcloud beta billing projects link ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1 --billing-account=${{secrets.GCP_BILLING_ID}}
             gcloud services enable cloudresourcemanager.googleapis.com
-            gcloud projects create "${{env.NEW_PROJECT_ID}}-2" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
-            gcloud beta billing projects link ${{env.NEW_PROJECT_ID}}-2 --billing-account=${{secrets.GCP_BILLING_ID}}
+            gcloud projects create "${{ steps.vars.outputs.GCP_PROJECT_ID }}-2" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
+            gcloud beta billing projects link ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2 --billing-account=${{secrets.GCP_BILLING_ID}}
             gcloud services enable cloudresourcemanager.googleapis.com
             gcloud config set compute/zone europe-west2-a
 
@@ -63,8 +69,8 @@
             sed -i "s/access-policy-name/${{secrets.ACCESS_POLICY}}/" main.tf
             sed -i "s/resources-list/[${{secrets.ACCESS_POLICY}}-1,${{secrets.ACCESS_POLICY}}-2]/" main.tf
             sed -i "s/source-path/..\/..\/..\/..\/..\/gcp\/access_context_manager\/service_perimeter_regular" main.tf
-            sed -i "s/project-1/${{env.NEW_PROJECT_ID}}-1/" ingressPolicies.yml
-            sed -i "s/project-2/${{env.NEW_PROJECT_ID}}-2/" ingressPolicies.yml
+            sed -i "s/project-1/${{ steps.vars.outputs.GCP_PROJECT_ID }}-1/" ingressPolicies.yml
+            sed -i "s/project-2/${{ steps.vars.outputs.GCP_PROJECT_ID }}-2/" ingressPolicies.yml
 
         - name: Deploy perimeter
           run: |
@@ -77,5 +83,5 @@
         - name: delete projects
           if : ${{ always() }}
           run: |
-            gcloud projects delete ${{env.GCP_PROJECT_ID}}-1
-            gcloud projects delete ${{env.GCP_PROJECT_ID}}-2
+            gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
+            gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
