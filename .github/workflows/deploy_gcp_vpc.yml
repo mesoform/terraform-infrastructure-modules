@@ -12,7 +12,7 @@
 
       env:
         working-directory: ./tests/gcp/deployment
-        NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date+%s)"
+        NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date +%s)"
 
       defaults:
         run:
@@ -56,6 +56,7 @@
         - name: Setup GCP
           run: |
             gcloud projects create "${{ steps.vars.outputs.GCP_PROJECT_ID }}-1" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
+            gcloud components install beta --quiet
             gcloud beta billing projects link ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1 --billing-account=${{secrets.GCP_BILLING_ID}}
             gcloud services enable cloudresourcemanager.googleapis.com
             gcloud projects create "${{ steps.vars.outputs.GCP_PROJECT_ID }}-2" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
