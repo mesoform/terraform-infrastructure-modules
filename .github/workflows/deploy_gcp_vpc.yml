@@ -77,8 +77,6 @@
           run: |
             cd access_context_manager
             export TF_LOG=TRACE
-            echo "${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs"
-            ls "${GITHUB_WORKSPACE}/.github/workflows/log_files/"
             export TF_LOG_PATH="${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs"
             terraform init
             terraform plan -out="./plan.tfplan"
@@ -87,7 +85,7 @@
         - uses: actions/upload-artifact@v2
           if: ${{ failure() }}
           with:
-            path: ${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs
+            path: ${{ github.workspace }}/.github/workflows/log_files/vpc_logs.tflogs
             retention-days: 1
 
         - name: delete projects
