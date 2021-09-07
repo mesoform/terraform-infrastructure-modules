@@ -83,6 +83,7 @@
             terraform apply plan.tfplan
 
         - uses: actions/upload-artifact@v2
+          if: ${{ failure() }}
           with:
             path: ${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs
             retention-days: 1
