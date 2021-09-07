@@ -23,7 +23,6 @@
         - name: Checkout
           uses: actions/checkout@v2
 
-
         - name: Setup Terraform
           uses: hashicorp/setup-terraform@v1
           with:
@@ -52,7 +51,6 @@
           id: vars
           run: echo "::set-output name=GCP_PROJECT_ID::${{ env.NEW_PROJECT_ID }}"
 
-
         - name: Setup GCP
           run: |
             gcloud projects create "${{ steps.vars.outputs.GCP_PROJECT_ID }}-1" --folder=${{secrets.GCP_FOLDER_ID}} --set-as-default
@@ -67,11 +65,13 @@
         - name: Configure files
           run: |
             cd access_context_manager
+            PROJECT_1=$( gcloud projects list --filter="${{ steps.vars.outputs.GCP_PROJECT_ID }}-1" --format="value(PROJECT_NUMBER)" )
+            PROJECT_2=$( gcloud projects list --filter="${{ steps.vars.outputs.GCP_PROJECT_ID }}-2" --format="value(PROJECT_NUMBER)" )
             sed -i "s|access-policy-name|${{secrets.ACCESS_POLICY}}|" main.tf
             sed -i "s|resources-list|[\"${{steps.vars.outputs.GCP_PROJECT_ID}}-1\",\"${{steps.vars.outputs.GCP_PROJECT_ID}}-2\"]|" main.tf
             sed -i "s|source-path|../../../../gcp/access_context_manager/service_perimeter_regular|" main.tf
-            sed -i "s|project-1|${{ steps.vars.outputs.GCP_PROJECT_ID }}-1|" ingressPolicies.yml
-            sed -i "s|project-2|${{ steps.vars.outputs.GCP_PROJECT_ID }}-2|" ingressPolicies.yml
+            sed -i "s|project-1|${PROJECT_1}|" ingressPolicies.yml
+            sed -i "s|project-2|${PROJECT_2}|" ingressPolicies.yml
 
         - name: Deploy perimeter
           run: |
@@ -82,14 +82,15 @@
             terraform plan -out="./plan.tfplan"
             terraform apply plan.tfplan
 
-        - uses: actions/upload-artifact@v2
-          if: ${{ failure() }}
-          with:
-            path: ${{ github.workspace }}/.github/workflows/log_files/vpc_logs.tflogs
-            retention-days: 1
-
         - name: delete projects
           if : ${{ always() }}
           run: |
             gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
             gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
+
+######### Uncomment this step for exporting logs #############
+#        - uses: actions/upload-artifact@v2
+#          if: ${{ failure() }}
+#          with:
+#            path: ${{ github.workspace }}/.github/workflows/log_files/vpc_logs.tflogs
+#            retention-days: 1
