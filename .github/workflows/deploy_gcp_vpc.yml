@@ -67,11 +67,11 @@
         - name: Configure files
           run: |
             cd access_context_manager
-            sed -i "s/access-policy-name/${{secrets.ACCESS_POLICY}}/" main.tf
-            sed -i "s/resources-list/[${{secrets.ACCESS_POLICY}}-1,${{secrets.ACCESS_POLICY}}-2]/" main.tf
-            sed -i "s/source-path/..\/..\/..\/..\/..\/gcp\/access_context_manager\/service_perimeter_regular" main.tf
-            sed -i "s/project-1/${{ steps.vars.outputs.GCP_PROJECT_ID }}-1/" ingressPolicies.yml
-            sed -i "s/project-2/${{ steps.vars.outputs.GCP_PROJECT_ID }}-2/" ingressPolicies.yml
+            sed -i "s|access-policy-name|${{secrets.ACCESS_POLICY}}|" main.tf
+            sed -i "s|resources-list|[${{secrets.ACCESS_POLICY}}-1,${{secrets.ACCESS_POLICY}}-2]|" main.tf
+            sed -i "s|source-path|../../../../../gcp/access_context_manager/service_perimeter_regular|" main.tf
+            sed -i "s|project-1|${{ steps.vars.outputs.GCP_PROJECT_ID }}-1|" ingressPolicies.yml
+            sed -i "s|project-2|${{ steps.vars.outputs.GCP_PROJECT_ID }}-2|" ingressPolicies.yml
 
         - name: Deploy perimeter
           run: |
