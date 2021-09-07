@@ -85,6 +85,8 @@
         - name: delete projects
           if : ${{ always() }}
           run: |
+            gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1 --billing-account=${{secrets.GCP_BILLING_ID}}
+            gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2 --billing-account=${{secrets.GCP_BILLING_ID}}
             gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
             gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
 
