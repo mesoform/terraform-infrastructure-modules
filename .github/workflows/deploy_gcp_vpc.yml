@@ -77,7 +77,9 @@
           run: |
             cd access_context_manager
             export TF_LOG=TRACE
-            export TF_LOG_PATH=${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs
+            echo "${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs"
+            ls "${GITHUB_WORKSPACE}/.github/workflows/log_files/"
+            export TF_LOG_PATH="${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs"
             terraform init
             terraform plan -out="./plan.tfplan"
             terraform apply plan.tfplan
