@@ -12,7 +12,7 @@
 
       env:
         working-directory: ./tests/gcp/deployment
-        NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date +%s)"
+        NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date +%Y%m%d%H%M)"
 
       defaults:
         run:
@@ -76,23 +76,19 @@
         - name: Deploy perimeter
           run: |
             cd access_context_manager
-            export TF_LOG=TRACE
-            export TF_LOG_PATH="${GITHUB_WORKSPACE}/.github/workflows/log_files/vpc_logs.tflogs"
             terraform init
             terraform plan -out="./plan.tfplan"
             terraform apply plan.tfplan
 
+        - name: Destroy perimter
+          run: |
+            cd access_context_manager
+            terraform destroy -auto-approve
+
         - name: delete projects
           if : ${{ always() }}
           run: |
-            gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1 --billing-account=${{secrets.GCP_BILLING_ID}}
-            gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2 --billing-account=${{secrets.GCP_BILLING_ID}}
             gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
             gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
-
-######### Uncomment this step for exporting logs #############
-#        - uses: actions/upload-artifact@v2
-#          if: ${{ failure() }}
-#          with:
-#            path: ${{ github.workspace }}/.github/workflows/log_files/vpc_logs.tflogs
-#            retention-days: 1
+            gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
+            gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
