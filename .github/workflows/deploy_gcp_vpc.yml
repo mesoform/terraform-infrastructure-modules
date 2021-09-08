@@ -12,7 +12,7 @@
 
       env:
         working-directory: ./tests/gcp/deployment
-        NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date +%Y%m%d%H%M)"
+        NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date +%H%M%S)"
 
       defaults:
         run:

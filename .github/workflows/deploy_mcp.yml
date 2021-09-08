@@ -14,7 +14,7 @@ jobs:
 
     env:
       working-directory: ./tests/mcp/deployment
-      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-$(date +%Y%m%d%H%M)"
+      GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-$(date +%H%M%S)"
       KUBE_CONFIG_PATH: ~/.kube/config
 
     defaults:
