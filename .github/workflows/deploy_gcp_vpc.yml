@@ -6,30 +6,30 @@
         - develop
         - bug/INFRA-45/GCP_Deployment_Test_Fail
   jobs:
-#    ## Job to check if secret with service account for deploying perimeter exists
-#    check-sa:
-#      runs-on: ubuntu-latest
-#      outputs:
-#        sa-exists: ${{ steps.check.outputs.EXISTS }}
-#
-#      steps:
-#        - uses: actions/checkout@v2
-#
-#        - name: Check service account exists
-#          id: check
-#          run: |
-#            if [[ "${{ secrets.GCP_VPC_SA_KEY }}" == *"private_key_id"* ]]; then
-#              echo ::set-output name=EXISTS::true
-#            else
-#              echo ::set-output name=EXISTS::false
-#            fi
+    ## Job to check if secret with service account for deploying perimeter exists
+    check-sa:
+      runs-on: ubuntu-latest
+      outputs:
+        sa-exists: ${{ steps.check.outputs.EXISTS }}
 
-    ## If service account exists run this job
+      steps:
+        - uses: actions/checkout@v2
+
+        - name: Check service account exists
+          id: check
+          run: |
+            if [[ "${{ secrets.GCP_VPC_SA_KEY }}" == *"private_key_id"* ]]; then
+              echo ::set-output name=EXISTS::true
+            else
+              echo ::set-output name=EXISTS::false
+            fi
+
+    # If service account exists run this job
     deployment-tests:
       name: 'Deployment tests'
       runs-on: ubuntu-latest
-#      needs: check-sa
-#      if: needs.check-sa.outputs.sa-exists == 'true'
+      needs: check-sa
+      if: needs.check-sa.outputs.sa-exists == 'true'
 
       env:
         working-directory: ./tests/gcp/deployment
@@ -53,8 +53,7 @@
         - name: Setup Cloud SDK
           uses: google-github-actions/setup-gcloud@master
           with:
-            service_account_key: ${{secrets.GCP_SA_KEY}}
-#            service_account_key: ${{secrets.GCP_VPC_SA_KEY}}
+            service_account_key: ${{secrets.GCP_VPC_SA_KEY}}
             export_default_credentials: true
 
         - name: Install Python
