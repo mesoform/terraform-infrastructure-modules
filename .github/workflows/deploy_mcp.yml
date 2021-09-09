@@ -5,8 +5,7 @@ on:
     branches:
       - main
       - develop
-      - bug/INFRA-45/GCP_Deployment_Test_Fail
-# a comment
+
 jobs:
   deployment-tests:
     name: 'Deployment tests'
@@ -137,4 +136,4 @@ jobs:
         if : ${{ always() }}
         run: |
           gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}
-          gcloud beta billing project unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}
+          gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}
