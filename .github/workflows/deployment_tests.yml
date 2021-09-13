@@ -160,8 +160,8 @@ jobs:
   # If service account exists run this job
   GCP-perimeter-tests:
     runs-on: ubuntu-latest
-    needs: check-sa
-    if: needs.check-sa.outputs.sa-exists == 'true'
+    needs: check-vpc-sa
+    if: needs.check-vpc-sa.outputs.sa-exists == 'true'
 
     env:
       working-directory: ./tests/gcp/deployment
