@@ -140,7 +140,7 @@ jobs:
 
   ############################# Deployment Tests for GCP Access Context Manager ####################################
   ## Job to check if secret with service account for deploying perimeter exists
-  check-vpc-SA:
+  check-vpc-sa:
     runs-on: ubuntu-latest
     outputs:
       sa-exists: ${{ steps.check.outputs.EXISTS }}
