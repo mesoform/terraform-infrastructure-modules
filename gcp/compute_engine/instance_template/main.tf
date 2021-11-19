@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+terraform {
+  experiments = [module_variable_optional_attrs]
+}
 
 ###############
 # Data Sources
@@ -79,7 +82,8 @@ resource google_compute_instance_template self {
       source       = lookup(disk.value, "source", null)
       source_image = lookup(disk.value, "source_image", null)
       type         = lookup(disk.value, "type", null)
-
+      labels       = lookup(disk.value, "labels", null )
+      resource_policies = lookup(disk.value, "resource_policies", null)
       dynamic "disk_encryption_key" {
         for_each = lookup(disk.value, "disk_encryption_key", [])
         content {

@@ -38,25 +38,6 @@ resource time_static resource_policy_time {
   }
 }
 
-resource time_static disk_creation_time {
-  triggers = {
-    disk_size = var.disk_size
-    disk_type = var.disk_type
-  }
-}
-
-resource google_compute_disk self {
-  provider  = google-beta
-  name      = "${var.name}-${var.zone}-data-${formatdate("YYYYMMDDhhmm", time_static.disk_creation_time.rfc3339)}"
-  zone      = "${var.region}-${var.zone}"
-  project   = var.project
-  labels    = var.labels
-  size      = var.disk_size
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource google_compute_resource_policy self {
   name = "${var.name}-${var.zone}-${time_static.resource_policy_time.unix}"
   region = var.region
@@ -109,13 +90,6 @@ resource google_compute_resource_policy self {
   }
 }
 
-resource google_compute_disk_resource_policy_attachment self{
-  name = google_compute_resource_policy.self.name
-  disk = google_compute_disk.self.name
-  zone = "${var.region}-${var.zone}"
-  project = var.project
-}
-
 module secure_instance_template_blue {
   source      = "../compute_engine/instance_template"
   project_id  = var.project
@@ -138,16 +112,17 @@ module secure_instance_template_blue {
   network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip[var.zone]
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
-  disk_interface = "NVME"
+    disk_interface = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   additional_disks = [{
     boot         = false
     auto_delete  = false
-    device_name  = google_compute_disk.self.name
-    disk_name    = google_compute_disk.self.name
+    device_name  = "${var.name}-${var.zone}-data"
+    disk_name    = "${var.name}-${var.zone}-data"
     disk_size_gb = var.disk_size
     disk_type    = var.disk_type
     mode         = "READ_WRITE"
-    interface    = "NVME"
+    interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+    resource_policies = [google_compute_resource_policy.self.id]
   }]
   security_level = local.blue_instance_template["security_level"]
 }
@@ -175,16 +150,17 @@ module secure_instance_template_green {
   network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip[var.zone]
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
-  disk_interface = "NVME"
+  disk_interface = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   additional_disks = [{
     boot         = false
     auto_delete  = false
-    device_name  = google_compute_disk.self.name
-    disk_name    = google_compute_disk.self.name
+    device_name  = "${var.name}-${var.zone}-data"
+    disk_name    = "${var.name}-${var.zone}-data"
     disk_size_gb = var.disk_size
     disk_type    = var.disk_type
     mode         = "READ_WRITE"
-    interface    = "NVME"
+    interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+    resource_policies = [google_compute_resource_policy.self.id]
   }]
   security_level = local.green_instance_template["security_level"]
 }
@@ -216,7 +192,7 @@ resource google_compute_instance_group_manager self {
   }
 
   stateful_disk {
-    device_name = google_compute_disk.self.name
+    device_name = "${var.name}-${var.zone}-data"
     delete_rule = "NEVER"
   }
 

@@ -131,11 +131,17 @@ variable "additional_disks" {
   type = list(object({
     auto_delete  = bool
     boot         = bool
-    device_name  = string
-    disk_name    = string
-    disk_size_gb = number
-    disk_type    = string
-    interface    = string
+    device_name  = optional(string)
+    disk_name    = optional(string)
+    disk_size_gb = optional(number)
+    disk_type    = optional(string)
+    interface    = optional(string)
+    mode         = optional(string)
+    source       = optional(string)
+    source_image = optional(string)
+    type         = optional(string)
+    labels       = optional(map(string))
+    resource_policies = optional(list(string))
   }))
   default = []
 }
