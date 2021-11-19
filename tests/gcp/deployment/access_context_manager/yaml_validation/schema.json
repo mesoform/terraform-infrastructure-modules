@@ -1,11 +1,10 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema",
-    "type": "object",
+    "type": ["object", "null"],
     "properties": {
         "ingressPolicies": {
             "type": [
-                "array",
-                "null"
+                "array"
             ],
             "items": {
                 "type": "object",
@@ -76,8 +75,7 @@
         },
         "egressPolicies": {
             "type": [
-                "array",
-                "null"
+                "array"
             ],
             "items": {
                 "type": "object",

@@ -1,10 +1,11 @@
-- ingressFrom:
-    identityType: ANY_IDENTITY
-    sources:
-      - accessLevel: accessPolicies/000000000000000000/accessLevels/example
-      - accessLevel: accessPolicies/000000000000000000/accessLevels/example2
-  ingressTo:
-    operations:
-      - serviceName: '*'
-    resources:
-      - '*'
+ingressPolicies:
+  - ingressFrom:
+      identityType: ANY_IDENTITY
+      sources:
+        - accessLevel: accessPolicies/000000000000000000/accessLevels/example
+        - accessLevel: accessPolicies/000000000000000000/accessLevels/example2
+    ingressTo:
+      operations:
+        - serviceName: '*'
+      resources:
+        - '*'

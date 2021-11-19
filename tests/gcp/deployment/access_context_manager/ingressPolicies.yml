@@ -3,7 +3,7 @@ ingressPolicies:
       identityType: ANY_IDENTITY
       sources:
         - resource: projects/project-1
-        - accessLevel: projects/project-2
+        - resource: projects/project-2
     ingressTo:
       operations:
         - serviceName: '*'

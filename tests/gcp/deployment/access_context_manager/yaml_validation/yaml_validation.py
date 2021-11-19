@@ -3,8 +3,6 @@ import json
 import yaml
 import os
 
-
-valid = True
 #Load Schema
 with open('schema.json') as file:
     schema = json.load(file)
