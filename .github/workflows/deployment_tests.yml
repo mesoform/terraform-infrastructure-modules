@@ -15,7 +15,6 @@ jobs:
       working-directory: ./tests/mcp/deployment
       GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-$(date +%H%M%S)"
       KUBE_CONFIG_PATH: ~/.kube/config
-      CLOUDSDK_PYTHON: python
 
     defaults:
       run:
@@ -27,18 +26,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
       # Install the latest version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
 
-      # Install gcoud sdk and set the service account
+      # Install gcloud sdk and set the service account
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@master
         with:
@@ -167,7 +161,6 @@ jobs:
     env:
       working-directory: ./tests/gcp/deployment
       NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date +%H%M%S)"
-      CLOUDSDK_PYTHON: python
 
     defaults:
       run:
@@ -189,11 +182,6 @@ jobs:
         with:
           service_account_key: ${{secrets.GCP_VPC_SA_KEY}}
           export_default_credentials: true
-
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
 
       - name: Validate Yaml
         run: |

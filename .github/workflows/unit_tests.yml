@@ -19,7 +19,6 @@ jobs:
     if: ${{github.event.pull_requests.labels.*.name == 'feature'}} || ${{github.event.pull_requests.labels.*.name == 'bug'}} || ${{github.event.pull_requests.labels.*.name == 'patch'}}
     env:
       working-directory: ./tests/
-      CLOUDSDK_PYTHON: python
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -30,12 +29,6 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v2
-      
-    # Install Python
-    - name: Install Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
 
     # Install the latest version of Terraform CLI
     - name: Setup Terraform
