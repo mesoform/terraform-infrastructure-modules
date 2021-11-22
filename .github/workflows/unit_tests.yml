@@ -5,12 +5,12 @@ on:
     branches:
       - main
       - develop
-      - bug/ps-45/cloudsdk_step_fix
     types: [opened, synchronize, reopened, labeled]
   push:
     branches:
       - main
       - develop
+      - bug/ps-45/cloudsdk_step_fix
 
 jobs:
   unit-tests:
