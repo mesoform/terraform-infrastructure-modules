@@ -28,12 +28,6 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v2
-      
-    # Install Python
-    - name: Install Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
 
     # Install the latest version of Terraform CLI
     - name: Setup Terraform
