@@ -15,7 +15,7 @@ jobs:
       working-directory: ./tests/mcp/deployment
       GCP_PROJECT_ID: "mcpdeploytest-${GITHUB_SHA::8}-$(date +%H%M%S)"
       KUBE_CONFIG_PATH: ~/.kube/config
-      CLOUDSDK_PYTHON: python3.10
+      CLOUDSDK_PYTHON: python
 
     defaults:
       run:
@@ -167,7 +167,7 @@ jobs:
     env:
       working-directory: ./tests/gcp/deployment
       NEW_PROJECT_ID: "test-vpc-${GITHUB_SHA::8}-$(date +%H%M%S)"
-      CLOUDSDK_PYTHON: python3.10
+      CLOUDSDK_PYTHON: python
 
     defaults:
       run:
