@@ -125,6 +125,7 @@ module secure_instance_template_blue {
     resource_policies = [google_compute_resource_policy.self.id]
   }]
   security_level = local.blue_instance_template["security_level"]
+  tags = var.tags
 }
 
 
@@ -163,6 +164,7 @@ module secure_instance_template_green {
     resource_policies = [google_compute_resource_policy.self.id]
   }]
   security_level = local.green_instance_template["security_level"]
+  tags = var.tags
 }
 
 resource google_compute_instance_group_manager self {

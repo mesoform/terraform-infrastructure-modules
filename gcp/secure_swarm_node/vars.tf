@@ -22,6 +22,11 @@ variable "labels" {
   default = null
 }
 
+variable "tags" {
+  type = list(string)
+  description = "Tags for instance template"
+  default = []
+}
 
 //Disk configuration
 variable "disk_size" {
