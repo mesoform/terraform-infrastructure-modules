@@ -1,3 +1,8 @@
+//Keep this local variable here, as moving it to locals.tf breaks unit tests
+locals {
+  service_account_email = var.service_account_email == "" ? "${data.google_project.default.number}@-compute@developer.gserviceaccount.com" : var.service_account_email
+}
+
 data google_project default {
   project_id = var.project
 }

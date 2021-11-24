@@ -11,8 +11,5 @@ locals {
     device_name = "${var.name}-${var.zone}-boot"
     delete_rule = var.stateful_boot_delete_rule
   }] : []
-
-  service_account_email = var.service_account_email == "" ? "${data.google_project.default.number}@-compute@developer.gserviceaccount.com" : var.service_account_email
-
 }
 

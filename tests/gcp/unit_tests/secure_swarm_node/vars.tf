@@ -11,3 +11,19 @@ variable "green_instance_template" {
 variable "security_level" {
   default = "secure-2"
 }
+
+variable "stateful_boot" {
+  default = false
+}
+
+variable "stateful_boot_delete_rule" {
+  default = "NEVER"
+}
+
+variable "name" {
+  default = "unit-test"
+}
+
+variable "zone" {
+  default = "a"
+}
