@@ -28,7 +28,25 @@ variable "tags" {
   default = []
 }
 
+variable "metadata" {
+  type = map(string)
+  description = "Key value pairs for instance metadata"
+  default = {}
+}
+
 //Disk configuration
+variable "stateful_boot" {
+  type = bool
+  description = "Whether to have boot disk set to stateful"
+  default = false
+}
+
+variable "stateful_boot_delete_rule" {
+  type = string
+  description = "Default is 'ON_PERMANENT_INSTANCE_DELETION', set to 'NEVER' if boot disk should remain after scaling MIG down"
+  default = "ON_PERMANENT_INSTANCE_DELETION"
+}
+
 variable "disk_size" {
   type    = number
   default = 500
@@ -40,6 +58,13 @@ variable "disk_type" {
   default = "pd-standard"
 }
 
+variable "disk_resource_policies" {
+  description = "List of resource policies to attach to persistent disk (short name or id)"
+  type = list(string)
+  default = []
+}
+
+//Network configuration
 variable "access_config" {
   type = map(list(map(string)))
   default = {}
@@ -92,61 +117,12 @@ variable "service_account_scopes" {
   default = ["cloud-platform"]
 }
 
-
-variable "health_check" {
-  type = set(object({
-    name              = string
-    initial_delay_sec = number
-  }))
-  default = []
-}
-
-variable "named_ports" {
-  type = set(object({
-    name = string
-    port = number
-  }))
-  default = []
-}
-
 variable security_level {
   type = string
   validation {
     condition = contains(["secure-1", "confidential-1"], var.security_level)
     error_message = "Provided value not of a valid type."
   }
-}
-
-variable "update_policy" {
-  description = "The rolling update policy. https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html#rolling_update_policy"
-  type = list(object({
-    max_surge_fixed              = optional(number)
-    max_surge_percent            = optional(number)
-    max_unavailable_fixed        = optional(number)
-    max_unavailable_percent      = optional(number)
-    min_ready_sec                = optional(number)
-    minimal_action               = string
-    type                         = string
-    replacement_method           = optional(string)
-  }))
-  default = []
-}
-
-variable target_size {
-  description = "Target Size of the Managed Instance Group"
-  default = 0
-  validation {
-    condition = var.target_size <= 1
-    error_message = "Target size cannot be more than 1 for stateful managed instance groups."
-  }
-}
-
-variable "deployment_version" {
-  validation {
-    condition = contains(["blue", "green"], var.deployment_version)
-    error_message = "Invalid deployment version."
-  }
-  type = string
 }
 
 variable blue_instance_template {
@@ -181,47 +157,54 @@ variable green_instance_template {
   default = {}
 }
 
-variable data_disk_snapshot_schedule {
-  description = "Hourly, Daily or Weekly snapshot schedule, must be 24hour format"
-  type = object({
-    frequency = string
-    start_time = optional(string)
-    interval = optional(number)
-    weekly_snapshot_schedule = optional(list(object({
-      day = string
-      start_time = string
-    })))
-  })
+//Instance group manager vars
+variable "health_check" {
+  type = set(object({
+    name              = string
+    initial_delay_sec = number
+  }))
+  default = []
+}
 
-  default = {
-    frequency = "daily"
-    interval = 1
-    start_time = "03:00"
-  }
+variable "named_ports" {
+  type = set(object({
+    name = string
+    port = number
+  }))
+  default = []
+}
 
+
+variable "update_policy" {
+  description = "The rolling update policy. https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html#rolling_update_policy"
+  type = list(object({
+    max_surge_fixed              = optional(number)
+    max_surge_percent            = optional(number)
+    max_unavailable_fixed        = optional(number)
+    max_unavailable_percent      = optional(number)
+    min_ready_sec                = optional(number)
+    minimal_action               = string
+    type                         = string
+    replacement_method           = optional(string)
+  }))
+  default = []
+}
+
+variable target_size {
+  description = "Target Size of the Managed Instance Group"
+  default = 0
   validation {
-    condition = contains(["hourly", "daily", "weekly"], var.data_disk_snapshot_schedule.frequency)
-    error_message = "Frequency must be either 'hourly', 'daily', 'weekly'."
+    condition = var.target_size <= 1
+    error_message = "Target size cannot be more than 1 for stateful managed instance groups."
   }
 }
 
-variable retention_policy {
-  description = "Retention Policy Applied to snapshots"
-  type = object({
-    max_retention_days = number
-    on_source_disk_delete = optional(string)
-  })
-  default = null
-}
-
-variable snapshot_properties {
-  type = object({
-    labels = optional(map(string))
-    storage_locations = optional(list(string))
-    guest_flush = optional(string)
-
-  })
-  default = null
+variable "deployment_version" {
+  validation {
+    condition = contains(["blue", "green"], var.deployment_version)
+    error_message = "Invalid deployment version."
+  }
+  type = string
 }
 
 variable wait_for_instances {

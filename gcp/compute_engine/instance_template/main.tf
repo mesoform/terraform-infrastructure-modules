@@ -45,6 +45,8 @@ locals {
       auto_delete  = var.auto_delete
       interface    = var.disk_interface
       boot         = "true"
+      device_name  = var.boot_device_name
+      mode         = "READ_WRITE"
     },
   ]
 
