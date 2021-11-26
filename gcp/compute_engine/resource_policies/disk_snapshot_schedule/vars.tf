@@ -62,6 +62,6 @@ variable disks {
 variable regional_disks {
   type = set(string)
   description = "List of regional disks to attach schedule to"
-  default = {}
+  default = []
 }
 
