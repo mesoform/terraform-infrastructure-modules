@@ -12,12 +12,12 @@ Other variables:
   * `max_retention_days` - Number of days to keep the variable
   * `on_source_disk_delete` - Specifies what to do to a scheduled snapshot if the disk it is attached to is deleted. 
      Possible values are:
-    * `KEEP_AUTO_SNAPSHOTS` (default)
+    * `KEEP_AUTO_SNAPSHOTS` (default) 
     * `APPLY_RETENTION_POLICY`
 * The `snapshot_properties` variabled is a map defining configuration for the snapshot:
     * `labels` - snapshot labels
     * `storage_locations` - Cloud storage bucket location to autostore snapshot (e.g. `["europe-west2"]`)
-    * `guest_flush` - whether to enable VSS, to generate shadow copies of snapshot
+    * `guest_flush` - Whether to flush all pending writes from memory to disk before the snapshot is capture
 * The `shapshot_schdeule` variable is a map defining when snapshots should be taken, and has the following values:  
   * `frequency` - One of `"hourly"` `"daily"` or `"weekly"` (Default `"daily"`)
   * `interval` - If using `hourly` or `daily` snapshots, defines the interval between snapshots (Default `1`)
