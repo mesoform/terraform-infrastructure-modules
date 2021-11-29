@@ -85,6 +85,12 @@ variable "region" {
 #######
 # disk
 #######
+variable "boot_device_name" {
+  description = "Device name for the boot disk"
+  type = string
+  default     = null
+}
+
 variable "source_image" {
   description = "Source disk image. If neither source_image nor source_image_family is specified, defaults to the latest public Debian image."
   type = string
@@ -131,11 +137,17 @@ variable "additional_disks" {
   type = list(object({
     auto_delete  = bool
     boot         = bool
-    device_name  = string
-    disk_name    = string
-    disk_size_gb = number
-    disk_type    = string
-    interface    = string
+    device_name  = optional(string)
+    disk_name    = optional(string)
+    disk_size_gb = optional(number)
+    disk_type    = optional(string)
+    interface    = optional(string)
+    mode         = optional(string)
+    source       = optional(string)
+    source_image = optional(string)
+    type         = optional(string)
+    labels       = optional(map(string))
+    resource_policies = optional(list(string))
   }))
   default = []
 }

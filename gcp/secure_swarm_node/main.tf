@@ -1,8 +1,7 @@
-terraform {
-  required_version = ">= 0.14.0"
-  experiments = [module_variable_optional_attrs]
+//Keep this local variable here, as moving it to locals.tf breaks unit tests
+locals {
+  service_account_email = var.service_account_email == "" ? "${data.google_project.default.number}@-compute@developer.gserviceaccount.com" : var.service_account_email
 }
-
 
 data google_project default {
   project_id = var.project
@@ -14,10 +13,6 @@ data google_compute_health_check self {
   project  = var.project
 }
 
-locals {
-  service_account_email = var.service_account_email == "" ? "${data.google_project.default.number}@-compute@developer.gserviceaccount.com" : var.service_account_email
-}
-
 //Updates the time for the version when the template is updated or certain properties of MIG are updated
 resource time_static self {
   triggers = {
@@ -27,93 +22,6 @@ resource time_static self {
     health_check = jsonencode(var.health_check)
     named_ports = jsonencode(var.named_ports)
   }
-}
-
-//Updates the google_compute_disk_resource_policy_attachment when google_compute_resource_policy is updated
-resource time_static resource_policy_time {
-  triggers = {
-    snapshot_properties = jsonencode(var.snapshot_properties)
-    data_disk_snapshot_schedule = jsonencode(var.data_disk_snapshot_schedule)
-    retention_policy = jsonencode(var.retention_policy)
-  }
-}
-
-resource time_static disk_creation_time {
-  triggers = {
-    disk_size = var.disk_size
-    disk_type = var.disk_type
-  }
-}
-
-resource google_compute_disk self {
-  provider  = google-beta
-  name      = "${var.name}-${var.zone}-data-${formatdate("YYYYMMDDhhmm", time_static.disk_creation_time.rfc3339)}"
-  zone      = "${var.region}-${var.zone}"
-  project   = var.project
-  labels    = var.labels
-  size      = var.disk_size
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource google_compute_resource_policy self {
-  name = "${var.name}-${var.zone}-${time_static.resource_policy_time.unix}"
-  region = var.region
-  project = var.project
-  snapshot_schedule_policy {
-    schedule{
-      dynamic hourly_schedule {
-        for_each = var.data_disk_snapshot_schedule.frequency == "hourly" ? [1] : []
-        content {
-          hours_in_cycle = var.data_disk_snapshot_schedule.interval
-          start_time = var.data_disk_snapshot_schedule.start_time
-        }
-      }
-      dynamic daily_schedule {
-        //If weekly or hourly schedule is specified ignore default daily schedule
-        for_each = var.data_disk_snapshot_schedule.frequency == "daily" ? [1] : []
-        content {
-          days_in_cycle = var.data_disk_snapshot_schedule.interval
-          start_time = var.data_disk_snapshot_schedule.start_time
-        }
-      }
-      dynamic weekly_schedule {
-        for_each = var.data_disk_snapshot_schedule.frequency == "weekly" ? [1] : []
-        content {
-          dynamic day_of_weeks{
-            for_each = var.data_disk_snapshot_schedule.weekly_snapshot_schedule
-            content {
-              day = day_of_weeks.value.day
-              start_time = day_of_weeks.value.start_time
-            }
-          }
-        }
-      }
-    }
-    dynamic retention_policy {
-      for_each = var.retention_policy == null ? [] : [1]
-      content {
-        max_retention_days = var.retention_policy.max_retention_days
-        on_source_disk_delete = lookup(var.retention_policy, "on_source_disk_delete", null)
-      }
-    }
-    dynamic snapshot_properties {
-      for_each = var.snapshot_properties ==  null ? [] : [1]
-      content {
-        labels = lookup(var.snapshot_properties, "labels", null)
-        storage_locations =  lookup(var.snapshot_properties, "storage_locations", null)
-        guest_flush = lookup(var.snapshot_properties, "guest_flush", null)
-}
-    }
-  }
-}
-
-resource google_compute_disk_resource_policy_attachment self{
-  name = google_compute_resource_policy.self.name
-  disk = google_compute_disk.self.name
-  zone = "${var.region}-${var.zone}"
-  project = var.project
 }
 
 module secure_instance_template_blue {
@@ -138,18 +46,23 @@ module secure_instance_template_blue {
   network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip[var.zone]
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
-  disk_interface = "NVME"
-  additional_disks = [{
+  disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+  auto_delete          = !var.stateful_boot
+  additional_disks     = [{
     boot         = false
     auto_delete  = false
-    device_name  = google_compute_disk.self.name
-    disk_name    = google_compute_disk.self.name
+    device_name  = "${var.name}-${var.zone}-data"
+    disk_name    = "${var.name}-${var.zone}-data"
     disk_size_gb = var.disk_size
     disk_type    = var.disk_type
     mode         = "READ_WRITE"
-    interface    = "NVME"
+    interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+    resource_policies = var.disk_resource_policies
   }]
   security_level = local.blue_instance_template["security_level"]
+  tags           = var.tags
+  metadata       = var.metadata
+
 }
 
 
@@ -175,18 +88,23 @@ module secure_instance_template_green {
   network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip[var.zone]
   access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
-  disk_interface = "NVME"
+  disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+  auto_delete          = !var.stateful_boot
+  boot_device_name     = "${var.name}-${var.zone}-boot"
   additional_disks = [{
     boot         = false
     auto_delete  = false
-    device_name  = google_compute_disk.self.name
-    disk_name    = google_compute_disk.self.name
+    device_name  = "${var.name}-${var.zone}-data"
+    disk_name    = "${var.name}-${var.zone}-data"
     disk_size_gb = var.disk_size
     disk_type    = var.disk_type
     mode         = "READ_WRITE"
-    interface    = "NVME"
+    interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+    resource_policies = var.disk_resource_policies
   }]
   security_level = local.green_instance_template["security_level"]
+  tags           = var.tags
+  metadata       = var.metadata
 }
 
 resource google_compute_instance_group_manager self {
@@ -216,8 +134,18 @@ resource google_compute_instance_group_manager self {
   }
 
   stateful_disk {
-    device_name = google_compute_disk.self.name
+    device_name = "${var.name}-${var.zone}-data"
     delete_rule = "NEVER"
+  }
+
+  # For optional stateful boot disk
+  dynamic "stateful_disk" {
+    for_each = local.stateful_boot_disk
+    //noinspection HILUnresolvedReference
+    content {
+      device_name = stateful_disk.value.device_name
+      delete_rule = stateful_disk.value.delete_rule
+    }
   }
 
   dynamic "update_policy" {
