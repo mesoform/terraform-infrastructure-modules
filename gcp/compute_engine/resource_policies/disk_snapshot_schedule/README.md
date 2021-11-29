@@ -45,3 +45,39 @@ snapshot_schedule = {
     }
   ]
 }
+```
+
+### Attaching snapshot to disks
+If there are existing disks that the created snapshot schedule should be applied to, 
+they can be specified and managed by the `google_compute_disk_resource_policy_attachment` resource.
+To specify disks the schedule should be attached to list define:
+* `disks` - A map with the disk name as the key, and it's zone as the value (**NOTE** disks must be in the same region). 
+  E.g. 
+  ```terraform
+  disks = {
+    disk1 = "europe-west2-a"
+    disk2 = "europe-west2-b"
+  }
+  ```
+* `regional disk` - A list of regional disks within the same region as the snapshot schedule
+
+### Destroying resource
+_**NOTE**: A snapshot schedule cannot be deleted if it is attached to a disk._  
+If `disks` and/or `regional_disks` were specified, the schedule will be detached from disks, and then deleted, when running `terraform destroy`.  
+If schedule was attached to disks outside the control of this module, the schedule needs to be detached before `terraform destroy`.   
+Options for doing this are:
+* **Google Cloud Console** - Go to  `Compute engine > disks > DISK_NAME > edit` 
+  and then set `Snapshot Schedule` to `No schedule`
+* **gcloud** - Run :
+  ```shell
+    gcloud compute disks remove-resource-policies DISK_NAME
+        --resource-policies=[RESOURCE_POLICY]
+        [--region=REGION | --zone=ZONE]
+  ```
+* **Terraform** - Import resource attachment for disks before running `terraform destroy`
+  ```shell
+  terraform import google_compute_disk_resource_policy_attachment.self PROJECT/ZONE/DISK/SNAPSHOT_SCHEDULE_NAME
+  
+  #If this module is being referenced as a submodule, the import command will be
+  terraform import module.PARENT_MODULE_NAME.google_compute_disk_resource_policy_attachment.self PROJECT/ZONE/DISK/SNAPSHOT_SCHEDULE_NAME
+  ```

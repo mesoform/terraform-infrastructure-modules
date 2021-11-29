@@ -1,6 +1,6 @@
 variable "name" {
   type = string
-  default = "snapshot-schedule"
+  description = "Name of the snapshot schedule policy"
 }
 
 variable "project" {
@@ -8,6 +8,7 @@ variable "project" {
 }
 variable "region" {
   type = string
+  description = "Region snapshot schedule can be applied to, e.g. 'europe-west2'"
 }
 
 variable snapshot_schedule {
