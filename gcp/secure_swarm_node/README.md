@@ -35,8 +35,10 @@ The template defines:
 * Source image for boot disk
 * Persistent disk config
   * Disk `interface` is set to `NVME` if using confidential computing, otherwise it is `SCSI`
-  * This disk **will NOT be deleted** on terraform destroy, as is created outside terraform. 
+  * This disk **will NOT be deleted** on `terraform destroy`, as is created outside terraform. 
     Persistent disk removal must be done manually.
+  * A resource policy (e.g. snapshot schedule), can be attached to the disk by setting `disk_resource_policies` 
+    as a list of resource policies to attach.
 * Network configuration
   * VPC network to use
   * Optional network IP and external IP to use

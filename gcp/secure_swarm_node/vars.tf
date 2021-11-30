@@ -49,6 +49,7 @@ variable "stateful_boot_delete_rule" {
 
 variable "disk_size" {
   type    = number
+  description = "Size of the persistent disk in GB"
   default = 500
 }
 
@@ -59,7 +60,7 @@ variable "disk_type" {
 }
 
 variable "disk_resource_policies" {
-  description = "List of resource policies to attach to persistent disk (short name or id)"
+  description = "List of resource policies to attach to persistent disk, in form of short name or id e.g. 'projects/PROJECT/regions/REGION/resourcePolicies/SNAPSHOT_SCHEDULE_NAME'"
   type = list(string)
   default = []
 }
