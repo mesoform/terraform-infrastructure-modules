@@ -49,6 +49,7 @@ variable "stateful_boot_delete_rule" {
 
 variable "disk_size" {
   type    = number
+  description = "Size of the persistent disk in GB"
   default = 500
 }
 
