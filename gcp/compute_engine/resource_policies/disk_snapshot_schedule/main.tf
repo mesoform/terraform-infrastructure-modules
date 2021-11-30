@@ -49,19 +49,3 @@ resource "google_compute_resource_policy" "disk_snapshot_schedule" {
     }
   }
 }
-
-resource "google_compute_disk_resource_policy_attachment" "self" {
-  for_each = var.disks
-  name     = google_compute_resource_policy.disk_snapshot_schedule.name
-  project  = var.project
-  disk     = each.key
-  zone     = each.value
-}
-
-resource "google_compute_region_disk_resource_policy_attachment" "attachment" {
-  for_each = var.regional_disks
-  name     = google_compute_resource_policy.disk_snapshot_schedule.name
-  project  = var.project
-  disk     = each.key
-  region   = var.region
-}

@@ -53,16 +53,3 @@ variable "snapshot_properties" {
   })
   default = null
 }
-
-variable disks {
-  type = map(string)
-  description = "Map of key value pairs of disk and zone. E.g. {disk1: 'europe-west2-a'}"
-  default = {}
-}
-
-variable regional_disks {
-  type = set(string)
-  description = "List of regional disks to attach schedule to"
-  default = []
-}
-
