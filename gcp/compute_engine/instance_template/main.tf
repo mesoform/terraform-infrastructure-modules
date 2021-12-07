@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+terraform {
+  experiments = [module_variable_optional_attrs]
+}
 
 ###############
 # Data Sources
@@ -21,11 +24,6 @@
 data "google_compute_image" "image" {
   project = var.source_image != "" ? var.source_image_project : "debian-cloud"
   name    = var.source_image != "" ? var.source_image : "debian-10-buster-v20200714"
-}
-
-data "google_compute_image" "image_family" {
-  project = var.source_image_family != "" ? var.source_image_project : "debian-cloud"
-  family  = var.source_image_family != "" ? var.source_image_family : "debian-10"
 }
 
 data "google_compute_subnetwork" "subnet" {
@@ -41,11 +39,14 @@ data "google_compute_subnetwork" "subnet" {
 locals {
   boot_disk = [
     {
-      source_image = var.source_image != "" ? data.google_compute_image.image.self_link : data.google_compute_image.image_family.self_link
+      source_image = var.source_image != "" ? data.google_compute_image.image.self_link : "projects/${var.source_image_project}/global/images/family/${var.source_image_family}"
       disk_size_gb = var.disk_size_gb
       disk_type    = var.disk_type
       auto_delete  = var.auto_delete
+      interface    = var.disk_interface
       boot         = "true"
+      device_name  = var.boot_device_name
+      mode         = "READ_WRITE"
     },
   ]
 
@@ -83,7 +84,8 @@ resource google_compute_instance_template self {
       source       = lookup(disk.value, "source", null)
       source_image = lookup(disk.value, "source_image", null)
       type         = lookup(disk.value, "type", null)
-
+      labels       = lookup(disk.value, "labels", null )
+      resource_policies = lookup(disk.value, "resource_policies", null)
       dynamic "disk_encryption_key" {
         for_each = lookup(disk.value, "disk_encryption_key", [])
         content {
@@ -113,10 +115,6 @@ resource google_compute_instance_template self {
         network_tier = lookup(access_config.value, "network_tier", null)
       }
     }
-  }
-
-  lifecycle {
-    create_before_destroy = "true"
   }
 
   # scheduling must have automatic_restart be false when preemptible is true.
@@ -152,5 +150,9 @@ resource google_compute_instance_template self {
       count = 0
       type  = ""
     }
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }

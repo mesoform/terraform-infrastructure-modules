@@ -142,6 +142,7 @@ terraform plan -var-file resources/single_manifest.tfvars -out my.plan 2>&1 > /d
 
 ## Running the tests from a CI/CD pipeline
 ### Github Actions  
+
 #### Unit Tests 
 Tests are automated in github actions using workflows. For each job in a workflow, 
 there are different steps which validate unit tests for each module.
@@ -160,13 +161,20 @@ Non-zero exit codes indicate a fail, due to either an error in the workflow file
 
 #### Deployment Tests
 A github workflow can be used to verify successful deployment of terraform modules. 
-The steps included are:
+A separate job is defined for each set of deployment tests. Each job contains the steps required. The standard steps for TIM deployment tests are:
 1. Download terraform and any other services required (python, gcloud, aws, etc)
 2. Configure cloud services for deployment. This will require a service account with permissions to create relevant resources
 3. Plan and apply terraform infrastructure
 4. Destroy infrastructure and delete cloud resources
 
-The deployment workflow file can be found [here](../.github/workflows/deploy_mcp.yml).
+The deployment workflow file can be found [here](../.github/workflows/deployment_tests.yml).
 Relevant yaml configuration files and resources are in the deployment directory, with subdirectories for relevant adaptors. 
-E.g. for kubernetes mcp deployment tests`tests/mcp/deployment/k8s`.  
-See the [workflow](../.github/workflows/deploy_mcp.yml) for mcp deployment tests
+E.g. for MCP kubernetes deployment tests`tests/mcp/deployment/k8s`.  
+
+To run these tests, [GitHub Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets) with key files for GCP service accounts need to be set up.
+1. `GCP_SA_KEY` - A service account for MCP deployments, must have Compute Engine permissions, IAM permissions for creating other Service Account and permission to create Projects.
+2. `GCP_VPC_SA_KEY` - A service account for creating perimeters, requires Organisation level AccessContext permissions and permission to create projects.
+
+If `GCP_VPC_SA_KEY` does not exist or is empty, the perimeter tests will be skipped when the workflow is triggered. 
+This secret should not be set unless it is necessary to test the perimeter configuration, and should be unset after job has successfully completed.
+

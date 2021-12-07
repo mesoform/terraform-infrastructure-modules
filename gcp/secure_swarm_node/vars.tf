@@ -22,13 +22,50 @@ variable "labels" {
   default = null
 }
 
+variable "tags" {
+  type = list(string)
+  description = "Tags for instance template"
+  default = []
+}
+
+variable "metadata" {
+  type = map(string)
+  description = "Key value pairs for instance metadata"
+  default = {}
+}
 
 //Disk configuration
+variable "stateful_boot" {
+  type = bool
+  description = "Whether to have boot disk set to stateful"
+  default = false
+}
+
+variable "stateful_boot_delete_rule" {
+  type = string
+  description = "Default is 'ON_PERMANENT_INSTANCE_DELETION', set to 'NEVER' if boot disk should remain after scaling MIG down"
+  default = "ON_PERMANENT_INSTANCE_DELETION"
+}
+
 variable "disk_size" {
   type    = number
+  description = "Size of the persistent disk in GB"
   default = 500
 }
 
+variable "disk_type" {
+  description = "Type of disk to attach to instance, default is standard persistent disk"
+  type    = string
+  default = "pd-standard"
+}
+
+variable "disk_resource_policies" {
+  description = "List of resource policies to attach to persistent disk, in form of short name or id e.g. 'projects/PROJECT/regions/REGION/resourcePolicies/SNAPSHOT_SCHEDULE_NAME'"
+  type = list(string)
+  default = []
+}
+
+//Network configuration
 variable "access_config" {
   type = map(list(map(string)))
   default = {}
@@ -81,7 +118,47 @@ variable "service_account_scopes" {
   default = ["cloud-platform"]
 }
 
+variable security_level {
+  type = string
+  validation {
+    condition = contains(["secure-1", "confidential-1"], var.security_level)
+    error_message = "Provided value not of a valid type."
+  }
+}
 
+variable blue_instance_template {
+  type = object({
+    machine_type = optional(string)
+    source_image = optional(string)
+    source_image_family = optional(string)
+    source_image_project = optional(string)
+    network = optional(string)
+    subnetwork = optional(string)
+    network_ip = optional(map(string))
+    access_config = optional(map(list(map(string))))
+    security_level = optional(string)
+    service_account_scopes = optional(set(string))
+  })
+  default = {}
+}
+
+variable green_instance_template {
+  type = object({
+    machine_type = optional(string)
+    source_image = optional(string)
+    source_image_family = optional(string)
+    source_image_project = optional(string)
+    network = optional(string)
+    subnetwork = optional(string)
+    network_ip = optional(map(string))
+    access_config = optional(map(list(map(string))))
+    security_level = optional(string)
+    service_account_scopes = optional(set(string))
+  })
+  default = {}
+}
+
+//Instance group manager vars
 variable "health_check" {
   type = set(object({
     name              = string
@@ -98,13 +175,6 @@ variable "named_ports" {
   default = []
 }
 
-variable security_level {
-  type = string
-  validation {
-    condition = contains(["secure-1", "confidential-1"], var.security_level)
-    error_message = "Provided value not of a valid type."
-  }
-}
 
 variable "update_policy" {
   description = "The rolling update policy. https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html#rolling_update_policy"
@@ -138,73 +208,8 @@ variable "deployment_version" {
   type = string
 }
 
-variable blue_instance_template {
-  type = object({
-    machine_type = optional(string)
-    source_image = optional(string)
-    source_image_family = optional(string)
-    source_image_project = optional(string)
-    network = optional(string)
-    subnetwork = optional(string)
-    access_config = optional(map(list(map(string))))
-    security_level = optional(string)
-  })
-  default = {}
-}
-
-variable green_instance_template {
-  type = object({
-    machine_type = optional(string)
-    source_image = optional(string)
-    source_image_family = optional(string)
-    source_image_project = optional(string)
-    network = optional(string)
-    subnetwork = optional(string)
-    access_config = optional(map(list(map(string))))
-    security_level = optional(string)
-  })
-  default = {}
-}
-
-variable data_disk_snapshot_schedule {
-  description = "Hourly, Daily or Weekly snapshot schedule"
-  type = object({
-    frequency = string
-    start_time = optional(string)
-    interval = optional(number)
-    weekly_snapshot_schedule = optional(list(object({
-      day = string
-      start_time = string
-    })))
-  })
-
-  default = {
-    frequency = "daily"
-    interval = 1
-    start_time = "3:00"
-  }
-
-  validation {
-    condition = contains(["hourly", "daily", "weekly"], var.data_disk_snapshot_schedule.frequency)
-    error_message = "Frequency must be either 'hourly', 'daily', 'weekly'."
-  }
-}
-
-variable retention_policy {
-  description = "Retention Policy Applied to snapshots"
-  type = object({
-    max_retention_days = number
-    on_source_disk_delete = optional(string)
-  })
-  default = null
-}
-
-variable snapshot_properties {
-  type = object({
-    labels = optional(map(string))
-    storage_locations = optional(list(string))
-    guest_flush = optional(string)
-
-  })
-  default = null
+variable wait_for_instances {
+  description = "Whether to wait for instances to be created before returning"
+  type = bool
+  default = false
 }
