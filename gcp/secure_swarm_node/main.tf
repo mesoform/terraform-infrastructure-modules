@@ -90,6 +90,7 @@ module secure_instance_template_green {
   on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
   disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
+  disk_size_gb         = var.boot_disk_size
   boot_device_name     = "${var.name}-${var.zone}-boot"
   additional_disks = [{
     boot         = false
