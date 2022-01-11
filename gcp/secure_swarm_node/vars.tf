@@ -93,6 +93,12 @@ variable "version_name" {
   default = null
 }
 
+variable "boot_disk_size" {
+  description = "Size of the boot disk in GB"
+  type = number
+  default = 10
+}
+
 variable "source_image" {
   description = "Source disk image. If neither source_image nor source_image_family is specified, defaults to the latest public Debian image."
   default     = ""
@@ -213,3 +219,4 @@ variable wait_for_instances {
   type = bool
   default = false
 }
+
