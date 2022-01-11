@@ -46,6 +46,7 @@ module secure_instance_template_blue {
   network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip[var.zone]
   access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
   on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  disk_size_gb         = var.boot_disk_size
   disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
   additional_disks     = [{
