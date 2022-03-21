@@ -173,12 +173,13 @@ Mount the disk in desired folder e.g. at `/data`:
 ```shell
 sudo mount -o discard,defaults /dev/nvme02 /data
 ```
-To mount the disk on automatically on restart, edit the `/etc/fstab` file to include one the line (uncomment relevant one):
+To mount the disk on automatically on restart, edit the `/etc/fstab` file to include one of the following lines:
 ```shell
-#Confidential VM
-#/dev/nvme0n2 /data 	ext4	defaults	0 0
-#Shielded VM
-#/dev/sdb /data 	ext4	defaults	0 0
+# Confidential VM
+/dev/nvme0n2 /data 	ext4	defaults	0 0
+
+# or Shielded VM
+/dev/sdb  /data 	ext4	defaults	0 0
 ```
 ### 2.Install  and configure docker
 ## Troubleshooting
