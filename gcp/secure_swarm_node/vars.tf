@@ -47,6 +47,12 @@ variable "stateful_boot_delete_rule" {
   default = "ON_PERMANENT_INSTANCE_DELETION"
 }
 
+variable "persistent_disk" {
+  type = bool
+  description = "Whether to attach a persistent disk to the instance (default true)"
+  default = true
+}
+
 variable "disk_size" {
   type    = number
   description = "Size of the persistent disk in GB"
@@ -54,7 +60,7 @@ variable "disk_size" {
 }
 
 variable "disk_type" {
-  description = "Type of disk to attach to instance, default is standard persistent disk"
+  description = "Type of persistent disk to attach to instance, default is standard persistent disk"
   type    = string
   default = "pd-standard"
 }
@@ -91,6 +97,12 @@ variable "machine_type" {
 variable "version_name" {
   type = string
   default = null
+}
+
+variable "boot_disk_size" {
+  description = "Size of the boot disk in GB"
+  type = number
+  default = 10
 }
 
 variable "source_image" {
@@ -213,3 +225,4 @@ variable wait_for_instances {
   type = bool
   default = false
 }
+
