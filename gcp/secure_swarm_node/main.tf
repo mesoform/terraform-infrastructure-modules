@@ -49,7 +49,7 @@ module secure_instance_template_blue {
   disk_size_gb         = var.boot_disk_size
   disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
-  additional_disks     = [{
+  additional_disks     = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
     device_name  = "${var.name}-${var.zone}-data"
@@ -59,7 +59,7 @@ module secure_instance_template_blue {
     mode         = "READ_WRITE"
     interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
     resource_policies = var.disk_resource_policies
-  }]
+  }] : []
   security_level = local.blue_instance_template["security_level"]
   tags           = var.tags
   metadata       = var.metadata
@@ -93,7 +93,7 @@ module secure_instance_template_green {
   auto_delete          = !var.stateful_boot
   disk_size_gb         = var.boot_disk_size
   boot_device_name     = "${var.name}-${var.zone}-boot"
-  additional_disks = [{
+  additional_disks = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
     device_name  = "${var.name}-${var.zone}-data"
@@ -103,7 +103,7 @@ module secure_instance_template_green {
     mode         = "READ_WRITE"
     interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
     resource_policies = var.disk_resource_policies
-  }]
+  }] : []
   security_level = local.green_instance_template["security_level"]
   tags           = var.tags
   metadata       = var.metadata

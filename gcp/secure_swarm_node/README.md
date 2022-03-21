@@ -4,7 +4,8 @@
 2. [Resources](#resources)
 3. [Blue Green Deployment](#blue-green-deployment)
 4. [Example Usage](#example-usage)
-5. [Troubleshooting](#troubleshooting)
+5. [Post deployment Steps](#post-deployment-steps)
+6. [Troubleshooting](#troubleshooting)
 
 
 ##  Information
@@ -33,7 +34,7 @@ The name prefix will be `${var.name}-${var.zone}-${var.deployment_version}-` and
 The template defines:
 * Compute instance shielded/confidential configuration
 * Source image for boot disk
-* Persistent disk config
+* Persistent disk config (if `persisent_disk = true`)
   * Disk `interface` is set to `NVME` if using confidential computing, otherwise it is `SCSI`
   * This disk **will NOT be deleted** on `terraform destroy`, as is created outside terraform. 
     Persistent disk removal must be done manually.
@@ -148,6 +149,38 @@ module "secure_swarm_b" {
 }
 ```
 
+## Post Deployment Steps
+### 1. Mount Persistent Data Disk
+If using a persistent data disk, it must be formatted and mounted after the initial creation of the disk. 
+Formatting is not required if attaching an existing, previously formatted disk, as data loss would occur.  
+Find the name of the device to mount, if the `security_level` was set to `confidential-1` the device name should be `nvme0n2`,
+and if it was set to `secure-1` it should be `sdb` (the boot disk would be `nvme0n1` and `sda` respecively). Confirm this with `sudo lsblk`.  
+E.g on Confidential VM:
+```shell
+$ sudo lsblk
+...
+nvme0n1      259:0    0   100G  0 disk 
+├─nvme0n1p1  259:1    0  99.9G  0 part /
+├─nvme0n1p14 259:2    0     4M  0 part 
+└─nvme0n1p15 259:3    0   106M  0 part /boot/efi
+nvme0n2      259:4    0   512G  0 disk 
+```
+Format the disk, e.g.:
+```shell
+sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/nvme0n2
+```
+Mount the disk in desired folder e.g. at `/data`:
+```shell
+sudo mount -o discard,defaults /dev/nvme02 /data
+```
+To mount the disk on automatically on restart, edit the `/etc/fstab` file to include one the line (uncomment relevant one):
+```shell
+#Confidential VM
+#/dev/nvme0n2 /data 	ext4	defaults	0 0
+#Shielded VM
+#/dev/sdb /data 	ext4	defaults	0 0
+```
+### 2.Install  and configure docker
 ## Troubleshooting
 ### Instance update failed: NVME interface must be specified when the disk is created rather than during attachment
  
