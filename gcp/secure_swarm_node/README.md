@@ -19,8 +19,8 @@ to be used as a secure docker swarm node.
 
 ### Required variables
 * `project` - GCP project ID
-* `deployment_version` - `"blue"` or `"green"` representing the `instance_template` version the `instance_group_manager` will use for the deploymetn
-* `zone` - The zone the compute instances will be deployed in
+* `deployment_version` - `"blue"` or `"green"` representing the `instance_template` version the `instance_group_manager` will use for the deployment
+  (defaults to `"green"`)
 * `security_level` - Level of security for instance template. Options are:
   * `"secure-1"` - Shielded VM settings enabled
   * `"confidential-1` - Same settings as `"secure-1"` but with confidential computing enabled as well
@@ -46,18 +46,26 @@ The template defines:
 
 
 ### Managed Instance Group
-The instance group has the name `${var.name}-${var.zone}` and configures the ports, stateful disk, update policy and auto healing policies for the VM.  
-If using the timestamp for the configuration, the version of the instance will update when there is a change to:
+The module deploys either a zonal (default) or regional instance group manager, with either a stateful (default) or stateless configuration.  
+If `zone` is set, an MIG will be deployed in `${var.region}-${var.zone}`, with the name `${var.name}-${var.zone}`.  
+If `zone` is null, a regional MIG will be deployed instead, and will just have the name set in the `name` variable.
+
+The MIG can either be stateful (default) or set to stateless by setting `stateful_instance_group=false`.
+If using a persistent disks, the maximum `target_size` is 1 (see [troubleshooting](#the-instance-template-cannot-be-used-to-create-more-than-one-instance-per-zone)).
+
+If the `update_policy` is configured to do so, the instances deployed from MIG will update when the version changes.
+If `version_name` is not set, a timestamp is used for the `version` configuration. 
+The timestamp, and therefore the version, is updated when there is a change to one of the following:
 * Deployment version (blue or green)
 * The fingerprint of the instance template corresponding to the deployment version
 * Update Policy
 * Health Check
 * Named Ports  
 
-Otherwise, it will update when `${var.version}` is updated.
+Otherwise, it will update when `version_name` is updated. NOTE: This module currently only deploys 1 version at a time.
 
 #### Confidential Compute Instance configuration
-To use auto healing in the MIG with confidential compute instances, the boot disk must be set as stateful (see [troubleshooting](#troubleshooting)).  
+To use auto healing in the MIG with confidential compute instances, the boot disk must be set as stateful (see [troubleshooting](#instance-update-failed-nvme-interface-must-be-specified-when-the-disk-is-created-rather-than-during-attachment)).  
 If `stateful_disk_delete_rule` is set to `NEVER`, the boot disk will persist after deletion of the instance it was attached to. 
 If it is set to `ON_PERMANENT_INSTANCE_DELETION`:
 * Boot disk **persists** and is reattached to instance when:
@@ -154,7 +162,7 @@ module "secure_swarm_b" {
 If using a persistent data disk, it must be formatted and mounted after the initial creation of the disk. 
 Formatting is not required if attaching an existing, previously formatted disk, as data loss would occur.  
 Find the name of the device to mount, if the `security_level` was set to `confidential-1` the device name should be `nvme0n2`,
-and if it was set to `secure-1` it should be `sdb` (the boot disk would be `nvme0n1` and `sda` respecively). Confirm this with `sudo lsblk`.  
+and if it was set to `secure-1` it should be `sdb` (the boot disk would be `nvme0n1` and `sda` respectively). Confirm this with `sudo lsblk`.  
 E.g on Confidential VM:
 ```shell
 $ sudo lsblk
@@ -181,7 +189,7 @@ To mount the disk on automatically on restart, edit the `/etc/fstab` file to inc
 # or Shielded VM
 /dev/sdb  /data 	ext4	defaults	0 0
 ```
-### 2.Install  and configure docker
+
 ## Troubleshooting
 ### Instance update failed: NVME interface must be specified when the disk is created rather than during attachment
  
@@ -189,9 +197,19 @@ Likely scenarios this occurs in:
 * Instance template configured with existing persistent disk, which did not have `interface` set to `NVME` on creation. 
   * Use an existing disk that was created with `NVME` interface specified
   * Use disk created with this module in the [instance template](#instance-templates) configuration
-* During autohealing by MIG, if not set as stateful, the boot disk will be recreated as `${boot-disk-name}-temp`. 
+* During auto-healing by MIG, if not set as stateful, the boot disk will be recreated as `${boot-disk-name}-temp`. 
   That disk has an interface of `SCSI` regardless of the interface configuration in the used instance template. 
   This instance will be recreated, but unable to join the instance group, so recreation will be indefinite until either:
   * MIG is scaled down to 0 instance, then scaled back up to 1 to create a completely new instance and boot disk from the specified template
-  * Set `stateful_boot` to `true` to have persistence on the boot disk (see [config documention](#confidential-compute-instance-configuration)),
-    meaning the interfacce is never changed from `NVME`, allowing recreated instance to rejoin the instance group
+  * Set `stateful_boot` to `true` to have persistence on the boot disk (see [config documentation](#confidential-compute-instance-configuration)),
+    meaning the interface is never changed from `NVME`, allowing recreated instance to rejoin the instance group
+
+### The instance template cannot be used to create more than one instance per zone
+```shell
+│ Error: Error waiting for Creating InstanceGroupManager: Invalid value for field 'operation': ''. 
+  The instance template cannot be used to create more than one instance per zone in the instance group. 
+  This is because the instance template has attached a disk definition with a custom disk name and only one disk with a specific name can exist in a zone. 
+  To create more than one instance, set the name of the disk to instance name or Autogenerated.
+```
+The persistent-disk name in this module is set to be `${var.name}-data`. 
+Set the `target_size` to a maximum of 1 if using a persistent disk. 

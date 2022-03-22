@@ -10,6 +10,13 @@ variable "project" {
 
 variable "zone"{
   type = string
+  default = null
+}
+
+variable "stateful_instance_group" {
+  description = "Whether the MIG should be stateful (true) or not (false)"
+  type = bool
+  default = true
 }
 
 variable "region" {
@@ -73,8 +80,9 @@ variable "disk_resource_policies" {
 
 //Network configuration
 variable "access_config" {
-  type = map(list(map(string)))
-  default = {}
+  description = "List of access configurations, i.e. IPs via which the VM instance can be accessed via the Internet."
+  type = list(map(string))
+  default = []
 }
 variable "network" {
   type    = string
@@ -146,8 +154,8 @@ variable blue_instance_template {
     source_image_project = optional(string)
     network = optional(string)
     subnetwork = optional(string)
-    network_ip = optional(map(string))
-    access_config = optional(map(list(map(string))))
+    network_ip = optional(string)
+    access_config = optional(list(map(string)))
     security_level = optional(string)
     service_account_scopes = optional(set(string))
   })
@@ -162,8 +170,8 @@ variable green_instance_template {
     source_image_project = optional(string)
     network = optional(string)
     subnetwork = optional(string)
-    network_ip = optional(map(string))
-    access_config = optional(map(list(map(string))))
+    network_ip = optional(string)
+    access_config = optional(list(map(string)))
     security_level = optional(string)
     service_account_scopes = optional(set(string))
   })
@@ -191,6 +199,7 @@ variable "named_ports" {
 variable "update_policy" {
   description = "The rolling update policy. https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html#rolling_update_policy"
   type = list(object({
+    instance_redistribution_type = optional(string)
     max_surge_fixed              = optional(number)
     max_surge_percent            = optional(number)
     max_unavailable_fixed        = optional(number)
@@ -206,10 +215,6 @@ variable "update_policy" {
 variable target_size {
   description = "Target Size of the Managed Instance Group"
   default = 0
-  validation {
-    condition = var.target_size <= 1
-    error_message = "Target size cannot be more than 1 for stateful managed instance groups."
-  }
 }
 
 variable "deployment_version" {
@@ -218,6 +223,7 @@ variable "deployment_version" {
     error_message = "Invalid deployment version."
   }
   type = string
+  default = "green"
 }
 
 variable wait_for_instances {
