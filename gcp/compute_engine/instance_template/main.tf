@@ -109,7 +109,7 @@ resource google_compute_instance_template self {
     subnetwork_project = var.subnetwork_project == null ? var.project_id : var.subnetwork_project
     network_ip         = var.network_ip
     dynamic "access_config" {
-      for_each = lookup(var.access_config, var.zone, [])
+      for_each = var.access_config
       content {
         nat_ip       = lookup(access_config.value, "nat_ip", null)
         network_tier = lookup(access_config.value, "network_tier", null)
