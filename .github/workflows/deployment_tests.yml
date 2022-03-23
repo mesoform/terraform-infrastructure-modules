@@ -34,7 +34,7 @@ jobs:
 
       # Install gcloud sdk and set the service account
       - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           service_account_key: ${{secrets.GCP_SA_KEY}}
           export_default_credentials: true
@@ -131,7 +131,7 @@ jobs:
         if : ${{ always() }}
         run: |
           gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}
-          gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}
+#          gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }} #Unlinking billing doesn't seem to be necessary
 
   ############################# Deployment Tests for GCP Access Context Manager ####################################
   ## Job to check if secret with service account for deploying perimeter exists
@@ -178,7 +178,7 @@ jobs:
 
       # Install gcloud sdk and set the service account
       - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           service_account_key: ${{secrets.GCP_VPC_SA_KEY}}
           export_default_credentials: true
@@ -233,5 +233,5 @@ jobs:
         run: |
           gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
           gcloud projects delete ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
-          gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
-          gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
+#          gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-1
+#          gcloud beta billing projects unlink ${{ steps.vars.outputs.GCP_PROJECT_ID }}-2
