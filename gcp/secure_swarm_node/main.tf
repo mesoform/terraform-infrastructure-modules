@@ -27,7 +27,7 @@ resource time_static self {
 module secure_instance_template_blue {
   source      = "../compute_engine/instance_template"
   project_id  = var.project
-  description = "Secure Swarm Node template"
+  description = var.instance_template_description
   service_account = {
     email  = local.service_account_email
     scopes = var.blue_instance_template.service_account_scopes == null ? var.service_account_scopes : var.blue_instance_template.service_account_scopes
@@ -70,7 +70,7 @@ module secure_instance_template_blue {
 module secure_instance_template_green {
   source      = "../compute_engine/instance_template"
   project_id  = var.project
-  description = "Secure Swarm Node template"
+  description = var.instance_template_description
   service_account = {
     email  = local.service_account_email
     scopes = var.green_instance_template.service_account_scopes == null ? var.service_account_scopes : var.green_instance_template.service_account_scopes
