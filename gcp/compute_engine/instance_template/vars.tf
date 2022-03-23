@@ -237,8 +237,8 @@ variable security_level {
 # Public IP
 ###########################
 variable "access_config" {
-  description = "Access configurations, i.e. IPs via which the VM instance can be accessed via the Internet."
-  type = map(list(map(string)))
-  default = {}
+  description = "List of access configurations, i.e. IPs via which the VM instance can be accessed via the Internet."
+  type = list(map(string))
+  default = []
 }
 
