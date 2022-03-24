@@ -146,6 +146,11 @@ variable security_level {
   }
 }
 
+variable "instance_template_description" {
+  type = string
+  default = "Secure Swarm Node template"
+}
+
 variable blue_instance_template {
   type = object({
     machine_type = optional(string)
