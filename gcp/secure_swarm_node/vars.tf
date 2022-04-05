@@ -113,6 +113,12 @@ variable "boot_disk_size" {
   default = 10
 }
 
+variable "boot_device_name" {
+  description = "Device name for the boot disk"
+  type = string
+  default     = null
+}
+
 variable "source_image" {
   description = "Source disk image. If neither source_image nor source_image_family is specified, defaults to the latest public Debian image."
   default     = ""
@@ -202,7 +208,22 @@ variable "named_ports" {
 
 
 variable "update_policy" {
-  description = "The rolling update policy. https://www.terraform.io/docs/providers/google/r/compute_region_instance_group_manager.html#rolling_update_policy"
+  description = "The update policy for zonal instance group"
+  type = list(object({
+    max_surge_fixed              = optional(number)
+    max_surge_percent            = optional(number)
+    max_unavailable_fixed        = optional(number)
+    max_unavailable_percent      = optional(number)
+    min_ready_sec                = optional(number)
+    minimal_action               = string
+    type                         = string
+    replacement_method           = optional(string)
+  }))
+  default = []
+}
+
+variable "regional_update_policy" {
+  description = "The update policy for regional instance group"
   type = list(object({
     instance_redistribution_type = optional(string)
     max_surge_fixed              = optional(number)
