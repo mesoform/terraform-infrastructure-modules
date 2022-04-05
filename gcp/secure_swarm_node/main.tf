@@ -24,6 +24,16 @@ resource time_static self {
   }
 }
 
+resource time_static regional_mig_update {
+  triggers = {
+    deployment_version = var.deployment_version
+    instance = var.deployment_version == "blue" ? module.secure_instance_template_blue.fingerprint : module.secure_instance_template_green.fingerprint
+    regional_update_policy = jsonencode(var.regional_update_policy)
+    health_check = jsonencode(var.health_check)
+    named_ports = jsonencode(var.named_ports)
+  }
+}
+
 module secure_instance_template_blue {
   source      = "../compute_engine/instance_template"
   project_id  = var.project
@@ -193,7 +203,7 @@ resource google_compute_region_instance_group_manager self {
   target_size        = var.target_size
 
   version {
-    name              = var.version_name == null ? formatdate("YYYYMMDDhhmm", time_static.self.rfc3339) : var.version_name
+    name              = var.version_name == null ? formatdate("YYYYMMDDhhmm", time_static.regional_mig_update.rfc3339) : var.version_name
     instance_template = var.deployment_version == "blue" ? module.secure_instance_template_blue.self_link : module.secure_instance_template_green.self_link
   }
 
