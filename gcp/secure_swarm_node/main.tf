@@ -59,7 +59,7 @@ module secure_instance_template_blue {
   disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
   disk_size_gb         = var.boot_disk_size
-  boot_device_name     = "${local.name}-boot"
+  boot_device_name     = var.boot_device_name
   additional_disks     = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
@@ -102,7 +102,7 @@ module secure_instance_template_green {
   disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
   disk_size_gb         = var.boot_disk_size
-  boot_device_name     = "${local.name}-boot"
+  boot_device_name     = var.boot_device_name
   additional_disks     = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
