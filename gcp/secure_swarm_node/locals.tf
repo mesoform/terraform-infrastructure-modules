@@ -9,7 +9,7 @@ locals {
   ) : contains(["secure-1", "confidential-1"], var.green_instance_template["security_level"]) ? var.green_instance_template : merge(var.green_instance_template, { security_level = "confidential-1" })
 
   stateful_boot_disk = var.stateful_boot ? [{
-    device_name = "${local.name}-boot"
+    device_name = var.boot_device_name
     delete_rule = var.stateful_boot_delete_rule
   }] : []
 }
