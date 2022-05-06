@@ -9,11 +9,16 @@ module secure_instance_template_blue {
   instance_type       = "t2.large"
   tags                = var.common_tags
   availability_zone   = "us-east-1a"
-  key_name            = aws_key_pair.instance_key.key_name
   public_subnet_id    = module.vpc.public_subnet_id
   private_subnet_id   = module.vpc.private_subnet_id
   db_subnet_id        = module.vpc.db_subnet_id
+  security_group_id   = module.vpc.sg_id
 }
+
+#module "iam" {
+#  source      = "../compute_engine/iam"
+#  common_tags = var.common_tags
+#}
 
 resource "aws_autoscaling_group" "example" {
   name               = "test"
@@ -29,11 +34,18 @@ resource "aws_autoscaling_group" "example" {
     version = module.secure_instance_template_blue.launch_template_version
   }
 
-  tag {
-    key                 = "Key"
-    value               = "Value"
-    propagate_at_launch = true
-  }
+  tags = [
+      {
+        "key"                 = "interpolation1"
+        "value"               = "value3"
+        "propagate_at_launch" = true
+      },
+      {
+        "key"                 = "interpolation2"
+        "value"               = "value4"
+        "propagate_at_launch" = true
+      },
+    ]
 
   instance_refresh {
     strategy = "Rolling"
@@ -42,32 +54,6 @@ resource "aws_autoscaling_group" "example" {
     }
     triggers = ["tag"]
   }
-}
-
-data "aws_instance" "self" {
-  filter {
-    name   = "tag:Name"
-    values = ["swarm_node"]
-  }
-  depends_on = [
-    aws_autoscaling_group.example,
-  ]
-}
-
-data "aws_ebs_volume" "ebs_volume" {
-  most_recent = true
-
-  filter {
-    name   = "tag:Name"
-    values = ["persistent_volume"]
-  }
-}
-
-
-resource "aws_volume_attachment" "ebs_att" {
-  device_name = "/dev/sdh"
-  volume_id   = data.aws_ebs_volume.ebs_volume.id
-  instance_id = data.aws_instance.self.id
 }
 
 module "vpc" {
@@ -80,7 +66,3 @@ module "vpc" {
   common_tags          = var.common_tags
 }
 
-resource "aws_key_pair" "instance_key" {
-  key_name   = "mesoform_key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDH/L16ACajBGASbwvPw/9kgCchE2WsPCmXR44cG4yqojPj3gSNOkxCwAcbbSraru2UxPSZzlb08WFRYz2Ewrxs1hD7A7v9CSA2P1Kxc5mRkuH/p0svIwaq/pUOvNWdEREnvVELScRhjUqtPYil3XOXQBrNNR8EHeiJ4bt04oQB3sr71HFtm65hbB3OnGm5Zymgq3vREKCaac2VoUQJ+Iw4E81sMrxS9Y6kAL+iNVZfcJYmANc+QJyyAMIZRTtjoTKiDeQIpSPX5M7lG7MV26bXIoysY1ISTu9ZB6kihYyiAXGAN1asLU16+9g1HzkHUJAVtEvOeBOQt2lAaHD6RAjkjrCyDCmEgczMT6x+P5ZiX6ffN4B1BTQArOxVXPGWP73hmxkiztRbtyKQincy9BlGyNxvUSnnrk2X9VjnQDRlgww7Qe7aEpjB0PHcnjQW6/FTRu7NR8K6t+VDV4XnsWSNekraI6hAIuXJbdiQaTc3H1CsRRLVNE2Spq7E5vvbGds= dmitrogavrichuk@iMac-Dmitro.local"
-}

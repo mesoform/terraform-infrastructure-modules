@@ -51,7 +51,7 @@ variable "key_name" {
 }
 
 variable "common_tags" {
-  type = map
+  type = map(string)
   default = {
     Project     = "mesoform"
     Environment = "blue"
