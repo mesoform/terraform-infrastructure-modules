@@ -7,11 +7,11 @@ except Exception as e:
     print(e, stderr)
 
 """
-    Tests the configuration of security level for blue instance template.
+    Tests the configuration of security level for green instance template.
 """
 
 expected_data = {
-    "security_level": "secure-1"
+    "device_name": "unit-test-a-boot"
 }
 
 
