@@ -35,8 +35,8 @@ resource "aws_launch_template" "self" {
   placement {
     availability_zone = var.availability_zone
   }
-  
-  key_name = var.key_name
+
+  key_name = aws_key_pair.instance_key.key_name
 
   block_device_mappings {
     device_name = "/dev/sda1"
@@ -48,8 +48,8 @@ resource "aws_launch_template" "self" {
   }
 
   network_interfaces {
-    security_groups = [var.sg_id,]
     subnet_id       = var.public_subnet_id[0]
+    security_groups = [var.security_group_id,]
   }
   
   tag_specifications {
@@ -59,4 +59,7 @@ resource "aws_launch_template" "self" {
     }
   }
 }
-
+resource "aws_key_pair" "instance_key" {
+  key_name   = "${var.tags["Project"]}_key}"
+  public_key = file("../compute_engine/instance_template/ssh/key.pub")
+}

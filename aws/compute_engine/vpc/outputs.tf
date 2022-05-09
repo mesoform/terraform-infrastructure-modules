@@ -7,7 +7,7 @@ output "vpc_cidr" {
 }
 
 output "sg_id" {
-  value = "${aws_security_group.main_sg.id}"
+  value = aws_security_group.main_sg.id
 }
 
 output "public_subnet_id" {
