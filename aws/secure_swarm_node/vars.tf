@@ -155,3 +155,22 @@ variable "stateful_boot_delete_rule" {
   description = "Default is 'ON_PERMANENT_INSTANCE_DELETION', set to 'NEVER' if boot disk should remain after scaling MIG down"
   default = "ON_PERMANENT_INSTANCE_DELETION"
 }
+
+variable "stateful_device_name" {
+  description = "Name of stateful disk"
+  default = "/dev/sdf"
+}
+
+variable "persistent_device_name" {
+  description = "Name of persistent disk"
+  default = "/dev/sdh"
+}
+
+variable "ASG_tags"{
+  type = set(map(string))
+  default = [
+    {
+    Name     = "ASG"
+  },
+  ]
+}

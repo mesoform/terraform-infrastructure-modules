@@ -21,69 +21,58 @@ module secure_instance_template_blue {
 #}
 
 resource "aws_autoscaling_group" "example" {
-  name               = local.name
-  availability_zones = ["us-east-1a"]
+  name                      = local.name
+  availability_zones        = ["us-east-1a"]
   health_check_grace_period = 300
   force_delete              = true
-  desired_capacity   = 1
-  max_size           = 1
-  min_size           = 1
+  desired_capacity          = 1
+  max_size                  = 1
+  min_size                  = 1
 
   launch_template {
     id      = module.secure_instance_template_blue.launch_template_id
     version = module.secure_instance_template_blue.launch_template_version
   }
 
-  tags = [
-      {
-        "key"                 = "interpolation1"
-        "value"               = "value3"
-        "propagate_at_launch" = true
-      },
-      {
-        "key"                 = "interpolation2"
-        "value"               = "value4"
-        "propagate_at_launch" = true
-      },
-    ]
+  tags = var.ASG_tags
 
   instance_refresh {
-    strategy = "Rolling"
+    strategy                 = "Rolling"
     preferences {
       min_healthy_percentage = 50
     }
-    triggers = ["tag"]
+    triggers                 = ["tag"]
   }
 }
 
 # For optional persistent disk
 
 resource "aws_ebs_volume" "persistent_disk" {
-  count = var.stateful_instance_group && var.persistent_disk ? 1 : 0
+  count             = var.stateful_instance_group && var.persistent_disk ? 1 : 0
   availability_zone = var.availability_zone
   size              = var.persistent_disk_size
-  encrypted = var.security_level == "confidential-1" ? true : false
-  type = var.disk_type
-  kms_key_id = var.kms_key_id
+  encrypted         = var.security_level == "confidential-1" ? true : false
+  type              = var.disk_type
+  kms_key_id        = var.kms_key_id
 
   tags = {
-    Name = "${local.name}-data",
-    Device_name = "/dev/sdh"
+    Name        = "${local.name}-data",
+    Device_name = var.persistent_device_name
   }
 }
 
 # For optional stateful disk
 
 resource "aws_ebs_volume" "stateful_disk" {
-  count = length(local.stateful_boot_disk) == 0 ? 0 :1
+  count             = length(local.stateful_boot_disk) == 0 ? 0 :1
   availability_zone = var.availability_zone
   size              = var.stateful_disk_size
-  encrypted = var.security_level == "confidential-1" ? true : false
-  type = var.disk_type
+  encrypted         = var.security_level == "confidential-1" ? true : false
+  type              = var.disk_type
 
   tags = {
-    Name = "${local.name}-state",
-    Device_name = "/dev/sdf"
+    Name        = "${local.name}-state",
+    Device_name = var.stateful_device_name
   } 
 }
 
