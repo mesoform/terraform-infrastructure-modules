@@ -30,7 +30,7 @@ resource "aws_launch_template" "self" {
   description         = var.description
   instance_type       = var.instance_type
   tags                = var.tags
-  user_data           = filebase64("../compute_engine/instance_template/user_data/start.sh")
+  user_data           = filebase64("../compute_engine/instance_template/user_data/attach.sh")
   image_id            = local.image_id
   placement {
     availability_zone = var.availability_zone

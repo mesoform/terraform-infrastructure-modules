@@ -67,7 +67,8 @@ resource "aws_ebs_volume" "persistent_disk" {
   kms_key_id = var.kms_key_id
 
   tags = {
-    Name = "${local.name}-data"
+    Name = "${local.name}-data",
+    Device_name = "/dev/sdh"
   }
 }
 
@@ -81,7 +82,8 @@ resource "aws_ebs_volume" "stateful_disk" {
   type = var.disk_type
 
   tags = {
-    Name = "${local.name}-state"
+    Name = "${local.name}-state",
+    Device_name = "/dev/sdf"
   } 
 }
 
