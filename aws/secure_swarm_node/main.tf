@@ -1,4 +1,3 @@
-
 resource time_static self {
   triggers = {
     deployment_version = var.deployment_version
@@ -48,9 +47,9 @@ resource "aws_autoscaling_group" "self" {
   tags = var.ASG_tags
 }
 
-# For optional persistent disk
+# For optional persistent disk blue
 
-resource "aws_ebs_volume" "persistent_disk" {
+resource "aws_ebs_volume" "_blue_persistent_disk" {
   count             = var.stateful_instance_group && var.persistent_disk ? 1 : 0
   availability_zone = var.availability_zone
   size              = var.persistent_disk_size
@@ -59,14 +58,14 @@ resource "aws_ebs_volume" "persistent_disk" {
   kms_key_id        = var.kms_key_id
 
   tags = {
-    Name        = "${local.name}-data",
+    Name        = "${local.name}-data-blue",
     Device_name = var.persistent_device_name
   }
 }
 
-# For optional stateful disk
+# For optional stateful disk blue
 
-resource "aws_ebs_volume" "stateful_disk" {
+resource "aws_ebs_volume" "blue_stateful_disk" {
   count             = length(local.stateful_boot_disk) == 0 ? 0 :1
   availability_zone = var.availability_zone
   size              = var.stateful_disk_size
@@ -74,7 +73,38 @@ resource "aws_ebs_volume" "stateful_disk" {
   type              = var.disk_type
 
   tags = {
-    Name        = "${local.name}-state",
+    Name        = "${local.name}-state-blue",
+    Device_name = var.stateful_device_name
+  } 
+}
+
+# For optional persistent disk green
+
+resource "aws_ebs_volume" "_blue_persistent_disk" {
+  count             = var.stateful_instance_group && var.persistent_disk ? 1 : 0
+  availability_zone = var.availability_zone
+  size              = var.persistent_disk_size
+  encrypted         = var.security_level == "confidential-1" ? true : false
+  type              = var.disk_type
+  kms_key_id        = var.kms_key_id
+
+  tags = {
+    Name        = "${local.name}-data-green",
+    Device_name = var.persistent_device_name
+  }
+}
+
+# For optional stateful disk green
+
+resource "aws_ebs_volume" "blue_stateful_disk" {
+  count             = length(local.stateful_boot_disk) == 0 ? 0 :1
+  availability_zone = var.availability_zone
+  size              = var.stateful_disk_size
+  encrypted         = var.security_level == "confidential-1" ? true : false
+  type              = var.disk_type
+
+  tags = {
+    Name        = "${local.name}-state-green",
     Device_name = var.stateful_device_name
   } 
 }
@@ -84,26 +114,9 @@ module "vpc" {
   ports                = ["22", "80"]
   public_subnet_cidrs  = ["10.0.10.0/24"]
   private_subnet_cidrs = []
-  db_subnet_cidrs      = ["10.0.12.0/24", "10.0.22.0/24", "10.0.32.0/24"]
   access_config        = var.access_config
   region               = var.region
   common_tags          = var.common_tags
 }
 
-
-output local_name {
-  value = local.name
-}
-
-output green_instance_template {
-  value = local.green_instance_template
-}
-
-output blue_instance_template {
-  value = local.blue_instance_template
-}
-
-output boot_disk {
-  value = local.stateful_boot_disk
-}
 

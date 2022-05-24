@@ -57,20 +57,6 @@ resource "aws_subnet" "public_subnets" {
   var.common_tags)
 }
 
-###########################
-# Creating db subnets     #
-###########################
-
-resource "aws_subnet" "db_subnets" {
-  count                   = length(var.db_subnet_cidrs)
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = element(var.db_subnet_cidrs, count.index)
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
-  map_public_ip_on_launch = false
-  tags = merge(
-    { Name = "${var.common_tags["Project"]}_db_subnet_${count.index + 1}" },
-  var.common_tags)
-}
 
 ############################
 # Creating private subnets #
@@ -174,16 +160,6 @@ resource "aws_route_table_association" "nat_routes" {
   count          = length(aws_subnet.private_subnets[*].id)
   route_table_id = element(aws_route_table.nat_rt[*].id, count.index)
   subnet_id      = element(aws_subnet.private_subnets[*].id, count.index)
-}
-
-######################################################
-# NAT rout table assotiation with db subnets         #
-######################################################
-
-resource "aws_route_table_association" "db_routes" {
-  count          = length(aws_subnet.db_subnets[*].id)
-  route_table_id = aws_route_table.local_rt.id
-  subnet_id      = element(aws_subnet.db_subnets[*].id, count.index)
 }
 
 ######################
