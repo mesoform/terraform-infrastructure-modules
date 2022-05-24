@@ -56,7 +56,7 @@ variable "stateful_disk_size" {
 
 variable "name" {
   description = "instance name"
-  default = "swarm_node"
+  default = "secure-swarm"
 }
 
 variable "name_prefix" {
@@ -125,6 +125,7 @@ variable security_level {
     condition = contains(["secure-1", "confidential-1"], var.security_level)
     error_message = "Provided value not of a valid type."
   }
+  default = "secure-1"
 }
 
 variable kms_key_id {
@@ -173,4 +174,25 @@ variable "ASG_tags"{
     Name     = "ASG"
   },
   ]
+}
+
+variable "deployment_version" {
+  validation {
+    condition = contains(["blue", "green"], var.deployment_version)
+    error_message = "Invalid deployment version."
+  }
+  type = string
+  default = "blue"
+}
+
+variable "access_config" {
+  description = "List of access configurations, i.e. IPs via which the VM instance can be accessed via the Internet."
+  type = list(string)
+  default = ["194.44.103.0/24"]
+}
+
+variable "asg_az" {
+  description = "List of autoscaling group availability zones"
+  type = list(string)
+  default = ["us-east-1a"]
 }

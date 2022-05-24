@@ -1,6 +1,6 @@
 ##################
 # Security group #
-###s###############
+##################
 
 resource "aws_security_group" "main_sg" {
   name        = "${var.common_tags["Project"]}_security_group"
@@ -16,7 +16,7 @@ resource "aws_security_group" "main_sg" {
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = var.access_config
     }
   }
 
@@ -24,14 +24,14 @@ resource "aws_security_group" "main_sg" {
     from_port   = 8
     to_port     = 0
     protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.access_config
   }
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.access_config
   }
 }
 

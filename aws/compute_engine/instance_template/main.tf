@@ -1,26 +1,3 @@
-
-#########
-# Locals
-#########
-
-locals {
-  image_id = var.ami_id == "" ? data.aws_ami.ami.id : var.ami_id
-}
-
-###############
-# Data Sources
-###############
-
-data "aws_ami" "ami" {
-  owners = [var.ami_owner]
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["${var.ami_name}"]
-  }
-}
-
 ####################
 # Instance Template
 ####################
@@ -31,7 +8,7 @@ resource "aws_launch_template" "self" {
   instance_type       = var.instance_type
   tags                = var.tags
   user_data           = filebase64("../compute_engine/instance_template/user_data/attach.sh")
-  image_id            = local.image_id
+  image_id            = var.image_id
   placement {
     availability_zone = var.availability_zone
   }

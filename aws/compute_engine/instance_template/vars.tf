@@ -1,28 +1,4 @@
-variable "ami_owner" {
-  description = "AMI owner"
-  type = string
-  default     = "099720109477"
-}
 
-variable "ami_id" {
-  description = "AMI id"
-  type = string
-  default     = "ami-0d12a58ec39ffb406"
-  #default     = "ami-085cbb6056e18788f"
-  #default     = "ami-0aa06d075f7c18dff"
-}
-
-variable "ami_path" {
-  description = "AMI path"
-  type = string
-  default     = "/aws/service/ami-amazon-linux-latest/"
-}
-
-variable "ami_name" {
-  description = "AMI name"
-  type = string
-  default     = "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"
-}
 
 variable "description" {
   type    = string
@@ -80,4 +56,7 @@ variable "private_subnet_id" {
 }
 
 variable "db_subnet_id" {
+}
+
+variable "image_id" {
 }

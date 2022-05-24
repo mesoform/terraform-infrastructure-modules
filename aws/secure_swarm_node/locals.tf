@@ -12,4 +12,16 @@ locals {
     device_name = "${local.name}-boot"
     delete_rule = var.stateful_boot_delete_rule
   }] : []
+
+  image_id = var.ami_id == "" ? data.aws_ami.ami.id : var.ami_id
 }
+
+data "aws_ami" "ami" {
+    owners = [var.ami_owner]
+    most_recent = true
+
+    filter {
+      name   = "name"
+      values = ["${var.ami_name}"]
+    }
+  }

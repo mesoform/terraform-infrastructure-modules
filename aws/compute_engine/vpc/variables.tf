@@ -29,3 +29,9 @@ variable "common_tags" {
 variable "region" {
 
 }
+
+variable "access_config" {
+  description = "List of access configurations, i.e. IPs via which the VM instance can be accessed via the Internet."
+  type = list(string)
+  default = []
+}
