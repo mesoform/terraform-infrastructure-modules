@@ -13,9 +13,9 @@ module secure_instance_template_blue {
   availability_zone   = var.availability_zone
   public_subnet_id    = module.vpc.public_subnet_id
   private_subnet_id   = module.vpc.private_subnet_id
-  db_subnet_id        = module.vpc.db_subnet_id
   security_group_id   = module.vpc.sg_id
   image_id            = local.image_id
+  key_path            = var.key_path
 }
 
 module secure_instance_template_green {
@@ -27,9 +27,9 @@ module secure_instance_template_green {
   availability_zone   = var.availability_zone
   public_subnet_id    = module.vpc.public_subnet_id
   private_subnet_id   = module.vpc.private_subnet_id
-  db_subnet_id        = module.vpc.db_subnet_id
   security_group_id   = module.vpc.sg_id
   image_id            = local.image_id
+  key_path            = var.key_path
 }
 
 
@@ -80,7 +80,7 @@ resource "aws_ebs_volume" "blue_stateful_disk" {
 
 # For optional persistent disk green
 
-resource "aws_ebs_volume" "_blue_persistent_disk" {
+resource "aws_ebs_volume" "green_persistent_disk" {
   count             = var.stateful_instance_group && var.persistent_disk ? 1 : 0
   availability_zone = var.availability_zone
   size              = var.persistent_disk_size
@@ -96,7 +96,7 @@ resource "aws_ebs_volume" "_blue_persistent_disk" {
 
 # For optional stateful disk green
 
-resource "aws_ebs_volume" "blue_stateful_disk" {
+resource "aws_ebs_volume" "green_stateful_disk" {
   count             = length(local.stateful_boot_disk) == 0 ? 0 :1
   availability_zone = var.availability_zone
   size              = var.stateful_disk_size

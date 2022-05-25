@@ -55,8 +55,9 @@ variable "public_subnet_id" {
 variable "private_subnet_id" {
 }
 
-variable "db_subnet_id" {
+variable "image_id" {
 }
 
-variable "image_id" {
+variable "key_path" {
+  description = "Path to SSH key"
 }

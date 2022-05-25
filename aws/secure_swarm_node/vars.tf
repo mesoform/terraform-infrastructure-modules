@@ -196,3 +196,8 @@ variable "asg_az" {
   type = list(string)
   default = ["us-east-1a"]
 }
+
+variable "key_path" {
+  description = "Path to SSH key"
+  default = "../../../ssh/key.pub"
+}
