@@ -31,7 +31,7 @@ resource "aws_security_group" "main_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = var.access_config
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -78,9 +78,10 @@ resource "aws_subnet" "private_subnets" {
 ######################
 
 resource "aws_nat_gateway" "gw" {
-  count         = length(aws_subnet.public_subnets[*].id)
-  allocation_id = element(aws_eip.nat[*].id, count.index)
-  subnet_id     = element(aws_subnet.public_subnets[*].id, count.index)
+  count             = length(aws_subnet.public_subnets[*].id)
+  #allocation_id = element(aws_eip.nat[*].id, count.index)
+  connectivity_type = "private"
+  subnet_id         = element(aws_subnet.public_subnets[*].id, count.index)
   #depends_on    = ["aws_internet_gateway.main"]
   tags = merge(
     { Name = "${var.common_tags["Project"]}_NAT_gateway_${count.index + 1}" },
@@ -91,13 +92,13 @@ resource "aws_nat_gateway" "gw" {
 # Elastic IP        #
 ######################
 
-resource "aws_eip" "nat" {
-  count = length(aws_subnet.public_subnets[*].id)
-  vpc   = true
-  tags = merge(
-    { Name = "${var.common_tags["Project"]}_EIP_${count.index + 1}" },
-  var.common_tags)
-}
+#resource "aws_eip" "nat" {
+#  count = length(aws_subnet.public_subnets[*].id)
+#  vpc   = true
+#  tags = merge(
+#    { Name = "${var.common_tags["Project"]}_EIP_${count.index + 1}" },
+#  var.common_tags)
+#}
 
 ###################################
 # Rout table for internet gateway #
@@ -174,7 +175,7 @@ resource "aws_vpc" "main" {
 }
 
 ######################
-# Internrt gateway   #
+# Internet gateway   #
 ######################
 
 resource "aws_internet_gateway" "main" {

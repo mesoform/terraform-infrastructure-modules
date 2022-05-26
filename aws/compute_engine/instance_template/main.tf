@@ -12,9 +12,9 @@ resource "aws_launch_template" "self" {
   placement {
     availability_zone = var.availability_zone
   }
-  iam_instance_profile {
-    name = aws_iam_instance_profile.self.name
-  }
+  #iam_instance_profile {
+  #  name = aws_iam_instance_profile.self.name
+  #}
 
   key_name = aws_key_pair.instance_key.key_name
 
@@ -40,12 +40,11 @@ resource "aws_launch_template" "self" {
   }
 }
 resource "aws_key_pair" "instance_key" {
-  key_name   = "${var.tags["Project"]}_key}"
-  #public_key = file("../compute_engine/instance_template/ssh/key.pub")
+  key_name   = var.key_name
   public_key = file(var.key_path)
 }
 
-resource "aws_iam_instance_profile" "self" {
-  name = "test_profile"
-  role = "OrganizationAccountAccessRole"
-}
+#resource "aws_iam_instance_profile" "self" {
+#  name = "test_profile"
+#  role = "OrganizationAccountAccessRole"
+#}

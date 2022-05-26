@@ -12,10 +12,10 @@ module secure_instance_template_blue {
   tags                = var.common_tags
   availability_zone   = var.availability_zone
   public_subnet_id    = module.vpc.public_subnet_id
-  private_subnet_id   = module.vpc.private_subnet_id
   security_group_id   = module.vpc.sg_id
   image_id            = local.image_id
   key_path            = var.key_path
+  key_name            = "${var.common_tags["Project"]}_blue_key"
 }
 
 module secure_instance_template_green {
@@ -26,15 +26,15 @@ module secure_instance_template_green {
   tags                = var.common_tags
   availability_zone   = var.availability_zone
   public_subnet_id    = module.vpc.public_subnet_id
-  private_subnet_id   = module.vpc.private_subnet_id
   security_group_id   = module.vpc.sg_id
   image_id            = local.image_id
   key_path            = var.key_path
+  key_name            = "${var.common_tags["Project"]}_green_key"
 }
 
 
-resource "aws_autoscaling_group" "self" {
-  name                      = local.name
+resource "aws_autoscaling_group" "blue" {
+  name                      = "${var.name}-blue"
   availability_zones        = var.asg_az
   desired_capacity          = 1
   max_size                  = 1
@@ -43,6 +43,20 @@ resource "aws_autoscaling_group" "self" {
   launch_template {
     id      = module.secure_instance_template_blue.launch_template_id
     version = module.secure_instance_template_blue.launch_template_version
+  }
+  tags = var.ASG_tags
+}
+
+resource "aws_autoscaling_group" "green" {
+  name                      = "${var.name}-green"
+  availability_zones        = var.asg_az
+  desired_capacity          = 1
+  max_size                  = 1
+  min_size                  = 1
+
+  launch_template {
+    id      = module.secure_instance_template_green.launch_template_id
+    version = module.secure_instance_template_green.launch_template_version
   }
   tags = var.ASG_tags
 }

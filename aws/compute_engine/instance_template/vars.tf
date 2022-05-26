@@ -1,5 +1,3 @@
-
-
 variable "description" {
   type    = string
   default = null
@@ -27,35 +25,18 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
-variable "key_name" {
-  description = "SSH key name"
-  default     = ""
-}
-
-variable "vpc_id" {
-  description = "VPC id"
-  default     = ""
-}
-
 variable "security_group_id" {
-  default = ""
-}
-
-variable "vpc_cidr" {
-  default = ""
-}
-
-variable "sg_id" {
   default = ""
 }
 
 variable "public_subnet_id" {
 }
 
-variable "private_subnet_id" {
+variable "image_id" {
 }
 
-variable "image_id" {
+variable "key_name" {
+  description = "SSH key pair name"
 }
 
 variable "key_path" {
