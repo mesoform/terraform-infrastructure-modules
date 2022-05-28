@@ -1,1 +1,0 @@
-../../mcp/swarm_docker_container.tf
