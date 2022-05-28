@@ -16,4 +16,16 @@ locals {
     app => { docker_registry_image : lookup(config, "docker_registry_image", null) }
     if lookup(config, "docker_registry_image", null) != null
   }
+  docker_image = { for app, config in local.docker_components :
+    app => { docker_image : lookup(config, "docker_image", null) }
+    if lookup(config, "docker_image", null) != null
+  }
+  docker_network = { for app, config in local.docker_components :
+    app => { docker_network : lookup(config, "docker_network", null) }
+    if lookup(config, "docker_network", null) != null
+  }
+  docker_plugin = { for app, config in local.docker_components :
+    app => { docker_plugin : lookup(config, "docker_plugin", null) }
+    if lookup(config, "docker_plugin", null) != null
+  }
 }
