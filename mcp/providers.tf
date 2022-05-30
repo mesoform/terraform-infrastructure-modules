@@ -12,9 +12,14 @@ terraform {
       source = "hashicorp/google-beta"
       version = ">=3.55.0, <4.0.0"
     }
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "2.16.0"
+    }
   }
 }
 
 provider "google" {}
 provider "google-beta" {}
 provider "kubernetes" {}
+provider "docker" {}
