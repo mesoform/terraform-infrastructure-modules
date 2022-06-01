@@ -28,4 +28,8 @@ locals {
     app => { docker_plugin : lookup(config, "docker_plugin", null) }
     if lookup(config, "docker_plugin", null) != null
   }
+  docker_service = { for app, config in local.docker_components :
+    app => { docker_service : lookup(config, "docker_service", null) }
+    if lookup(config, "docker_service", null) != null
+  }
 }
