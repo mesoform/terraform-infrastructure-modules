@@ -1,6 +1,74 @@
 resource "docker_service" "self" {
   for_each = local.docker_service
   name     = lookup(each.value.docker_service, "name", null)
+  dynamic "auth" {
+    for_each = lookup(each.value.docker_service, "auth", null) == null ? {} : { auth : each.value.docker_service.auth }
+    content {
+      server_address   = lookup(auth.value, "server_address", null)
+      password   = lookup(auth.value, "password", null)
+      username   = lookup(auth.value, "username", null)
+    }
+  }
+  dynamic "converge_config" {
+    for_each = lookup(each.value.docker_service, "converge_config", null) == null ? {} : { converge_config : each.value.docker_service.converge_config }
+    content {
+      delay   = lookup(converge_config.value, "delay", null)
+      timeout   = lookup(converge_config.value, "timeout", null)
+    }
+  }
+  dynamic "endpoint_spec" {
+    for_each = lookup(each.value.docker_service, "endpoint_spec", null) == null ? {} : { endpoint_spec : each.value.docker_service.endpoint_spec }
+    content {
+      mode   = lookup(endpoint_spec.value, "mode", null)
+      dynamic "ports" {
+        for_each = lookup(each.value.endpoint_spec, "converge_config", null) == null ? {} : { ports : each.value.endpoint_spec.ports }
+        content {
+          dtarget_portelay   = lookup(ports.value, "target_port", null)  
+        }
+      }
+    }
+  }
+  dynamic "labels" {
+    for_each = lookup(each.value.docker_service, "labels", null) == null ? {} : { labels : each.value.docker_service.labels }
+    content {
+      label     = lookup(labels.value, "label", null)
+      value      = lookup(labels.value, "value", null)
+    }
+  }
+  dynamic "mode" {
+    for_each = lookup(each.value.docker_service, "mode", null) == null ? {} : { mode : each.value.docker_service.mode }
+    content {
+      global   = lookup(mode.value, "global", null)
+      dynamic "replicated" {
+        for_each = lookup(global.value, "replicated", null) == null ? {} : { replicated : global.value.replicated.replicated }
+        content {
+          replicas   = lookup(replicated.value, "replicas", null)  
+        }
+      }
+    }
+  }
+  dynamic "rollback_config" {
+    for_each = lookup(each.value.docker_service, "rollback_config", null) == null ? {} : { rollback_config : each.value.docker_service.rollback_config }
+    content {
+      delay     = lookup(rollback_config.value, "delay", null)
+      failure_action      = lookup(rollback_config.value, "failure_action", null)
+      max_failure_ratio      = lookup(rollback_config.value, "max_failure_ratio", null)
+      monitor      = lookup(rollback_config.value, "monitor", null)
+      order      = lookup(rollback_config.value, "order", null)
+      parallelism      = lookup(rollback_config.value, "parallelism", null)
+    }
+  }
+  dynamic "update_config" {
+    for_each = lookup(each.value.docker_service, "update_config", null) == null ? {} : { update_config : each.value.docker_service.update_config }
+    content {
+      delay     = lookup(update_config.value, "delay", null)
+      failure_action      = lookup(update_config.value, "failure_action", null)
+      max_failure_ratio      = lookup(update_config.value, "max_failure_ratio", null)
+      monitor      = lookup(update_config.value, "monitor", null)
+      order      = lookup(update_config.value, "order", null)
+      parallelism      = lookup(update_config.value, "parallelism", null)
+    }
+  }
   dynamic "task_spec" {
     for_each = lookup(each.value.docker_service, "task_spec", null) == null ? {} : { task_spec : each.value.docker_service.task_spec }
     content {
@@ -118,13 +186,20 @@ resource "docker_service" "self" {
             }
           }
           read_only = lookup(container_spec.value, "read_only", null)
-          dynamic "labels" {
-            for_each = lookup(container_spec.value, "labels", null) == null ? {} : { labels : container_spec.value.labels }
+          dynamic "secrets" {
+            for_each = lookup(container_spec.value, "secrets", null) == null ? {} : { secrets : container_spec.value.secrets }
             content {
-              label     = lookup(labels.value, "label", null)
-              value      = lookup(labels.value, "value", null)
+              file_name     = lookup(secrets.value, "file_name", null)
+              secret_id      = lookup(secrets.value, "secret_id", null)
+              file_gid      = lookup(secrets.value, "file_gid", null)
+              file_mode      = lookup(secrets.value, "file_mode", null)
+              file_uid      = lookup(secrets.value, "file_uid", null)
+              secret_name      = lookup(secrets.value, "secret_name", null)
             }
           }
+          stop_grace_period = lookup(container_spec.value, "stop_grace_period", null)
+          stop_signal = lookup(container_spec.value, "stop_signal", null)
+          user = lookup(container_spec.value, "user", null)
         }
       }
       force_update = lookup(task_spec.value, "force_update", null)
