@@ -1,6 +1,10 @@
 resource "docker_image" "self" {
-  for_each = local.docker_image
-  name     = lookup(each.value.docker_image, "name", null)
+  for_each      = local.docker_image
+  name          = lookup(each.value.docker_image, "name", null)
+  force_remove  = lookup(each.value.docker_image, "force_remove", null)
+  keep_locally  = lookup(each.value.docker_image, "keep_locally", null)
+  pull_trigger  = lookup(each.value.docker_image, "pull_trigger", null)
+  pull_triggers = lookup(each.value.docker_image, "pull_triggers", null)
   dynamic "build" {
     for_each = lookup(each.value.docker_image, "build", null) == null ? {} : { build : each.value.docker_image.build }
     content {
@@ -14,10 +18,5 @@ resource "docker_image" "self" {
       tag          = lookup(build.value, "tag", null)
       target       = lookup(build.value, "target", null)
     }
-  }
-  force_remove = lookup(each.value.docker_image, "force_remove", null)
-  #id            = lookup(each.value.docker_image, "id", null)
-  keep_locally  = lookup(each.value.docker_image, "keep_locally", null)
-  pull_trigger  = lookup(each.value.docker_image, "pull_trigger", null)
-  pull_triggers = lookup(each.value.docker_image, "pull_triggers", null)
+  } 
 }

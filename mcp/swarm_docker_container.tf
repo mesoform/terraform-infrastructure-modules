@@ -1,8 +1,51 @@
 resource "docker_container" "self" {
   for_each = local.docker_container
-  name     = lookup(each.value.docker_container, "name", null)
-  image    = lookup(each.value.docker_container, "image", null)
-  attach   = lookup(each.value.docker_container, "attach", null)
+  name                  = lookup(each.value.docker_container, "name", null)
+  image                 = lookup(each.value.docker_container, "image", null)
+  attach                = lookup(each.value.docker_container, "attach", null)
+  command               = lookup(each.value.docker_container, "command", [])
+  cpu_set               = lookup(each.value.docker_container, "cpu_set", null)
+  cpu_shares            = lookup(each.value.docker_container, "cpu_shares", null)
+  destroy_grace_seconds = lookup(each.value.docker_container, "destroy_grace_seconds", null)
+  dns                   = lookup(each.value.docker_container, "dns", [])
+  dns_opts              = lookup(each.value.docker_container, "dns_opts", [])
+  dns_search            = lookup(each.value.docker_container, "dns_search", [])
+  domainname            = lookup(each.value.docker_container, "domainname", null)
+  entrypoint            = lookup(each.value.docker_container, "entrypoint", [])
+  env                   = lookup(each.value.docker_container, "env", [])
+  group_add             = lookup(each.value.docker_container, "group_add", [])
+  hostname              = lookup(each.value.docker_container, "hostname", null)
+  init                  = lookup(each.value.docker_container, "init", null)
+  ipc_mode              = lookup(each.value.docker_container, "ipc_mode", null)
+  links                 = lookup(each.value.docker_container, "links", [])
+  log_driver            = lookup(each.value.docker_container, "log_driver", null)
+  log_opts              = lookup(each.value.docker_container, "log_opts", {})
+  logs                  = lookup(each.value.docker_container, "logs", null)
+  max_retry_count       = lookup(each.value.docker_container, "max_retry_count", null)
+  memory                = lookup(each.value.docker_container, "memory", null)
+  memory_swap           = lookup(each.value.docker_container, "memory_swap", null)
+  must_run              = lookup(each.value.docker_container, "must_run", null)
+  network_alias         = lookup(each.value.docker_container, "network_alias", [])
+  network_mode          = lookup(each.value.docker_container, "network_mode", null)
+  networks              = lookup(each.value.docker_container, "networks", [])
+  pid_mode              = lookup(each.value.docker_container, "pid_mode", null)
+  privileged            = lookup(each.value.docker_container, "privileged", null)
+  publish_all_ports     = lookup(each.value.docker_container, "publish_all_ports", null)
+  read_only             = lookup(each.value.docker_container, "read_only", null)
+  remove_volumes        = lookup(each.value.docker_container, "remove_volumes", null)
+  restart               = lookup(each.value.docker_container, "restart", null)
+  rm                    = lookup(each.value.docker_container, "rm", null)
+  security_opts         = lookup(each.value.docker_container, "security_opts", [])
+  shm_size              = lookup(each.value.docker_container, "shm_size", null)
+  start                 = lookup(each.value.docker_container, "start", null)
+  stdin_open            = lookup(each.value.docker_container, "stdin_open", null)
+  storage_opts          = lookup(each.value.docker_container, "storage_opts", {})
+  sysctls               = lookup(each.value.docker_container, "sysctls", {})
+  tmpfs                 = lookup(each.value.docker_container, "tmpfs", {})
+  tty                   = lookup(each.value.docker_container, "tty", null)
+  user                  = lookup(each.value.docker_container, "user", null)
+  userns_mode           = lookup(each.value.docker_container, "userns_mode", null)
+  working_dir           = lookup(each.value.docker_container, "working_dir", null)
   dynamic "capabilities" {
     for_each = lookup(each.value.docker_container, "capabilities", null) == null ? {} : { capabilities : each.value.docker_container.capabilities }
     content {
@@ -10,10 +53,6 @@ resource "docker_container" "self" {
       drop = lookup(capabilities.value, "drop", null)
     }
   }
-  command               = lookup(each.value.docker_container, "command", [])
-  cpu_set               = lookup(each.value.docker_container, "cpu_set", null)
-  cpu_shares            = lookup(each.value.docker_container, "cpu_shares", null)
-  destroy_grace_seconds = lookup(each.value.docker_container, "destroy_grace_seconds", null)
   dynamic "devices" {
     for_each = lookup(each.value.docker_container, "devices", null) == null ? {} : { devices : each.value.docker_container.devices }
     content {
@@ -22,13 +61,6 @@ resource "docker_container" "self" {
       permissions    = lookup(devices.value, "permissions", null)
     }
   }
-  dns        = lookup(each.value.docker_container, "dns", [])
-  dns_opts   = lookup(each.value.docker_container, "dns_opts", [])
-  dns_search = lookup(each.value.docker_container, "dns_search", [])
-  domainname = lookup(each.value.docker_container, "domainname", null)
-  entrypoint = lookup(each.value.docker_container, "entrypoint", [])
-  env        = lookup(each.value.docker_container, "env", [])
-  group_add  = lookup(each.value.docker_container, "group_add", [])
   dynamic "healthcheck" {
     for_each = lookup(each.value.docker_container, "healthcheck", null) == null ? {} : { healthcheck : each.value.docker_container.healthcheck }
     content {
@@ -46,10 +78,6 @@ resource "docker_container" "self" {
       ip   = lookup(host.value, "ip", null)
     }
   }
-  hostname = lookup(each.value.docker_container, "hostname", null)
-  #id  = lookup(each.value.docker_container, "id", null)
-  init     = lookup(each.value.docker_container, "init", null)
-  ipc_mode = lookup(each.value.docker_container, "ipc_mode", null)
   dynamic "labels" {
     for_each = lookup(each.value.docker_container, "labels", null) == null ? {} : { labels : each.value.docker_container.labels }
     content {
@@ -57,16 +85,11 @@ resource "docker_container" "self" {
       value = lookup(labels.value, "value", null)
     }
   }
-  links           = lookup(each.value.docker_container, "links", [])
-  log_driver      = lookup(each.value.docker_container, "log_driver", null)
-  log_opts        = lookup(each.value.docker_container, "log_opts", {})
-  logs            = lookup(each.value.docker_container, "logs", null)
-  max_retry_count = lookup(each.value.docker_container, "max_retry_count", null)
-  memory          = lookup(each.value.docker_container, "memory", null)
-  memory_swap     = lookup(each.value.docker_container, "memory_swap", null)
   dynamic "mounts" {
     for_each = lookup(each.value.docker_container, "mounts", null) == null ? {} : { mounts : each.value.docker_container.mounts }
     content {
+      type   = lookup(mounts.value, "type", null)
+      target = lookup(mounts.value, "target", null)
       dynamic "bind_options" {
         for_each = lookup(mounts.value, "bind_options", null) == null ? {} : { bind_options : mounts.value.bind.options }
         content {
@@ -95,15 +118,9 @@ resource "docker_container" "self" {
             }
           }
         }
-      }
-      type   = lookup(mounts.value, "type", null)
-      target = lookup(mounts.value, "target", null)
+      }   
     }
   }
-  must_run      = lookup(each.value.docker_container, "must_run", null)
-  network_alias = lookup(each.value.docker_container, "network_alias", [])
-  network_mode  = lookup(each.value.docker_container, "network_mode", null)
-  networks      = lookup(each.value.docker_container, "networks", [])
   dynamic "networks_advanced" {
     for_each = lookup(each.value.docker_container, "networks_advanced", null) == null ? {} : { networks_advanced : each.value.docker_container.networks_advanced }
     content {
@@ -113,7 +130,6 @@ resource "docker_container" "self" {
       ipv6_address = lookup(networks_advanced.value, "ipv6_address", null)
     }
   }
-  pid_mode = lookup(each.value.docker_container, "pid_mode", null)
   dynamic "ports" {
     for_each = lookup(each.value.docker_container, "ports", null) == null ? {} : { ports : each.value.docker_container.ports }
     content {
@@ -123,20 +139,6 @@ resource "docker_container" "self" {
       protocol = lookup(ports.value, "protocol", null)
     }
   }
-  privileged        = lookup(each.value.docker_container, "privileged", null)
-  publish_all_ports = lookup(each.value.docker_container, "publish_all_ports", null)
-  read_only         = lookup(each.value.docker_container, "read_only", null)
-  remove_volumes    = lookup(each.value.docker_container, "remove_volumes", null)
-  restart           = lookup(each.value.docker_container, "restart", null)
-  rm                = lookup(each.value.docker_container, "rm", null)
-  security_opts     = lookup(each.value.docker_container, "security_opts", [])
-  shm_size          = lookup(each.value.docker_container, "shm_size", null)
-  start             = lookup(each.value.docker_container, "start", null)
-  stdin_open        = lookup(each.value.docker_container, "stdin_open", null)
-  storage_opts      = lookup(each.value.docker_container, "storage_opts", {})
-  sysctls           = lookup(each.value.docker_container, "sysctls", {})
-  tmpfs             = lookup(each.value.docker_container, "tmpfs", {})
-  tty               = lookup(each.value.docker_container, "tty", null)
   dynamic "ulimit" {
     for_each = lookup(each.value.docker_container, "ulimit", null) == null ? {} : { ulimit : each.value.docker_container.ulimit }
     content {
@@ -156,8 +158,6 @@ resource "docker_container" "self" {
       source_hash    = lookup(upload.value, "source_hash", null)
     }
   }
-  user        = lookup(each.value.docker_container, "user", null)
-  userns_mode = lookup(each.value.docker_container, "userns_mode", null)
   dynamic "volumes" {
     for_each = lookup(each.value.docker_container, "volumes", null) == null ? {} : { volumes : each.value.docker_container.volumes }
     content {
@@ -167,6 +167,5 @@ resource "docker_container" "self" {
       read_only      = lookup(volumes.value, "read_only", null)
       volume_name    = lookup(volumes.value, "volume_name", null)
     }
-  }
-  working_dir = lookup(each.value.docker_container, "working_dir", null)
+  }  
 }

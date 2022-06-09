@@ -7,6 +7,8 @@ resource "docker_network" "self" {
   ingress         = lookup(each.value.docker_network, "ingress", null)
   internal        = lookup(each.value.docker_network, "internal", null)
   ipam_driver     = lookup(each.value.docker_network, "ipam_driver", null)
+  ipv6            = lookup(each.value.docker_network, "ipv6", null)
+  options         = lookup(each.value.docker_network, "options", {})
   dynamic "ipam_config" {
     for_each = lookup(each.value.docker_network, "ipam_config", null) == null ? {} : { ipam_config : each.value.docker_network.ipam_config }
     content {
@@ -16,7 +18,6 @@ resource "docker_network" "self" {
       subnet      = lookup(ipam_config.value, "subnet", null)
     }
   }
-  ipv6 = lookup(each.value.docker_network, "ipv6", null)
   dynamic "labels" {
     for_each = lookup(each.value.docker_network, "labels", null) == null ? {} : { labels : each.value.docker_network.labels }
     content {
@@ -24,5 +25,4 @@ resource "docker_network" "self" {
       value = lookup(labels.value, "value", null)
     }
   }
-  options = lookup(each.value.docker_network, "options", {})
 }

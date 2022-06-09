@@ -6,20 +6,7 @@ resource "docker_registry_image" "self" {
   dynamic "build" {
     for_each = lookup(each.value.docker_registry_image, "build", null) == null ? {} : { build : each.value.docker_registry_image.build }
     content {
-      context = lookup(build.value, "context", null)
-      dynamic "auth_config" {
-        for_each = lookup(build.value, "auth_config", null) == null ? {} : { auth_config : build.value.auth_config }
-        content {
-          host_name      = lookup(auth_config.value, "host_name", null)
-          auth           = lookup(auth_config.value, "auth", null)
-          email          = lookup(auth_config.value, "email", null)
-          identity_token = lookup(auth_config.value, "identity_token", null)
-          password       = lookup(auth_config.value, "password", null)
-          registry_token = lookup(auth_config.value, "registry_token", null)
-          server_address = lookup(auth_config.value, "server_address", null)
-          user_name      = lookup(auth_config.value, "user_name", null)
-        }
-      }
+      context         = lookup(build.value, "context", null)
       build_args      = lookup(build.value, "build_args", {})
       build_id        = lookup(build.value, "build_id", null)
       cache_from      = lookup(build.value, "cache_from", null)
@@ -48,6 +35,20 @@ resource "docker_registry_image" "self" {
       squash          = lookup(build.value, "squash", null)
       suppress_output = lookup(build.value, "suppress_output", null)
       target          = lookup(build.value, "target", null)
+      version         = lookup(build.value, "version", null)
+      dynamic "auth_config" {
+        for_each = lookup(build.value, "auth_config", null) == null ? {} : { auth_config : build.value.auth_config }
+        content {
+          host_name      = lookup(auth_config.value, "host_name", null)
+          auth           = lookup(auth_config.value, "auth", null)
+          email          = lookup(auth_config.value, "email", null)
+          identity_token = lookup(auth_config.value, "identity_token", null)
+          password       = lookup(auth_config.value, "password", null)
+          registry_token = lookup(auth_config.value, "registry_token", null)
+          server_address = lookup(auth_config.value, "server_address", null)
+          user_name      = lookup(auth_config.value, "user_name", null)
+        }
+      } 
       dynamic "ulimit" {
         for_each = lookup(build.value, "ulimit", null) == null ? {} : { ulimit : build.value.ulimit }
         content {
@@ -56,7 +57,6 @@ resource "docker_registry_image" "self" {
           soft = lookup(ulimit.value, "soft", null)
         }
       }
-      version = lookup(build.value, "version", null)
     }
   }
 }

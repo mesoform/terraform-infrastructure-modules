@@ -1,3 +1,3 @@
 #output "docker" {
-#    value = local.docker_registry_image
+#    value = local.docker_service
 #}

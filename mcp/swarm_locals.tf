@@ -5,7 +5,7 @@ locals {
   docker = local.docker_config_yml == null ? {} : yamldecode(local.docker_config_yml)
 
   docker_components       = try(lookup(local.docker, "components", {}), lookup(local.docker, "components"))
-  k8s_components_specs = lookup(local.docker_components, "specs", {})
+  docker_components_specs = lookup(local.docker_components, "specs", {})
 
 
   docker_container = { for app, config in local.docker_components :
@@ -32,4 +32,17 @@ locals {
     app => { docker_service : lookup(config, "docker_service", null) }
     if lookup(config, "docker_service", null) != null
   }
+  docker_secret = { for app, config in local.docker_components :
+    app => { docker_secret : lookup(config, "docker_secret", null) }
+    if lookup(config, "docker_secret", null) != null
+  }
+  docker_volume = { for app, config in local.docker_components :
+    app => { docker_volume : lookup(config, "docker_volume", null) }
+    if lookup(config, "docker_volume", null) != null
+  }
+  docker_config = { for app, config in local.docker_components :
+    app => { docker_config : lookup(config, "docker_config", null) }
+    if lookup(config, "docker_config", null) != null
+  }
+  
 }
