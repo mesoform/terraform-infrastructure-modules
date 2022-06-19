@@ -1,5 +1,10 @@
 # Multi-Cloud Platform Module
 
+# The MCP adapters have now moved to their own repositories
+## https://github.com/mesoform/Multi-Cloud-Platform-Foundations.git for foundational infrastructure adapters
+## https://github.com/mesoform/Multi-Cloud-Platform-Services.git for service adapters
+
+
 * [Information](#Information)  
 * [Structure](#Structure)     
 * [Setup](#Setup)
