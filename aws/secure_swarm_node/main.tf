@@ -5,7 +5,7 @@ resource time_static self {
 }
 
 module secure_instance_template_blue {
-  source = "../compute_engine/instance_template"
+  source = "../ec2/instance_template"
   name_prefix         = "${local.name}-blue-"
   description         = var.description
   instance_type       = var.blue_instance_template.instance_type == null ? var.instance_type : var.blue_instance_template.instance_type
@@ -19,7 +19,7 @@ module secure_instance_template_blue {
 }
 
 module secure_instance_template_green {
-  source = "../compute_engine/instance_template"
+  source = "../ec2/instance_template"
   name_prefix         = "${local.name}-green-"
   description         = var.description
   instance_type       = var.blue_instance_template.instance_type == null ? var.instance_type : var.blue_instance_template.instance_type
@@ -61,70 +61,70 @@ resource "aws_autoscaling_group" "green" {
   tags = var.ASG_tags
 }
 
-# For optional persistent disk blue
+# For optional root disk blue
 
-resource "aws_ebs_volume" "_blue_persistent_disk" {
-  count             = var.stateful_instance_group && var.persistent_disk ? 1 : 0
+resource "aws_ebs_volume" "blue_root_disk" {
+  count             = var.data_instance_group && var.root_disk ? 1 : 0
   availability_zone = var.availability_zone
-  size              = var.persistent_disk_size
+  size              = var.root_disk_size
   encrypted         = var.security_level == "confidential-1" ? true : false
   type              = var.disk_type
   kms_key_id        = var.kms_key_id
 
   tags = {
     Name        = "${local.name}-data-blue",
-    Device_name = var.persistent_device_name
+    Device_name = var.root_device_name
   }
 }
 
-# For optional stateful disk blue
+# For optional data disk blue
 
-resource "aws_ebs_volume" "blue_stateful_disk" {
-  count             = length(local.stateful_boot_disk) == 0 ? 0 :1
+resource "aws_ebs_volume" "blue_data_disk" {
+  count             = length(local.data_boot_disk) == 0 ? 0 :1
   availability_zone = var.availability_zone
-  size              = var.stateful_disk_size
-  encrypted         = var.security_level == "confidential-1" ? true : false
+  size              = var.data_disk_size
+  encrypted         = true
   type              = var.disk_type
 
   tags = {
     Name        = "${local.name}-state-blue",
-    Device_name = var.stateful_device_name
+    Device_name = var.data_device_name
   } 
 }
 
-# For optional persistent disk green
+# For optional root disk green
 
-resource "aws_ebs_volume" "green_persistent_disk" {
-  count             = var.stateful_instance_group && var.persistent_disk ? 1 : 0
+resource "aws_ebs_volume" "green_root_disk" {
+  count             = var.data_instance_group && var.root_disk ? 1 : 0
   availability_zone = var.availability_zone
-  size              = var.persistent_disk_size
+  size              = var.root_disk_size
   encrypted         = var.security_level == "confidential-1" ? true : false
   type              = var.disk_type
   kms_key_id        = var.kms_key_id
 
   tags = {
     Name        = "${local.name}-data-green",
-    Device_name = var.persistent_device_name
+    Device_name = var.root_device_name
   }
 }
 
-# For optional stateful disk green
+# For optional data disk green
 
-resource "aws_ebs_volume" "green_stateful_disk" {
-  count             = length(local.stateful_boot_disk) == 0 ? 0 :1
+resource "aws_ebs_volume" "green_data_disk" {
+  count             = length(local.data_boot_disk) == 0 ? 0 :1
   availability_zone = var.availability_zone
-  size              = var.stateful_disk_size
-  encrypted         = var.security_level == "confidential-1" ? true : false
+  size              = var.data_disk_size
+  encrypted         = true
   type              = var.disk_type
 
   tags = {
     Name        = "${local.name}-state-green",
-    Device_name = var.stateful_device_name
+    Device_name = var.data_device_name
   } 
 }
 
 module "vpc" {
-  source               = "../compute_engine/vpc"
+  source               = "../ec2/vpc"
   ports                = ["22", "80"]
   public_subnet_cidrs  = ["10.0.10.0/24"]
   private_subnet_cidrs = []

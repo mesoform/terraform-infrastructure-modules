@@ -44,12 +44,12 @@ variable "region" {
 }
 
 
-variable "persistent_disk_size"{
+variable "root_disk_size"{
   description = "Data disk size"
   default = 20
 }
 
-variable "stateful_disk_size" {
+variable "data_disk_size" {
   description = "Stateful disk size"
   default = 20
 }
@@ -139,7 +139,7 @@ variable "stateful_instance_group" {
   default = true
 }
 
-variable "persistent_disk" {
+variable "root_disk" {
   type = bool
   description = "Whether to attach a persistent disk to the instance (default true)"
   default = true
