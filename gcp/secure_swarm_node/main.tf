@@ -238,7 +238,7 @@ resource google_compute_region_instance_group_manager self {
   }
 
   dynamic "update_policy" {
-    for_each = var.update_policy
+    for_each = var.regional_update_policy
     content {
       type                         = update_policy.value.type
       minimal_action               = update_policy.value.minimal_action
