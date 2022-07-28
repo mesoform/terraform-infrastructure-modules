@@ -152,7 +152,7 @@ module "secure_swarm_regional" {
     subnetwork = "subnet"
     network_ip = "10.0.0.3"
   }
-  update_policy = [{
+  regional_update_policy = [{
     type                         = "PROACTIVE"
     instance_redistribution_type = "PROACTIVE"
     minimal_action               = "REPLACE"
@@ -177,7 +177,7 @@ module "stateful_secure_swarm_regional" {
     initial_delay_sec = 180
   }]
   access_config = [{nat_ip = "35.0.0.3"}]
-  update_policy = [{
+  regional_update_policy = [{
     type                         = "PROACTIVE"
     instance_redistribution_type = "NONE"
     minimal_action               = "REPLACE"
