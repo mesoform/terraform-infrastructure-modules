@@ -59,7 +59,7 @@ module secure_instance_template_blue {
   disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
   disk_size_gb         = var.boot_disk_size
-  boot_device_name     = var.boot_device_name
+  boot_device_name     = local.boot_device_name
   additional_disks     = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
@@ -102,7 +102,7 @@ module secure_instance_template_green {
   disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
   disk_size_gb         = var.boot_disk_size
-  boot_device_name     = var.boot_device_name
+  boot_device_name     = local.boot_device_name
   additional_disks     = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
@@ -238,7 +238,7 @@ resource google_compute_region_instance_group_manager self {
   }
 
   dynamic "update_policy" {
-    for_each = var.update_policy
+    for_each = var.regional_update_policy
     content {
       type                         = update_policy.value.type
       minimal_action               = update_policy.value.minimal_action

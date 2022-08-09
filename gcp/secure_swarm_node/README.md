@@ -53,7 +53,7 @@ If `zone` is null, a regional MIG will be deployed instead, and will just have t
 The MIG can either be stateful (default) or set to stateless by setting `stateful_instance_group=false`.
 If using a persistent disks, the maximum `target_size` is 1 (see [troubleshooting](#the-instance-template-cannot-be-used-to-create-more-than-one-instance-per-zone)).
 
-If the `update_policy` is configured to do so, the instances deployed from MIG will update when the version changes.
+If the `update_policy` or `regional_update_policy` is configured to do so, the instances deployed from MIG will update when the version changes.
 If `version_name` is not set, a timestamp is used for the `version` configuration. 
 The timestamp, and therefore the version, is updated when there is a change to one of the following:
 * Deployment version (blue or green)
@@ -111,7 +111,7 @@ module "secure_swarm_a" {
   deployment_version = "blue"
   security_level = "confidential-1"
   zone = "a"
-  project = "project"
+  project = var.project
   disk_size = 20
   service_account_email = "sa@project.iam.gserviceaccount.com"
   health_check = [{
@@ -119,23 +119,27 @@ module "secure_swarm_a" {
     initial_delay_sec = 180
   }]
   access_config = [{nat_ip = "35.0.0.2"}]
-  }
   blue_instance_template = {}
   green_instance_template = {
     network = "network"
     subnetwork = "subnet"
     network_ip = "10.0.0.2"
-    }
   }
 }
 
-module "secure_swarm_b" {
+data "google_compute_zones" "available" {
+  project = var.project
+  region  = var.region
+}
+
+module "secure_swarm_regional" {
   source = "github.com/mesoform/terraform-infrastructure-modules//gcp/secure_swarm_node"
   deployment_version = "green"
   security_level = "confidential-1"
-  zone = "b"
-  project = "project"
-  disk_size = 20
+  stateful_instance_group = false
+  persistent_disk = false
+  region = var.region
+  project = var.project
   service_account_email = "sa@project.iam.gserviceaccount.com"
   health_check = [{
     name              = "test-check"
@@ -148,6 +152,39 @@ module "secure_swarm_b" {
     subnetwork = "subnet"
     network_ip = "10.0.0.3"
   }
+  regional_update_policy = [{
+    type                         = "PROACTIVE"
+    instance_redistribution_type = "PROACTIVE"
+    minimal_action               = "REPLACE"
+    max_surge_fixed              = 0
+    max_unavailable_fixed        = length(data.google_compute_zones.available.names)
+    replacement_method           = "RECREATE"
+  }]
+}
+
+module "stateful_secure_swarm_regional" {
+  source = "github.com/mesoform/terraform-infrastructure-modules//gcp/secure_swarm_node"
+  deployment_version = "green"
+  security_level = "confidential-1"
+  region = var.region
+  project = var.project
+  stateful_instance_group = true
+  persistent_disk = true
+  disk_size = 20
+  service_account_email = "sa@project.iam.gserviceaccount.com"
+  health_check = [{
+    name              = "test-check"
+    initial_delay_sec = 180
+  }]
+  access_config = [{nat_ip = "35.0.0.3"}]
+  regional_update_policy = [{
+    type                         = "PROACTIVE"
+    instance_redistribution_type = "NONE"
+    minimal_action               = "REPLACE"
+    max_surge_fixed              = 0
+    max_unavailable_fixed        = length(data.google_compute_zones.available.names)
+    replacement_method           = "RECREATE"
+  }]
 }
 ```
 

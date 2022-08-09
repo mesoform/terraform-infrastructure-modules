@@ -114,8 +114,8 @@ variable "boot_disk_size" {
 }
 
 variable "boot_device_name" {
-  description = "Device name for the boot disk"
-  type = string
+  description = "Device name for the boot disk, defaults to <name>-<zone>-boot"
+  type        = string
   default     = null
 }
 
