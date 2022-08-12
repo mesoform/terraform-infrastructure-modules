@@ -1,5 +1,5 @@
 module "private-cloudsql-postgres" {
-  source = "../../gcp/cloudsql/private_postgres"
+  source = "../../gcp/databases/cloudsql/private_postgres"
   project_id  = "cryptotraders-platform-test"
   vpc_network = "cryptotraders-platform"
   private_address = "10.240.0.0"
