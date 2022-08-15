@@ -1,16 +1,16 @@
-data "google_compute_network" "main" {
+data google_compute_network main {
   name = var.vpc_network
   project = var.project_id
 }
 
-module "private-service-access" {
+module private-service-access {
   source = "github.com/terraform-google-modules/terraform-google-sql-db.git//modules/private_service_access?ref=v11.0.0"
   project_id  = var.project_id
   vpc_network = var.vpc_network
   address = var.private_address
 }
 
-module "cloudsql-postgres" {
+module cloudsql-postgres {
   source = "github.com/terraform-google-modules/terraform-google-sql-db.git//modules/postgresql?ref=v11.0.0"
   project_id = var.project_id
   name = var.cloudsql_instance_name
