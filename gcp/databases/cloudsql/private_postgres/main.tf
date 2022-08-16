@@ -4,14 +4,14 @@ data google_compute_network main {
 }
 
 module private-service-access {
-  source = "github.com/terraform-google-modules/terraform-google-sql-db.git//modules/private_service_access?ref=v11.0.0"
+  source = "../private_service_access"
   project_id  = var.project_id
   vpc_network = var.vpc_network
   address = var.private_address
 }
 
 module cloudsql-postgres {
-  source = "github.com/terraform-google-modules/terraform-google-sql-db.git//modules/postgresql?ref=v11.0.0"
+  source = "../postgresql"
   project_id = var.project_id
   name = var.cloudsql_instance_name
 
@@ -40,6 +40,5 @@ module cloudsql-postgres {
 
   create_timeout = "60m"
 
-  // Optional: used to enforce ordering in the creation of resources.
   module_depends_on = [module.private-service-access.peering_completed]
 }

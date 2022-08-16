@@ -1,6 +1,6 @@
 # terraform-google-sql for PostgreSQL
 
-Note: CloudSQL provides [disk autoresize](https://cloud.google.com/sql/docs/mysql/instance-settings#automatic-storage-increase-2ndgen) feature which can cause a [Terraform configuration drift](https://www.hashicorp.com/blog/detecting-and-managing-drift-with-terraform) due to the value in `disk_size` variable, and hence any updates to this variable is ignored in the [Terraform lifecycle](https://www.terraform.io/docs/configuration/resources.html#ignore_changes).
+Note: PostgreSQL provides [disk autoresize](https://cloud.google.com/sql/docs/postgres/instance-settings#automatic-storage-increase-limit-2ndgen) feature which can cause a [Terraform configuration drift](https://www.hashicorp.com/blog/detecting-and-managing-drift-with-terraform) due to the value in `disk_size` variable, and hence any updates to this variable is ignored in the [Terraform lifecycle](https://www.terraform.io/docs/configuration/resources.html#ignore_changes).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
@@ -53,8 +53,6 @@ Note: CloudSQL provides [disk autoresize](https://cloud.google.com/sql/docs/mysq
 
 | Name | Description |
 |------|-------------|
-| additional\_users | List of maps of additional users and passwords |
-| generated\_user\_password | The auto generated default user password if not input password was provided |
 | instance\_connection\_name | The connection name of the master instance to be used in connection strings |
 | instance\_first\_ip\_address | The first IPv4 address of the addresses assigned. |
 | instance\_ip\_address | The IPv4 address assigned for the master instance |

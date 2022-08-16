@@ -1,7 +1,7 @@
 module private-cloudsql-postgres {
   source = "../../gcp/databases/cloudsql/private_postgres"
   project_id  = "project-test"
-  vpc_network = "project-vpc"
+  vpc_network = "project-test-vpc"
   private_address = "10.240.0.0"
   cloudsql_instance_name = "postgres-test"
   database_version = "POSTGRES_14"

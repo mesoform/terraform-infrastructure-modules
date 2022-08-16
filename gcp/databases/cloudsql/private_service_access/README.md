@@ -1,14 +1,14 @@
 # Submodule for VPC peering Cloud SQL services
 
-MySQL [Private IP](https://cloud.google.com/sql/docs/mysql/private-ip)
+PostgreSQL [Private IP](https://cloud.google.com/sql/docs/postgres/private-ip)
 configurations require a special peering between your VPC network and a
 VPC managed by Google. The module supports creating such a peering.
 
-It is sufficient to instantiate this module once for all MySQL instances
+It is sufficient to instantiate this module once for all PostgreSQL instances
 that are connected to the same VPC.
 
-> NOTE: See the linked [documentation](https://cloud.google.com/sql/docs/mysql/private-ip)
-> for all requirements for accessing a MySQL instance via its Private IP.
+> NOTE: See the linked [documentation](https://cloud.google.com/sql/docs/postgres/private-ip)
+> for all requirements for accessing a PostgreSQL instance via its Private IP.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs

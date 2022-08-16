@@ -35,13 +35,13 @@ locals {
   retention_unit   = lookup(var.backup_configuration, "retention_unit", null)
 }
 
-resource "random_id" "suffix" {
+resource random_id suffix {
   count = var.random_instance_name ? 1 : 0
 
   byte_length = 4
 }
 
-resource "google_sql_database_instance" "default" {
+resource google_sql_database_instance default {
   provider            = google-beta
   project             = var.project_id
   name                = local.master_instance_name
@@ -55,7 +55,7 @@ resource "google_sql_database_instance" "default" {
     activation_policy = var.activation_policy
     availability_type = var.availability_type
 
-    dynamic "backup_configuration" {
+    dynamic backup_configuration {
       for_each = [var.backup_configuration]
       content {
         binary_log_enabled             = false
@@ -65,7 +65,7 @@ resource "google_sql_database_instance" "default" {
         point_in_time_recovery_enabled = lookup(backup_configuration.value, "point_in_time_recovery_enabled", false)
         transaction_log_retention_days = lookup(backup_configuration.value, "transaction_log_retention_days", null)
 
-        dynamic "backup_retention_settings" {
+        dynamic backup_retention_settings {
           for_each = local.retained_backups != null || local.retention_unit != null ? [var.backup_configuration] : []
           content {
             retained_backups = local.retained_backups
@@ -74,7 +74,7 @@ resource "google_sql_database_instance" "default" {
         }
       }
     }
-    dynamic "ip_configuration" {
+    dynamic ip_configuration {
       for_each = [local.ip_configurations[local.ip_configuration_enabled ? "enabled" : "disabled"]]
       content {
         ipv4_enabled       = lookup(ip_configuration.value, "ipv4_enabled", null)
@@ -82,7 +82,7 @@ resource "google_sql_database_instance" "default" {
         require_ssl        = lookup(ip_configuration.value, "require_ssl", null)
         allocated_ip_range = lookup(ip_configuration.value, "allocated_ip_range", null)
 
-        dynamic "authorized_networks" {
+        dynamic authorized_networks {
           for_each = lookup(ip_configuration.value, "authorized_networks", [])
           content {
             expiration_time = lookup(authorized_networks.value, "expiration_time", null)
@@ -92,7 +92,7 @@ resource "google_sql_database_instance" "default" {
         }
       }
     }
-    dynamic "insights_config" {
+    dynamic insights_config {
       for_each = var.insights_config != null ? [var.insights_config] : []
 
       content {
@@ -108,7 +108,7 @@ resource "google_sql_database_instance" "default" {
     disk_size             = var.disk_size
     disk_type             = var.disk_type
     pricing_plan          = var.pricing_plan
-    dynamic "database_flags" {
+    dynamic database_flags {
       for_each = var.database_flags
       content {
         name  = lookup(database_flags.value, "name", null)
@@ -144,7 +144,7 @@ resource "google_sql_database_instance" "default" {
   depends_on = [null_resource.module_depends_on]
 }
 
-resource "google_sql_database" "default" {
+resource google_sql_database default {
   count      = var.enable_default_db ? 1 : 0
   name       = var.db_name
   project    = var.project_id
@@ -154,7 +154,7 @@ resource "google_sql_database" "default" {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
-resource "google_sql_database" "additional_databases" {
+resource google_sql_database additional_databases {
   for_each   = local.databases
   project    = var.project_id
   name       = each.value.name
@@ -164,7 +164,7 @@ resource "google_sql_database" "additional_databases" {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
-resource "random_password" "user-password" {
+resource random_password user-password {
   keepers = {
     name = google_sql_database_instance.default.name
   }
@@ -174,7 +174,8 @@ resource "random_password" "user-password" {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
-resource "google_secret_manager_secret" "user-password" {
+resource google_secret_manager_secret user-password {
+  project = var.project_id
   secret_id   = "user-password"
   replication {
     user_managed {
@@ -187,14 +188,14 @@ resource "google_secret_manager_secret" "user-password" {
   depends_on = [null_resource.module_depends_on, random_password.user-password]
 }
 
-resource "google_secret_manager_secret_version" "user-password" {
+resource google_secret_manager_secret_version user-password {
   secret = google_secret_manager_secret.user-password.id
   secret_data = random_password.user-password.result
 
   depends_on = [null_resource.module_depends_on, google_secret_manager_secret.user-password]
 }
 
-resource "random_password" "additional_passwords" {
+resource random_password additional_passwords {
   for_each = local.users
   keepers = {
     name = google_sql_database_instance.default.name
@@ -205,9 +206,11 @@ resource "random_password" "additional_passwords" {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
-resource "google_secret_manager_secret" "additional_passwords" {
+resource google_secret_manager_secret additional_passwords {
   for_each = local.users
+  project = var.project_id
   secret_id = join("-", [each.value.name, "password"])
+
   replication {
     user_managed {
       replicas {
@@ -216,18 +219,18 @@ resource "google_secret_manager_secret" "additional_passwords" {
     }
   }
 
-  depends_on = [null_resource.module_depends_on, random_password.additional_passwords[each.value.name]]
+  depends_on = [null_resource.module_depends_on, random_password.additional_passwords]
 }
 
-resource "google_secret_manager_secret_version" "additional_passwords" {
+resource google_secret_manager_secret_version additional_passwords {
   for_each = local.users
-  secret = google_secret_manager_secret.additional_passwords.id
-  secret_data = random_password.additional_passwords.result
+  secret = google_secret_manager_secret.additional_passwords[each.key].id
+  secret_data = random_password.additional_passwords[each.key].result
 
-  depends_on = [null_resource.module_depends_on, google_secret_manager_secret.additional_passwords[each.value.name]]
+  depends_on = [null_resource.module_depends_on, google_secret_manager_secret.additional_passwords]
 }
 
-resource "google_sql_user" "default" {
+resource google_sql_user default {
   count    = var.enable_default_user ? 1 : 0
   name     = var.user_name
   project  = var.project_id
@@ -240,7 +243,7 @@ resource "google_sql_user" "default" {
   ]
 }
 
-resource "google_sql_user" "additional_users" {
+resource google_sql_user additional_users {
   for_each = local.users
   project  = var.project_id
   name     = each.value.name
@@ -253,7 +256,7 @@ resource "google_sql_user" "additional_users" {
   ]
 }
 
-resource "google_project_iam_member" "iam_binding" {
+resource google_project_iam_member iam_binding {
   for_each = {
     for iu in local.iam_users :
     "${iu.email} ${iu.is_account_sa}" => iu
@@ -267,7 +270,7 @@ resource "google_project_iam_member" "iam_binding" {
   )
 }
 
-resource "google_sql_user" "iam_account" {
+resource google_sql_user iam_account {
   for_each = {
     for iu in local.iam_users :
     "${iu.email} ${iu.is_account_sa}" => iu
@@ -287,7 +290,7 @@ resource "google_sql_user" "iam_account" {
   ]
 }
 
-resource "null_resource" "module_depends_on" {
+resource null_resource module_depends_on {
   triggers = {
     value = length(var.module_depends_on)
   }
