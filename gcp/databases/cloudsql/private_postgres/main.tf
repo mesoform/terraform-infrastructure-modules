@@ -1,28 +1,28 @@
 data google_compute_network main {
-  name = var.vpc_network
-  project = var.project_id
+  name = var.cloudsql_vpc_network
+  project = var.cloudsql_project_id
 }
 
 module private-service-access {
-  source = "../private_service_access"
-  project_id  = var.project_id
-  vpc_network = var.vpc_network
-  address = var.private_address
+  source = "../../../compute_engine/private_service_access"
+  project_id  = var.cloudsql_project_id
+  vpc_network = var.cloudsql_vpc_network
+  address = var. cloudsql_private_address
 }
 
 module cloudsql-postgres {
   source = "../postgresql"
-  project_id = var.project_id
+  project_id = var.cloudsql_project_id
   name = var.cloudsql_instance_name
-
-  database_version = var.database_version
-  region = var.region
-  zone = var.zone
+  create_timeout = "60m"
+  database_version = var.cloudsql_database_version
+  region = var.cloudsql_region
+  zone = var.cloudsql_zone
   tier = var.cloudsql_instance_tier
 
-  deletion_protection = var.deletion_protection
+  deletion_protection = var.cloudsql_deletion_protection
 
-  database_flags = var.database_flags
+  database_flags = var.cloudsql_database_flags
 
   ip_configuration = {
     authorized_networks = []
@@ -32,13 +32,14 @@ module cloudsql-postgres {
     allocated_ip_range = module.private-service-access.google_compute_global_address_name
   }
 
-  db_name = var.db_name
-  user_name = var.user_name
+  db_name = var.cloudsql_db_name
+  user_name = var.cloudsql_user_name
 
-  additional_users = var.additional_users
-  additional_databases = var.additional_databases
+  additional_users = var.cloudsql_additional_users
+  additional_databases = var.cloudsql_additional_databases
 
-  create_timeout = "60m"
+  secret_manager_project_id = var.secret_manager_project_id
+  secret_manager_location = var.secret_manager_location
 
   module_depends_on = [module.private-service-access.peering_completed]
 }

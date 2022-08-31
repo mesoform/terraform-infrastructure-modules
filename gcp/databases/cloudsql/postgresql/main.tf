@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  master_instance_name = var.random_instance_name ? "${var.name}-${random_id.suffix[0].hex}" : var.name
-
-  ip_configuration_enabled = length(keys(var.ip_configuration)) > 0 ? true : false
-
-  ip_configurations = {
-    enabled  = var.ip_configuration
-    disabled = {}
-  }
-
-  databases = { for db in var.additional_databases : db.name => db }
-  users     = { for u in var.additional_users : u.name => u }
-  iam_users = [for iu in var.iam_user_emails : {
-    email         = iu,
-    is_account_sa = trimsuffix(iu, "gserviceaccount.com") == iu ? false : true
-  }]
-
-  retained_backups = lookup(var.backup_configuration, "retained_backups", null)
-  retention_unit   = lookup(var.backup_configuration, "retention_unit", null)
-}
-
 resource random_id suffix {
   count = var.random_instance_name ? 1 : 0
 
@@ -174,25 +153,14 @@ resource random_password user-password {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
-resource google_secret_manager_secret user-password {
-  project = var.project_id
-  secret_id   = "user-password"
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-
-  depends_on = [null_resource.module_depends_on, random_password.user-password]
-}
-
-resource google_secret_manager_secret_version user-password {
-  secret = google_secret_manager_secret.user-password.id
+module secret-manager-user-password {
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "default-password"
   secret_data = random_password.user-password.result
 
-  depends_on = [null_resource.module_depends_on, google_secret_manager_secret.user-password]
+  depends_on = [null_resource.module_depends_on, random_password.user-password]
 }
 
 resource random_password additional_passwords {
@@ -206,28 +174,15 @@ resource random_password additional_passwords {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
-resource google_secret_manager_secret additional_passwords {
+module secret-manager-additional-passwords {
   for_each = local.users
-  project = var.project_id
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
   secret_id = join("-", [each.value.name, "password"])
-
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-
-  depends_on = [null_resource.module_depends_on, random_password.additional_passwords]
-}
-
-resource google_secret_manager_secret_version additional_passwords {
-  for_each = local.users
-  secret = google_secret_manager_secret.additional_passwords[each.key].id
   secret_data = random_password.additional_passwords[each.key].result
 
-  depends_on = [null_resource.module_depends_on, google_secret_manager_secret.additional_passwords]
+  depends_on = [null_resource.module_depends_on, random_password.additional_passwords]
 }
 
 resource google_sql_user default {

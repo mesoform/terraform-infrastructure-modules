@@ -40,7 +40,7 @@ variable database_version {
 variable region {
   type        = string
   description = "The region of the Cloud SQL resources"
-  default     = "us-central1"
+  default     = "europe-west2"
 }
 
 variable tier {
@@ -240,6 +240,17 @@ variable additional_databases {
   default = []
 }
 
+variable secret_manager_project_id {
+  type        = string
+  description = "The project ID to manage the secrets"
+}
+
+variable secret_manager_location {
+  type        = string
+  description = "The canonical IDs of the location to replicate data. For example: us-east1"
+  default     = "europe-west2"
+}
+
 variable user_name {
   description = "The name of the default user"
   type        = string
@@ -268,19 +279,19 @@ variable iam_user_emails {
 }
 
 variable create_timeout {
-  description = "The optional timout that is applied to limit long database creates."
+  description = "The optional timeout that is applied to limit long database creates."
   type        = string
   default     = "15m"
 }
 
 variable update_timeout {
-  description = "The optional timout that is applied to limit long database updates."
+  description = "The optional timeout that is applied to limit long database updates."
   type        = string
   default     = "15m"
 }
 
 variable delete_timeout {
-  description = "The optional timout that is applied to limit long database deletes."
+  description = "The optional timeout that is applied to limit long database deletes."
   type        = string
   default     = "15m"
 }
