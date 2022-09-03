@@ -52,6 +52,8 @@ If `zone` is null, a regional MIG will be deployed instead, and will just have t
 
 The MIG can either be stateful (default) or set to stateless by setting `stateful_instance_group=false`.
 If using a persistent disks, the maximum `target_size` is 1 (see [troubleshooting](#the-instance-template-cannot-be-used-to-create-more-than-one-instance-per-zone)).
+The persistent disk created using the instance template from this module will have the device_name of `${var.name}-${var.zone}-data` (e.g "secure-swarm-a-data").
+If using a stateful boot disk, the device name is configured using the `boot_device_name` (defaults to `${var.name}-${var.zone}-boot`). 
 
 If the `update_policy` or `regional_update_policy` is configured to do so, the instances deployed from MIG will update when the version changes.
 If `version_name` is not set, a timestamp is used for the `version` configuration. 
@@ -244,3 +246,11 @@ Likely scenarios this occurs in:
 ```
 The persistent-disk name in this module is set to be `${var.name}-data`. 
 Set the `target_size` to a maximum of 1 if using a persistent disk. 
+
+
+### Invalid value for field 'resource.versions[0].instanceTemplate': <Instance-Template>. Instance template <Instance-template> does not contain stateful disks [secure-swarm-a-boot]., invalid
+This occurs when the device name of a MIG stateful disk is not defined in the instance template for the MIG. 
+This issue occurs when upgrading module versions from 1.6.0 to versions before 1.8.3. 
+The MIG was hardcoded to have a stateful boot disk named `${var.name}-${var.zone}-boot`, if that did not match the `device_name` of the boot disk in the instance template. This error would occur.
+
+To resolve this update to version 1.8.3+, where setting the `boot_device_name` will ensure the stateful disk configuration in the MIG matches the instance template
