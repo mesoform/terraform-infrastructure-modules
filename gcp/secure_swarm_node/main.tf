@@ -37,86 +37,86 @@ resource time_static regional_mig_update {
 module secure_instance_template_blue {
   source      = "../compute_engine/instance_template"
   project_id  = var.project
-  description = var.instance_template_description
+  description = local.blue_instance_template.description
   service_account = {
     email  = local.service_account_email
-    scopes = var.blue_instance_template.service_account_scopes == null ? var.service_account_scopes : var.blue_instance_template.service_account_scopes
+    scopes = local.blue_instance_template.service_account_scopes
   }
   region               = var.region
   zone                 = var.zone
   enable_shielded_vm   = true
   name_prefix          = "${local.name}-blue-"
-  machine_type         = var.blue_instance_template.machine_type == null ? var.machine_type : var.blue_instance_template.machine_type
-  source_image         = var.blue_instance_template.source_image == null ? var.source_image : var.blue_instance_template.source_image
-  source_image_family  = var.blue_instance_template.source_image_family == null ? var.source_image_family : var.blue_instance_template.source_image_family
-  source_image_project = var.blue_instance_template.source_image_project == null ? var.source_image_project : var.blue_instance_template.source_image_project
-  subnetwork_project   = var.blue_instance_template.subnetwork == null ? null : var.project
-  network              = var.blue_instance_template.network == null ? var.network : var.blue_instance_template.network
-  subnetwork           = var.blue_instance_template.subnetwork == null ? var.subnetwork : var.blue_instance_template.subnetwork
-  network_ip           = var.blue_instance_template.network_ip == null ? var.network_ip : var.blue_instance_template.network_ip
-  access_config        = var.blue_instance_template.access_config == null ?  var.access_config: var.blue_instance_template.access_config
-  on_host_maintenance  = local.blue_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
-  disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+  machine_type         = local.blue_instance_template.machine_type
+  source_image         = local.blue_instance_template.source_image
+  source_image_family  = local.blue_instance_template.source_image_family
+  source_image_project = local.blue_instance_template.source_image_project
+  network              = local.blue_instance_template.network
+  subnetwork           = local.blue_instance_template.subnetwork
+  subnetwork_project   = local.blue_instance_template.subnetwork == null ? null : var.project
+  network_ip           = local.blue_instance_template.network_ip
+  access_config        = local.blue_instance_template.access_config
+  on_host_maintenance  = local.blue_instance_template.security_level  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  disk_interface       = local.blue_instance_template.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
-  disk_size_gb         = var.boot_disk_size
-  boot_device_name     = local.boot_device_name
+  disk_size_gb         = local.blue_instance_template.boot_disk_size
+  boot_device_name     = local.blue_instance_template.boot_device_name
   additional_disks     = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
     device_name  = "${local.name}-data"
     disk_name    = "${local.name}-data"
-    disk_size_gb = var.disk_size
-    disk_type    = var.disk_type
+    disk_size_gb = local.blue_instance_template.disk_size
+    disk_type    = local.blue_instance_template.disk_type
     mode         = "READ_WRITE"
-    interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
-    resource_policies = var.disk_resource_policies
+    interface    = local.blue_instance_template.security_level == "confidential-1" ? "NVME" : "SCSI"
+    resource_policies = local.blue_instance_template.resource_policies
   }] : []
-  security_level = local.blue_instance_template["security_level"]
-  tags           = var.tags
-  metadata       = var.metadata
+  security_level = local.blue_instance_template.security_level
+  tags           = local.blue_instance_template.tags
+  metadata       = local.blue_instance_template.metadata
 }
 
 
 module secure_instance_template_green {
   source      = "../compute_engine/instance_template"
   project_id  = var.project
-  description = var.instance_template_description
+  description = local.green_instance_template.description
   service_account = {
     email  = local.service_account_email
-    scopes = var.green_instance_template.service_account_scopes == null ? var.service_account_scopes : var.green_instance_template.service_account_scopes
+    scopes = local.green_instance_template.service_account_scopes
   }
   region               = var.region
   zone                 = var.zone
   enable_shielded_vm   = true
   name_prefix          = "${local.name}-green-"
-  machine_type         = var.green_instance_template.machine_type == null ? var.machine_type : var.green_instance_template.machine_type
-  source_image         = var.green_instance_template.source_image == null ? var.source_image : var.green_instance_template.source_image
-  source_image_family  = var.green_instance_template.source_image_family == null ? var.source_image_family : var.green_instance_template.source_image_family
-  source_image_project = var.green_instance_template.source_image_project == null ? var.source_image_project : var.green_instance_template.source_image_project
-  subnetwork_project   = var.green_instance_template.subnetwork == null ? null : var.project
-  network              = var.green_instance_template.network == null ? var.network : var.green_instance_template.network
-  subnetwork           = var.green_instance_template.subnetwork == null? var.subnetwork : var.green_instance_template.subnetwork
-  network_ip           = var.green_instance_template.network_ip == null ? var.network_ip : var.green_instance_template.network_ip
-  access_config        = var.green_instance_template.access_config == null?  var.access_config: var.green_instance_template.access_config
-  on_host_maintenance  = local.green_instance_template["security_level"]  == "confidential-1" ? "TERMINATE" : "MIGRATE"
-  disk_interface       = var.security_level == "confidential-1" ? "NVME" : "SCSI"
+  machine_type         = local.green_instance_template.machine_type
+  source_image         = local.green_instance_template.source_image
+  source_image_family  = local.green_instance_template.source_image_family
+  source_image_project = local.green_instance_template.source_image_project
+  network              = local.green_instance_template.network
+  subnetwork           = local.green_instance_template.subnetwork
+  subnetwork_project   = local.green_instance_template.subnetwork == null ? null : var.project
+  network_ip           = local.green_instance_template.network_ip
+  access_config        = local.green_instance_template.access_config
+  on_host_maintenance  = local.green_instance_template.security_level  == "confidential-1" ? "TERMINATE" : "MIGRATE"
+  disk_interface       = local.green_instance_template.security_level == "confidential-1" ? "NVME" : "SCSI"
   auto_delete          = !var.stateful_boot
-  disk_size_gb         = var.boot_disk_size
-  boot_device_name     = local.boot_device_name
+  disk_size_gb         = local.green_instance_template.boot_disk_size
+  boot_device_name     = local.green_instance_template.boot_device_name
   additional_disks     = var.persistent_disk ? [{
     boot         = false
     auto_delete  = false
     device_name  = "${local.name}-data"
     disk_name    = "${local.name}-data"
-    disk_size_gb = var.disk_size
-    disk_type    = var.disk_type
+    disk_size_gb = local.green_instance_template.disk_size
+    disk_type    = local.green_instance_template.disk_type
     mode         = "READ_WRITE"
-    interface    = var.security_level == "confidential-1" ? "NVME" : "SCSI"
-    resource_policies = var.disk_resource_policies
+    interface    = local.green_instance_template.security_level == "confidential-1" ? "NVME" : "SCSI"
+    resource_policies = local.green_instance_template.resource_policies
   }] : []
-  security_level = local.green_instance_template["security_level"]
-  tags           = var.tags
-  metadata       = var.metadata
+  security_level = local.green_instance_template.security_level
+  tags           = local.green_instance_template.tags
+  metadata       = local.green_instance_template.metadata
 }
 
 resource google_compute_instance_group_manager self {

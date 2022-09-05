@@ -159,6 +159,8 @@ variable "instance_template_description" {
 
 variable blue_instance_template {
   type = object({
+    description = optional(string)
+    service_account_scopes = optional(set(string))
     machine_type = optional(string)
     source_image = optional(string)
     source_image_family = optional(string)
@@ -168,13 +170,22 @@ variable blue_instance_template {
     network_ip = optional(string)
     access_config = optional(list(map(string)))
     security_level = optional(string)
-    service_account_scopes = optional(set(string))
+    boot_disk_size = optional(number)
+    boot_device_name = optional(string)
+    persistent_disk = optional(bool)
+    disk_size = optional(string)
+    disk_type = optional(string)
+    disk_resource_policies = optional(list(string))
+    tags = optional(list(string))
+    metadata = optional(map(string))
   })
   default = {}
 }
 
 variable green_instance_template {
   type = object({
+    description = optional(string)
+    service_account_scopes = optional(set(string))
     machine_type = optional(string)
     source_image = optional(string)
     source_image_family = optional(string)
@@ -184,7 +195,14 @@ variable green_instance_template {
     network_ip = optional(string)
     access_config = optional(list(map(string)))
     security_level = optional(string)
-    service_account_scopes = optional(set(string))
+    boot_disk_size = optional(number)
+    boot_device_name = optional(string)
+    persistent_disk = optional(bool)
+    disk_size = optional(string)
+    disk_type = optional(string)
+    disk_resource_policies = optional(list(string))
+    tags = optional(list(string))
+    metadata = optional(map(string))
   })
   default = {}
 }
