@@ -17,4 +17,8 @@ locals {
 
   retained_backups = lookup(var.backup_configuration, "retained_backups", null)
   retention_unit   = lookup(var.backup_configuration, "retention_unit", null)
+
+  replicas = {
+    for x in var.read_replicas : "${var.name}-replica${var.read_replica_name_suffix}${x.name}" => x
+  }
 }

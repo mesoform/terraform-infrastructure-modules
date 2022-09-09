@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  replicas = {
-    for x in var.read_replicas : "${var.name}-replica${var.read_replica_name_suffix}${x.name}" => x
-  }
-}
-
 resource "google_sql_database_instance" "replicas" {
   provider             = google-beta
   for_each             = local.replicas
@@ -105,4 +99,3 @@ resource "google_sql_database_instance" "replicas" {
     delete = var.delete_timeout
   }
 }
-
