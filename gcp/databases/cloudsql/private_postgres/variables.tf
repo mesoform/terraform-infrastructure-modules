@@ -1,14 +1,14 @@
-variable project_id {
+variable cloudsql_project_id {
   description = "The project ID of the VPC network to peer. This can be a shared VPC host project"
   type        = string
 }
 
-variable vpc_network {
+variable cloudsql_vpc_network {
   description = "Name of the VPC network to peer"
   type        = string
 }
 
-variable private_address {
+variable cloudsql_private_address {
   description = "First IP address of the IP range to allocate to CLoud SQL instances and other Private Service Access services. If not set, GCP will pick a valid one for you"
   type        = string
   default     = ""
@@ -19,18 +19,18 @@ variable cloudsql_instance_name {
   description = "The name of the CloudSQL instance"
 }
 
-variable database_version {
+variable cloudsql_database_version {
   description = "The database version to use"
   type        = string
 }
 
-variable region {
+variable cloudsql_region {
   type        = string
   description = "The region of the Cloud SQL resources"
   default     = "europe-west2"
 }
 
-variable zone {
+variable cloudsql_zone {
   type        = string
   description = "The zone for the CloudSQL instance"
 }
@@ -41,13 +41,13 @@ variable cloudsql_instance_tier {
   default     = "db-f1-micro"
 }
 
-variable deletion_protection {
+variable cloudsql_deletion_protection {
   description = "Used to block Terraform from deleting a CloudSQL instance"
   type        = bool
   default     = false
 }
 
-variable database_flags {
+variable cloudsql_database_flags {
   description = "The database flags for the CloudSQL instance"
   type = list(object({
     name  = string
@@ -56,19 +56,19 @@ variable database_flags {
   default = []
 }
 
-variable db_name {
+variable cloudsql_db_name {
   description = "The name of the default database to create"
   type        = string
   default     = "default"
 }
 
-variable user_name {
+variable cloudsql_user_name {
   description = "The name of the default user"
   type        = string
   default     = "default"
 }
 
-variable additional_users {
+variable cloudsql_additional_users {
   description = "A list of users to be created in your cluster"
   type = list(object({
     name     = string
@@ -77,7 +77,7 @@ variable additional_users {
   default = []
 }
 
-variable additional_databases {
+variable cloudsql_additional_databases {
   description = "A list of databases to be created in your cluster"
   type = list(object({
     name      = string
@@ -85,4 +85,15 @@ variable additional_databases {
     collation = string
   }))
   default = []
+}
+
+variable secret_manager_project_id {
+  type        = string
+  description = "The project ID to manage the secrets"
+}
+
+variable secret_manager_location {
+  type        = string
+  description = "The canonical IDs of the location to replicate data. For example: us-east1"
+  default     = "europe-west2"
 }
