@@ -56,6 +56,48 @@ variable cloudsql_database_flags {
   default = []
 }
 
+variable cloudsql_bckcfg {
+  description = "True if backup configuration is enabled"
+  type        = bool
+  default     = false
+}
+
+variable cloudsql_bckcfg_starttime {
+  description = "HH:MM format time indicating when backup configuration starts"
+  type        = string
+  default     = null
+}
+
+variable cloudsql_bckcfg_location {
+  description = "The region where the backup will be stored"
+  type        = string
+  default     = null
+}
+
+variable cloudsql_bckcfg_pitr {
+  description = "True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. Valid only for PostgreSQL instances"
+  type        = bool
+  default     = false
+}
+
+variable cloudsql_bckcfg_retention_days {
+  description = "The number of days of transaction logs we retain for point in time restore, from 1-7"
+  type        = string
+  default     = null
+}
+
+variable cloudsql_bckcfg_retained_bcks {
+  description = "Depending on the value of retention_unit, this is used to determine if a backup needs to be deleted. If retention_unit is 'COUNT', we will retain this many backups"
+  type        = number
+  default     = null
+}
+
+variable cloudsql_bckcfg_retention_unit {
+  description = "The unit that 'retained_backups' represents. Defaults to COUNT"
+  type        = string
+  default     = null
+}
+
 variable cloudsql_db_name {
   description = "The name of the default database to create"
   type        = string

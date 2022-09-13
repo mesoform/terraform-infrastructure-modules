@@ -33,13 +33,13 @@ module cloudsql-postgres {
   }
 
   backup_configuration = {
-    enabled = true
-    start_time = "00:00"
-    location = "europe-west2"
-    point_in_time_recovery_enabled = false
-    transaction_log_retention_days = 7
-    retained_backups = 7
-    retention_unit = "COUNT"
+    enabled = var.cloudsql_bckcfg
+    start_time = var.cloudsql_bckcfg_starttime
+    location = var.cloudsql_bckcfg_location
+    point_in_time_recovery_enabled = var.cloudsql_bckcfg_pitr
+    transaction_log_retention_days = var.cloudsql_bckcfg_retention_days
+    retained_backups = var.cloudsql_bckcfg_retained_bcks
+    retention_unit = var.cloudsql_bckcfg_retention_unit
   }
 
   db_name = var.cloudsql_db_name
