@@ -7,7 +7,7 @@ module private-service-access {
   source = "../../../compute_engine/private_service_access"
   project_id  = var.cloudsql_project_id
   vpc_network = var.cloudsql_vpc_network
-  address = var. cloudsql_private_address
+  address = var.cloudsql_private_address
 }
 
 module cloudsql-postgres {
