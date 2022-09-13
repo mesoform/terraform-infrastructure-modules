@@ -32,6 +32,16 @@ module cloudsql-postgres {
     allocated_ip_range = module.private-service-access.google_compute_global_address_name
   }
 
+  backup_configuration = {
+    enabled = true
+    start_time = "00:00"
+    location = "europe-west2"
+    point_in_time_recovery_enabled = false
+    transaction_log_retention_days = 7
+    retained_backups = 7
+    retention_unit = COUNT
+  }
+
   db_name = var.cloudsql_db_name
   user_name = var.cloudsql_user_name
 
