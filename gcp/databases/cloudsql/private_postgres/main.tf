@@ -29,7 +29,7 @@ module cloudsql-postgres {
     ipv4_enabled = false
     private_network = data.google_compute_network.main.id
     require_ssl = true
-    allocated_ip_range = module.private-service-access.google_compute_global_address_name
+    allocated_ip_range = null
   }
 
   backup_configuration = {
