@@ -39,7 +39,7 @@ module cloudsql-postgres {
     point_in_time_recovery_enabled = false
     transaction_log_retention_days = 7
     retained_backups = 7
-    retention_unit = COUNT
+    retention_unit = "COUNT"
   }
 
   db_name = var.cloudsql_db_name
