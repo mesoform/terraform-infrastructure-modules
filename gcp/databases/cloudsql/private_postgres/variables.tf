@@ -56,6 +56,12 @@ variable cloudsql_database_flags {
   default = []
 }
 
+variable cloudsql_require_ssl {
+  description = "Whether SSL connections over IP are enforced or not"
+  type        = bool
+  default     = false
+}
+
 variable cloudsql_bckcfg {
   description = "True if backup configuration is enabled"
   type        = bool

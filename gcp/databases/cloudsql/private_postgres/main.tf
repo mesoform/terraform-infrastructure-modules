@@ -28,7 +28,7 @@ module cloudsql-postgres {
     authorized_networks = []
     ipv4_enabled = false
     private_network = data.google_compute_network.main.id
-    require_ssl = true
+    require_ssl = var.cloudsql_require_ssl
     allocated_ip_range = null
   }
 
