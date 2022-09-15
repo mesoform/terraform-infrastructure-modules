@@ -9,14 +9,21 @@ module private-cloudsql-postgres {
   cloudsql_zone = "europe-west2-b"
   cloudsql_instance_tier = "db-f1-micro"
   cloudsql_deletion_protection = false
+  cloudsql_require_ssl = false
   cloudsql_database_flags = [
     {
       name = "max_connections"
       value = 50
     }
   ]
+  cloudsql_bckcfg = true
+  cloudsql_bckcfg_starttime = "00:00"
+  cloudsql_bckcfg_pitr = false
+  cloudsql_bckcfg_retention_days = "7"
+  cloudsql_bckcfg_retained_bcks = 7
+  cloudsql_bckcfg_retention_unit = "COUNT"
   cloudsql_db_name = "db-test"
-  cloudsql_user_name = "default"
+  cloudsql_user_name = "postgres"
   cloudsql_additional_users = [
     {
       name     = "admin"
