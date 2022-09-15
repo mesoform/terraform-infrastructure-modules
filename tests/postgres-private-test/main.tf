@@ -23,10 +23,10 @@ module private-cloudsql-postgres {
   cloudsql_bckcfg_retained_bcks = 7
   cloudsql_bckcfg_retention_unit = "COUNT"
   cloudsql_db_name = "db-test"
-  cloudsql_user_name = "postgres"
+  cloudsql_user_name = "admin"
   cloudsql_additional_users = [
     {
-      name     = "admin"
+      name     = "tester"
       password = ""
     }
   ]

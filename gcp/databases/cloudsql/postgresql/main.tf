@@ -143,6 +143,29 @@ resource google_sql_database additional_databases {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
+resource google_sql_user default {
+  count    = var.enable_default_user ? 1 : 0
+  name     = var.user_name
+  project  = var.project_id
+  instance = google_sql_database_instance.default.name
+  password = var.user_password == "" ? random_password.user-password.result : var.user_password
+  depends_on = [
+    null_resource.module_depends_on,
+    google_sql_database_instance.default,
+    google_sql_database_instance.replicas,
+  ]
+}
+
+module secret-manager-db-user {
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-user"
+  secret_data = var.user_name
+
+  depends_on = [null_resource.module_depends_on, google_sql_user.default]
+}
+
 resource random_password user-password {
   keepers = {
     name = google_sql_database_instance.default.name
@@ -157,10 +180,34 @@ module secret-manager-user-password {
   source = "../../../secret_manager"
   project = var.secret_manager_project_id
   location = var.secret_manager_location
-  secret_id = "default-password"
+  secret_id = "db-password"
   secret_data = random_password.user-password.result
 
   depends_on = [null_resource.module_depends_on, random_password.user-password]
+}
+
+resource google_sql_user additional_users {
+  for_each = local.users
+  project  = var.project_id
+  name     = each.value.name
+  password = coalesce(each.value["password"], random_password.additional_passwords[each.value.name].result)
+  instance = google_sql_database_instance.default.name
+  depends_on = [
+    null_resource.module_depends_on,
+    google_sql_database_instance.default,
+    google_sql_database_instance.replicas,
+  ]
+}
+
+module secret-manager-additional-users {
+  for_each = local.users
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = join("-", [each.value.name, "user"])
+  secret_data = each.value.name
+
+  depends_on = [null_resource.module_depends_on, google_sql_user.additional_users]
 }
 
 resource random_password additional_passwords {
@@ -183,32 +230,6 @@ module secret-manager-additional-passwords {
   secret_data = random_password.additional_passwords[each.key].result
 
   depends_on = [null_resource.module_depends_on, random_password.additional_passwords]
-}
-
-resource google_sql_user default {
-  count    = var.enable_default_user ? 1 : 0
-  name     = var.user_name
-  project  = var.project_id
-  instance = google_sql_database_instance.default.name
-  password = var.user_password == "" ? random_password.user-password.result : var.user_password
-  depends_on = [
-    null_resource.module_depends_on,
-    google_sql_database_instance.default,
-    google_sql_database_instance.replicas,
-  ]
-}
-
-resource google_sql_user additional_users {
-  for_each = local.users
-  project  = var.project_id
-  name     = each.value.name
-  password = coalesce(each.value["password"], random_password.additional_passwords[each.value.name].result)
-  instance = google_sql_database_instance.default.name
-  depends_on = [
-    null_resource.module_depends_on,
-    google_sql_database_instance.default,
-    google_sql_database_instance.replicas,
-  ]
 }
 
 resource google_project_iam_member iam_binding {
