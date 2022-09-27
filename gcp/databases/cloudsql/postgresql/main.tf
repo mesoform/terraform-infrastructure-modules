@@ -123,6 +123,16 @@ resource google_sql_database_instance default {
   depends_on = [null_resource.module_depends_on]
 }
 
+module secret-manager-db-host-ip {
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-host-ip"
+  secret_data = google_sql_database_instance.default.private_ip_address
+
+  depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
+}
+
 resource google_sql_database default {
   count      = var.enable_default_db ? 1 : 0
   name       = var.db_name
@@ -133,6 +143,16 @@ resource google_sql_database default {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
+module secret-manager-db-name {
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-name"
+  secret_data = var.db_name
+
+  depends_on = [null_resource.module_depends_on, google_sql_database.default]
+}
+
 resource google_sql_database additional_databases {
   for_each   = local.databases
   project    = var.project_id
@@ -141,6 +161,40 @@ resource google_sql_database additional_databases {
   collation  = lookup(each.value, "collation", null)
   instance   = google_sql_database_instance.default.name
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
+}
+
+module secret-manager-additional-databases {
+  for_each = local.databases
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = join("-", ["db", each.value.name,])
+  secret_data = each.value.name
+
+  depends_on = [null_resource.module_depends_on, google_sql_database.additional_databases]
+}
+
+resource google_sql_user default {
+  count    = var.enable_default_user ? 1 : 0
+  name     = var.user_name
+  project  = var.project_id
+  instance = google_sql_database_instance.default.name
+  password = var.user_password == "" ? random_password.user-password.result : var.user_password
+  depends_on = [
+    null_resource.module_depends_on,
+    google_sql_database_instance.default,
+    google_sql_database_instance.replicas,
+  ]
+}
+
+module secret-manager-db-user {
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-user"
+  secret_data = var.user_name
+
+  depends_on = [null_resource.module_depends_on, google_sql_user.default]
 }
 
 resource random_password user-password {
@@ -157,10 +211,34 @@ module secret-manager-user-password {
   source = "../../../secret_manager"
   project = var.secret_manager_project_id
   location = var.secret_manager_location
-  secret_id = "default-password"
+  secret_id = "db-password"
   secret_data = random_password.user-password.result
 
   depends_on = [null_resource.module_depends_on, random_password.user-password]
+}
+
+resource google_sql_user additional_users {
+  for_each = local.users
+  project  = var.project_id
+  name     = each.value.name
+  password = coalesce(each.value["password"], random_password.additional_passwords[each.value.name].result)
+  instance = google_sql_database_instance.default.name
+  depends_on = [
+    null_resource.module_depends_on,
+    google_sql_database_instance.default,
+    google_sql_database_instance.replicas,
+  ]
+}
+
+module secret-manager-additional-users {
+  for_each = local.users
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = join("-", ["db", each.value.name, "user"])
+  secret_data = each.value.name
+
+  depends_on = [null_resource.module_depends_on, google_sql_user.additional_users]
 }
 
 resource random_password additional_passwords {
@@ -179,36 +257,10 @@ module secret-manager-additional-passwords {
   source = "../../../secret_manager"
   project = var.secret_manager_project_id
   location = var.secret_manager_location
-  secret_id = join("-", [each.value.name, "password"])
+  secret_id = join("-", ["db", each.value.name, "pass"])
   secret_data = random_password.additional_passwords[each.key].result
 
   depends_on = [null_resource.module_depends_on, random_password.additional_passwords]
-}
-
-resource google_sql_user default {
-  count    = var.enable_default_user ? 1 : 0
-  name     = var.user_name
-  project  = var.project_id
-  instance = google_sql_database_instance.default.name
-  password = var.user_password == "" ? random_password.user-password.result : var.user_password
-  depends_on = [
-    null_resource.module_depends_on,
-    google_sql_database_instance.default,
-    google_sql_database_instance.replicas,
-  ]
-}
-
-resource google_sql_user additional_users {
-  for_each = local.users
-  project  = var.project_id
-  name     = each.value.name
-  password = coalesce(each.value["password"], random_password.additional_passwords[each.value.name].result)
-  instance = google_sql_database_instance.default.name
-  depends_on = [
-    null_resource.module_depends_on,
-    google_sql_database_instance.default,
-    google_sql_database_instance.replicas,
-  ]
 }
 
 resource google_project_iam_member iam_binding {
