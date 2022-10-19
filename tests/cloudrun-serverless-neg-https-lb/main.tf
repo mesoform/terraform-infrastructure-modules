@@ -38,15 +38,14 @@ module cloudrun_serverless_https_lb {
   backends = {
     cloudrun = {
       description = "Cloud Run backend"
+      security_policy = "cloudrun-policy"
       groups = [
         {
           group = "projects/test-project/regions/europe-west2/networkEndpointGroups/cr-serverless-neg"
         }
       ]
-      security_policy         = "cloudrun-policy"
-
       log_config = {
-        enable      = false
+        enable = false
         sample_rate = null
       }
     }
