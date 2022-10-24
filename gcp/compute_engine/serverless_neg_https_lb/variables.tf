@@ -83,7 +83,7 @@ variable managed_ssl_certificate_domains {
   type        = list(string)
 }
 
-variable cloud_run_backends {
+variable serverless_https_lb_backends {
   description = "Map backend indices to list of backend maps."
   type = map(object({
 
@@ -93,11 +93,9 @@ variable cloud_run_backends {
     custom_request_headers  = optional(list(string))
     custom_response_headers = optional(list(string))
 
-    groups = list(object({
-      group = string
-      tag = string
-      url_mask = string
-    }))
+#    groups = list(object({
+#      group = string
+#    }))
 
     iap_config = object({
       enable               = optional(bool, false)
@@ -112,40 +110,7 @@ variable cloud_run_backends {
   }))
 
   validation {
-    condition     = alltrue([ for backend in var.cloud_run_backends : length(backend.security_policy) > 0 ])
-    error_message = "Security policy can't be empty or null."
-  }
-}
-
-variable cloud_function_backends {
-  description = "Map backend indices to list of backend maps."
-  type = map(object({
-
-    description             = optional(string, "Cloud Function Backend service")
-    security_policy         = string
-    enable_cdn              = optional(bool, false)
-    custom_request_headers  = optional(list(string))
-    custom_response_headers = optional(list(string))
-
-    groups = list(object({
-      group = string
-      url_mask = string
-    }))
-
-    iap_config = object({
-      enable               = optional(bool, false)
-      oauth2_client_id     = optional(string)
-      oauth2_client_secret = optional(string)
-    })
-
-    log_config = object({
-      enable      = optional(bool, false)
-      sample_rate = optional(number)
-    })
-  }))
-
-  validation {
-    condition     = alltrue([ for backend in var.cloud_function_backends : length(backend.security_policy) > 0 ])
+    condition     = alltrue([ for backend in var.serverless_https_lb_backends : length(backend.security_policy) > 0 ])
     error_message = "Security policy can't be empty or null."
   }
 }
