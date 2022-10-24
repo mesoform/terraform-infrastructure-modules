@@ -1,5 +1,14 @@
 locals {
-  cloud_run_negs = google_compute_region_network_endpoint_group.cloud_run.name
+#  cloud_run_negs = [
+#    for cloud_run_neg in google_compute_region_network_endpoint_group.cloud_run:
+#      { group = cloud_run_neg.id }
+#  ]
+#  cloud_function_negs = [
+#    for cloud_function_neg, config in var.cloud_function_negs:
+#      { group = cloud_run_neg }
+#  ]
+#  all_negs = concat(local.cloud_function_negs, local.cloud_run_negs)
+
 # loop over the list of NEGs and pull out instance name
 
 #  backends = templatefile("${path.module}/backends.tftpl", { service = "cloud_run" })
