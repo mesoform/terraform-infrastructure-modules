@@ -57,39 +57,45 @@ variable managed_ssl_certificate_domains {
   type        = list(string)
 }
 
-#variable serverless_https_lb_backends {
-#  description = "Map backend indices to list of backend maps."
-#  type = map(object({
-#
-#    description             = optional(string, "Backend service")
-#    security_policy         = string
-#    enable_cdn              = optional(bool, false)
-#    custom_request_headers  = optional(list(string))
-#    custom_response_headers = optional(list(string))
-#
-##    groups = list(object({
-##      group = string
-##    }))
-#
-#    iap_config = object({
-#      enable               = optional(bool, false)
-#      oauth2_client_id     = optional(string)
-#      oauth2_client_secret = optional(string)
-#    })
-#
-#    log_config = object({
-#      enable      = optional(bool, false)
-#      sample_rate = optional(number)
-#    })
-#  }))
-#
-#  validation {
-#    condition     = alltrue([ for backend in var.serverless_https_lb_backends : length(backend.security_policy) > 0 ])
-#    error_message = "Security policy can't be empty or null."
-#  }
-#}
-
 variable security_policy {
   description = "Security policy"
   type        = string
+}
+
+#variable cloud_run_groups {
+#  type = list(object({
+#    group = string
+#  }))
+#}
+
+variable serverless_https_lb_backends {
+  description = "Map backend indices to list of backend maps."
+  type = map(object({
+
+    description             = optional(string, "Backend service")
+    security_policy         = string
+    enable_cdn              = optional(bool, false)
+    custom_request_headers  = optional(list(string))
+    custom_response_headers = optional(list(string))
+
+    groups = list(object({
+      group = string
+    }))
+
+    iap_config = object({
+      enable               = optional(bool, false)
+      oauth2_client_id     = optional(string)
+      oauth2_client_secret = optional(string)
+    })
+
+    log_config = object({
+      enable      = optional(bool, false)
+      sample_rate = optional(number)
+    })
+  }))
+
+  validation {
+    condition     = alltrue([ for backend in var.serverless_https_lb_backends : length(backend.security_policy) > 0 ])
+    error_message = "Security policy can't be empty or null."
+  }
 }

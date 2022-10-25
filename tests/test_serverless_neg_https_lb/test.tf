@@ -59,23 +59,23 @@ module test_lb {
   managed_ssl_certificate_domains = [ "test.project.com" ]
 
   security_policy = "cryptotraders-cloudrun-policy"
-}
 
-#  serverless_https_lb_backends = {
-#    cloudrun = {
-#      description = "Cloud Run backend"
-#      security_policy = "cryptotraders-cloudrun-policy"
-#      groups = [
-#        {
-#          group = "projects/cryptotraders-platform-test/regions/europe-west2/networkEndpointGroups/serverless-neg"
-#        }
-#      ]
-#      iap_config = {
-#        enable = false
-#      }
-#      log_config = {
-#        enable = false
-#      }
-#    }
-#  }
-#}
+  serverless_https_lb_backends = {
+    cloudrun = {
+      description = "Cloud Run backend"
+      security_policy = "cryptotraders-cloudrun-policy"
+      groups = [
+        {
+          group = "projects/cryptotraders-platform-test/regions/europe-west2/networkEndpointGroups/cloudrun-test1-serverless-neg",
+          group = "projects/cryptotraders-platform-test/regions/europe-west2/networkEndpointGroups/cloudrun-test2-serverless-neg"
+        }
+      ]
+      iap_config = {
+        enable = false
+      }
+      log_config = {
+        enable = false
+      }
+    }
+  }
+}

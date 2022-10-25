@@ -34,19 +34,21 @@ resource google_compute_region_network_endpoint_group cloud_function {
   }
 }
 
-#module serverless_neg_https_lb {
-#  source  = "github.com/terraform-google-modules/terraform-google-lb-http//modules/serverless_negs?ref=v6.3.0"
-#  project = var.project
-#  name = var.serverless_https_lb_name
-#  http_forward = var.serverless_https_lb_http_forward
-#  ssl = true
-#  managed_ssl_certificate_domains = var.managed_ssl_certificate_domains
-#  backends = { var.cloud_run_backends }
-##  backends = { merge(var.cloud_run_backends, var.cloud_function_backends) }
-#  depends_on = [
-#    google_compute_region_network_endpoint_group.cloud_run
-##   ,google_compute_region_network_endpoint_group.cloud_function
-#  ]
-#
-##  depends_on = [google_compute_region_network_endpoint_group.self]
-#}
+module serverless_neg_https_lb {
+  source  = "github.com/terraform-google-modules/terraform-google-lb-http//modules/serverless_negs?ref=v6.3.0"
+  project = var.project
+  name = var.serverless_https_lb_name
+  http_forward = var.serverless_https_lb_http_forward
+  ssl = true
+  managed_ssl_certificate_domains = var.managed_ssl_certificate_domains
+  backends = var.serverless_https_lb_backends
+#  backends = { merge(var.cloud_run_backends, var.cloud_function_backends) }
+
+  depends_on = [
+    google_compute_region_network_endpoint_group.cloud_run,
+    google_compute_region_network_endpoint_group.app_engine,
+    google_compute_region_network_endpoint_group.cloud_function
+  ]
+
+#  depends_on = [google_compute_region_network_endpoint_group.self]
+}
