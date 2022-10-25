@@ -15,57 +15,31 @@ variable serverless_neg_name {
 }
 
 variable cloud_run_services {
-  type = map(object(
+  type = list(object(
     {
-#      project = string
-#      region = string
       service_name = string
-#      tag = string
-#      url_mask = string
     }
   ))
+  default = []
 }
 
-#variable cloud_function_negs {
-#  type = map(object(
-#    {
-#      project = string
-#      region = string
-#      function_name = string
-#      url_mask = string
-#    }
-#  ))
-#}
+variable app_engine_services {
+  type = list(object(
+    {
+      service_name = string
+    }
+  ))
+  default = []
+}
 
-#variable cloud_run {
-#  description = "Cloud run service"
-#  type = set(object(
-#    {
-#      service = string
-#    }
-#  ))
-#  default = []
-#}
-#
-#variable app_engine {
-#  description = "App engine service"
-#  type = set(object(
-#    {
-#      service = string
-#    }
-#  ))
-#  default = []
-#}
-#
-#variable cloud_function {
-#  description = "Cloud function"
-#  type = set(object(
-#    {
-#      function = string
-#    }
-#  ))
-#  default = []
-#}
+variable cloud_functions {
+  type = list(object(
+    {
+      function_name = string
+    }
+  ))
+  default = []
+}
 
 variable serverless_https_lb_name {
   description = "Name for the forwarding rule and prefix for supporting resources"
