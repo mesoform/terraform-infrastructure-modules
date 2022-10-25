@@ -1,8 +1,9 @@
 locals {
-#  cloud_run_negs = [
-#    for cloud_run_neg in google_compute_region_network_endpoint_group.cloud_run:
-#      { group = cloud_run_neg.id }
-#  ]
+  cloud_run_negs = [
+    for cloud_run_neg in google_compute_region_network_endpoint_group.cloud_run:
+      { group = cloud_run_neg.id }
+  ]
+
 #  cloud_function_negs = [
 #    for cloud_function_neg, config in var.cloud_function_negs:
 #      { group = cloud_run_neg }

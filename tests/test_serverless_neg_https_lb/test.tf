@@ -27,12 +27,15 @@ module test_lb {
   project = "cryptotraders-platform-test"
   region = "europe-west2"
   serverless_neg_name = "serverless-neg"
-  cloud_run = [{ service = google_cloud_run_service.self.name }]
-
+#  cloud_run_services = { service_name = google_cloud_run_service.self.name }
+  cloud_run_services = { test1 = { service_name = "cloudrun_test" } }
   serverless_https_lb_name = "serverless-lb"
   managed_ssl_certificate_domains = [ "test.project.com" ]
 
   security_policy = "cryptotraders-cloudrun-policy"
+
+}
+
 #  serverless_https_lb_backends = {
 #    cloudrun = {
 #      description = "Cloud Run backend"
@@ -50,4 +53,4 @@ module test_lb {
 #      }
 #    }
 #  }
-}
+#}
