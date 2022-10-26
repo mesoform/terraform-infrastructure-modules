@@ -1,11 +1,18 @@
 locals {
-#  cloud_run_negs = [
+  cloud_run_groups = [
+    for service in var.cloud_run_services.*.service_name :
+          {
+            group = "projects/${var.project}/regions/${var.region}/networkEndpointGroups/${service}-serverless-neg"
+          }
+  ]
+
+  #  cloud_run_negs = [
 #    {
 #      group = module.test_lb.google_compute_region_network_endpoint_group.cloud_run
 #    }
 #  ]
 
-#  cloud_function_negs = [
+#  cloud_function_groups = [
 #    for cloud_function_neg, config in var.cloud_function_negs:
 #      { group = cloud_run_neg }
 #  ]
@@ -17,36 +24,38 @@ locals {
 #  backends = merge(var.serverless_https_lb_backends, {groups = google_compute_region_network_endpoint_group.self.self_link}
 #  )
 
-#  cloudrun = {
-#    description = "Cloud Run backend"
-#    security_policy = var.security_policy
-#    enable_cdn = false
-#    custom_request_headers = null
-#    custom_response_headers = null
-#    groups = local.cloud_run_negs
-##    groups = [
-##      {
-##        group = google_compute_region_network_endpoint_group.self.self_link
-##      }
-##    ]
-#    iap_config = {
-#      enable = false
-#      oauth2_client_id = ""
-#      oauth2_client_secret = ""
-#    }
-#    log_config = {
-#      enable = false
-#      sample_rate = 1.0
-#    }
-#  }
+  cloudrun_backend = {
+    cloud_run = {
+      description = "Cloud Run backend"
+      security_policy = var.security_policy
+      enable_cdn = false
+      custom_request_headers = null
+      custom_response_headers = null
+      groups = local.cloud_run_groups
+      #    groups = [
+      #      {
+      #        group = google_compute_region_network_endpoint_group.self.self_link
+      #      }
+      #    ]
+      iap_config = {
+        enable = false
+        oauth2_client_id = ""
+        oauth2_client_secret = ""
+      }
+      log_config = {
+        enable = false
+        sample_rate = 1.0
+      }
+    }
+  }
 
-#    app_engine = {
+#    appengine_backend = {
 #      description = "App engine backend"
 #      security_policy = var.security_policy
 #      enable_cdn = false
 #      custom_request_headers = null
 #      custom_response_headers = null
-#      groups          = [
+#      groups = [
 #        {
 #          group = google_compute_region_network_endpoint_group.self.self_link
 #        }
@@ -61,13 +70,14 @@ locals {
 #        sample_rate = 1.0
 #      }
 #    }
-#    cloud_function = {
+
+#    cloudfunction_backend = {
 #      description = "Cloud Function backend"
 #      security_policy = var.security_policy
 #      enable_cdn = false
 #      custom_request_headers = null
 #      custom_response_headers = null
-#      groups          = [
+#      groups = [
 #        {
 #          group = google_compute_region_network_endpoint_group.self.self_link
 #        }
