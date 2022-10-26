@@ -18,6 +18,7 @@ variable cloud_run_services {
   type = list(object(
     {
       service_name = string
+      region = string
     }
   ))
   default = []
@@ -27,6 +28,7 @@ variable app_engine_services {
   type = list(object(
     {
       service_name = string
+      region = string
     }
   ))
   default = []
@@ -36,6 +38,7 @@ variable cloud_functions {
   type = list(object(
     {
       function_name = string
+      region = string
     }
   ))
   default = []

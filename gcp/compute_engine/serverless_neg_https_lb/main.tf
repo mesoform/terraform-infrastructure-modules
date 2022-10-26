@@ -1,7 +1,7 @@
 resource google_compute_region_network_endpoint_group cloud_run {
   for_each = {for service in var.cloud_run_services: service.service_name => service}
   project = var.project
-  region = var.region
+  region = each.value.region
   name = join("-",[each.value.service_name, var.serverless_neg_name])
   network_endpoint_type = "SERVERLESS"
 
@@ -13,7 +13,7 @@ resource google_compute_region_network_endpoint_group cloud_run {
 resource google_compute_region_network_endpoint_group app_engine {
   for_each = {for service in var.app_engine_services: service.service_name => service}
   project = var.project
-  region = var.region
+  region = each.value.region
   name = join("-",[each.value.service_name, var.serverless_neg_name])
   network_endpoint_type = "SERVERLESS"
 
@@ -25,7 +25,7 @@ resource google_compute_region_network_endpoint_group app_engine {
 resource google_compute_region_network_endpoint_group cloud_function {
   for_each = {for function in var.cloud_functions: function.function_name => function}
   project = var.project
-  region = var.region
+  region = each.value.region
   name = join("-",[each.value.function_name, var.serverless_neg_name])
   network_endpoint_type = "SERVERLESS"
 

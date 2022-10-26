@@ -1,6 +1,6 @@
 resource google_cloud_run_service test1 {
   name     = "cloudrun-test1"
-  location = "europe-west2"
+  location = "europe-west1"
 #  project  = "test-project"
   project = "cryptotraders-platform-test"
 
@@ -52,8 +52,8 @@ module test_lb {
   serverless_neg_name = "serverless-neg"
 #  cloud_run_services = { service_name = google_cloud_run_service.self.name }
   cloud_run_services = [
-    { service_name = "cloudrun-test1" },
-    { service_name = "cloudrun-test2" }
+    { service_name = "cloudrun-test1", region = "europe-west1" },
+    { service_name = "cloudrun-test2", region = "europe-west2" }
   ]
   serverless_https_lb_name = "serverless-lb"
   managed_ssl_certificate_domains = [ "test.project.com" ]
@@ -61,12 +61,14 @@ module test_lb {
   security_policy = "cryptotraders-cloudrun-policy"
 
   serverless_https_lb_backends = {
-    cloudrun = {
+    cloudrun1 = {
       description = "Cloud Run backend"
       security_policy = "cryptotraders-cloudrun-policy"
       groups = [
         {
-          group = "projects/cryptotraders-platform-test/regions/europe-west2/networkEndpointGroups/cloudrun-test1-serverless-neg",
+          group = "projects/cryptotraders-platform-test/regions/europe-west1/networkEndpointGroups/cloudrun-test1-serverless-neg"
+        },
+        {
           group = "projects/cryptotraders-platform-test/regions/europe-west2/networkEndpointGroups/cloudrun-test2-serverless-neg"
         }
       ]
