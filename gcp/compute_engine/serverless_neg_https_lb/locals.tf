@@ -1,10 +1,19 @@
 locals {
+  list_cr_services = [for service in var.cloud_run_services : service.service_name]
+  list_cr_regions = [for region in var.cloud_run_services : region.region]
   cloud_run_groups = [
-    for service in var.cloud_run_services.*.service_name :
+    for index, service in local.list_cr_services :
           {
-            group = "projects/${var.project}/regions/${var.region}/networkEndpointGroups/${service}-serverless-neg"
+            group = "projects/${var.project}/regions/${local.list_cr_regions[index]}/networkEndpointGroups/${service}-serverless-neg"
           }
   ]
+
+#  cloud_run_groups = [
+#    for service in var.cloud_run_services.*.service_name :
+#          {
+#            group = "projects/${var.project}/regions/${var.region}/networkEndpointGroups/${service}-serverless-neg"
+#          }
+#  ]
 
   #  cloud_run_negs = [
 #    {
@@ -24,7 +33,7 @@ locals {
 #  backends = merge(var.serverless_https_lb_backends, {groups = google_compute_region_network_endpoint_group.self.self_link}
 #  )
 
-  cloudrun_backend = {
+  cloud_run_backend = {
     cloud_run = {
       description = "Cloud Run backend"
       security_policy = var.security_policy
@@ -49,7 +58,7 @@ locals {
     }
   }
 
-#    appengine_backend = {
+#    app_engine_backend = {
 #      description = "App engine backend"
 #      security_policy = var.security_policy
 #      enable_cdn = false
@@ -71,7 +80,7 @@ locals {
 #      }
 #    }
 
-#    cloudfunction_backend = {
+#    cloud_function_backend = {
 #      description = "Cloud Function backend"
 #      security_policy = var.security_policy
 #      enable_cdn = false

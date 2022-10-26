@@ -43,7 +43,7 @@ module serverless_neg_https_lb {
   managed_ssl_certificate_domains = var.managed_ssl_certificate_domains
 
 #  backends = var.serverless_https_lb_backends
-  backends = local.cloudrun_backend
+  backends = local.cloud_run_backend
 #  backends = { merge(var.cloud_run_backends, var.cloud_function_backends) }
 
   depends_on = [
