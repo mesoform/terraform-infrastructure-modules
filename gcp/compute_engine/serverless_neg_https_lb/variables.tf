@@ -3,46 +3,12 @@ variable project {
   type        = string
 }
 
-variable region {
-  description = "Location for serverless_neg and load balancer"
-  type        = string
-}
-
 variable serverless_neg_name {
   description = "Name for serverless network endpoint group"
   type        = string
   default     = "serverless-neg"
 }
 
-variable cloud_run_services {
-  type = list(object(
-    {
-      service_name = string
-      region = string
-    }
-  ))
-  default = []
-}
-
-variable app_engine_services {
-  type = list(object(
-    {
-      service_name = string
-      region = string
-    }
-  ))
-  default = []
-}
-
-variable cloud_functions {
-  type = list(object(
-    {
-      function_name = string
-      region = string
-    }
-  ))
-  default = []
-}
 
 variable serverless_https_lb_name {
   description = "Name for the forwarding rule and prefix for supporting resources"
@@ -60,46 +26,52 @@ variable managed_ssl_certificate_domains {
   type        = list(string)
 }
 
+variable cloud_run_services {
+  description = "List of Cloud Run services for backend"
+  type = list(object(
+    {
+      service_name = string
+      region = string
+    }
+  ))
+  default = []
+}
+
+variable app_engine_services {
+  description = "List of App Engine services for backend"
+  type = list(object(
+    {
+      service_name = string
+      region = string
+    }
+  ))
+  default = []
+}
+
+variable cloud_functions {
+  description = "List of Cloud Functions for backend"
+  type = list(object(
+    {
+      function_name = string
+      region = string
+    }
+  ))
+  default = []
+}
+
 variable security_policy {
   description = "Security policy"
   type        = string
 }
 
-variable cloud_run_groups {
-  type = list(object({
-    group = string
-  }))
-  default = []
+variable enable_iap_config {
+  description = "Set to `false` to disable Cloud Identity Aware Proxy"
+  type        = bool
+  default     = false
 }
 
-#variable serverless_https_lb_backends {
-#  description = "Map backend indices to list of backend maps."
-#  type = map(object({
-#
-#    description             = optional(string, "Backend service")
-#    security_policy         = string
-#    enable_cdn              = optional(bool, false)
-#    custom_request_headers  = optional(list(string))
-#    custom_response_headers = optional(list(string))
-#
-#    groups = list(object({
-#      group = string
-#    }))
-#
-#    iap_config = object({
-#      enable               = optional(bool, false)
-#      oauth2_client_id     = optional(string)
-#      oauth2_client_secret = optional(string)
-#    })
-#
-#    log_config = object({
-#      enable      = optional(bool, false)
-#      sample_rate = optional(number)
-#    })
-#  }))
-#
-#  validation {
-#    condition     = alltrue([ for backend in var.serverless_https_lb_backends : length(backend.security_policy) > 0 ])
-#    error_message = "Security policy can't be empty or null."
-#  }
-#}
+variable enable_log_config {
+  description = "Set to `false` to disable logging"
+  type        = bool
+  default     = false
+}
