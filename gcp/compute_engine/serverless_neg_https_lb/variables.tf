@@ -62,6 +62,11 @@ variable cloud_functions {
 variable security_policy {
   description = "Security policy"
   type        = string
+
+  validation {
+    condition     = length(var.security_policy) > 0
+    error_message = "Security policy can't be empty or null."
+  }
 }
 
 variable enable_iap_config {
