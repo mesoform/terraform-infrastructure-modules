@@ -41,10 +41,7 @@ module serverless_neg_https_lb {
   http_forward = var.serverless_https_lb_http_forward
   ssl = true
   managed_ssl_certificate_domains = var.managed_ssl_certificate_domains
-
-#  backends = var.serverless_https_lb_backends
-  backends = local.cloud_run_backend
-#  backends = { merge(var.cloud_run_backends, var.cloud_function_backends) }
+  backends = local.all_backends
 
   depends_on = [
     google_compute_region_network_endpoint_group.cloud_run,
