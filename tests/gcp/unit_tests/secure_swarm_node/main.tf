@@ -1,7 +1,3 @@
-terraform {
-  experiments = [module_variable_optional_attrs]
-}
-
 //noinspection HILUnresolvedReference
 data external test_blue_instance_template{
   query = {"security_level" = local.blue_instance_template.security_level}
