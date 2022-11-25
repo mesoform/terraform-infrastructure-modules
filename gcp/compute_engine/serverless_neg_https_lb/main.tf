@@ -42,7 +42,7 @@ module serverless_neg_https_lb {
   ssl = true
   managed_ssl_certificate_domains = var.managed_ssl_certificate_domains
   backends = local.all_backends
-
+  https_redirect = var.https_redirect
   depends_on = [
     google_compute_region_network_endpoint_group.cloud_run,
     google_compute_region_network_endpoint_group.app_engine,
