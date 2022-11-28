@@ -83,6 +83,6 @@ variable enable_log_config {
 
 variable https_redirect {
   description = "Set to `true` to enable https redirect on the lb."
-  type = book
+  type = bool
   default = false
 }
