@@ -1,1 +1,0 @@
-/Users/dmitrogavrichuk/DEVOPS/Mesoform/doc_test/terraform/k8s_service_account.tf

@@ -1,1 +1,0 @@
-gcp_ae_yml = "resources/single_manifest.yml"
