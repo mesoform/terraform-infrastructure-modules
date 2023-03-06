@@ -1,1 +1,0 @@
-/Users/dmitrogavrichuk/DEVOPS/Mesoform/terraform-infrastructure-modules/mcp/kubernetes_locals.tf

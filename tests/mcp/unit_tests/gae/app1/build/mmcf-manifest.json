@@ -1,7 +1,0 @@
-{
-  "artifactDir": "exploded-app1",
-  "contents": [
-    "WEB-INF/appengine-web.xml",
-    "WEB-INF/classes/com/ch/sandbox/experiences/dao/DataServicesKt$mockProviders$1.class"
-  ]
-}

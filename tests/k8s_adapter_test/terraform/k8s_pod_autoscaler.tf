@@ -1,1 +1,0 @@
-/Users/dmitrogavrichuk/DEVOPS/Mesoform/terraform-infrastructure-modules/mcp/k8s_pod_autoscaler.tf
