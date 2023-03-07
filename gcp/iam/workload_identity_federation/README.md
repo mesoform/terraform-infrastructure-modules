@@ -146,12 +146,13 @@ workload_identity_pools = {
 
 ### Preconfigured defaults
 This module has preconfigured Identity Provider settings for commonly used clients, referred to as "trusted issuers",
-which can be used by setting `providers.oidc.issuer` to one of the issuers from the table below, as well as setting required MCCF attributes.
+which can be used by setting `providers.oidc.issuer` to one of the issuers from the table below, 
+as well as setting the required attributes for the `workload_identity_pools` provider.
 
 Full defaults for preconfigured IDP can be found in the [`trusted_issuers.tf`](./trusted_issuers.yaml) file.
 
 #### Trusted issuers
-| Issuer                | Required MCCF attributes                                                              |
+| Issuer                | Required variable value                                                               |
 |-----------------------|---------------------------------------------------------------------------------------|
 | `azure`               | - `owner`: Tenant ID of Azure tenant                                                  |
 | `bitbucket-pipelines` | - `owner`: Name of the workspace owner <br> - `workspace_uuid`: UUid of the workspace |
