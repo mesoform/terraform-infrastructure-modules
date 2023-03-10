@@ -39,7 +39,7 @@ output test_provider_subject_attribute {
 
 //noinspection HILUnresolvedReference
 data external test_oidc_provider_attributes {
-  query   = local.identity_pool_providers.bitbucket.attribute_mapping
+  query   = { for key, value in local.identity_pool_providers.bitbucket.attribute_mapping: key => value if value != null}
   program = ["python", "${path.module}/test_provider_attributes.py"]
 }
 output test_oidc_provider_attributes {
