@@ -19,7 +19,6 @@ expected_data = {
     "google.subject": "assertion.sub",
     "attribute.workspace_uuid": "assertion.workspaceUuid",
     "attribute.repository": "assertion.repositoryUuid",
-    "attribute.git_ref": "assertion.branchName",
     "attribute.tid": "assertion.tid"
 }
 

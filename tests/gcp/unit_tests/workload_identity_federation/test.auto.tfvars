@@ -6,6 +6,7 @@ workload_identity_pool = {
       attribute_mapping = {
         "google.subject" = "assertion.sub"
         "attribute.tid"  = "assertion.tid"
+        "attribute.git_ref" = null
       }
       owner = "companyWorkspace"
       workspace_uuid = "{company-unique-id}"

@@ -161,12 +161,26 @@ Full defaults for preconfigured IDP can be found in the [`trusted_issuers.tf`](.
 | `gitlab`              | - `owner`: Unique group ID                                                            |
 | `terraform-cloud`     | - `owner`: Terraform Cloud Organization ID                                            |
 
-Each of the providers have a condition configured based on the `owner`/`workspace_uuid` attributes.
+#### Changing default values
+##### attribute_mapping:
+The `attribute_mapping` values can be overwritten by specifying a different value for preconfigured keys.
+If a preconfigured key is unwanted it can be set to null, e.g. `"attribute.git_ref" = null`.
+
+##### attribute_condition:
+Each of the providers have a condition configured based on the `owner`/`workspace_uuid` attributes, 
+ensuring .
 To make a custom condition configure set the `attribute_condition` to a [valid condition](https://cloud.google.com/iam/docs/workload-identity-federation#conditions).
 
-Some of these issuers have a configured default audience different to the Google default
+> **WARNING**: Some claims don't include the unique attributes, so tokens issued by other owners could have similar values. 
+> If the condition is not appropriately set to limit access, 
+> other users or users outside your organization could end up with access to your resources
+
+##### audience:
+The client's audience is extracted from the `aud` claim in the token, and by default is expected to be the address of the resource server
 (i.e. `https://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID`).
-If this Google default audience should be included in the `allowed_audiences` as well as the preconfigured default,
+Some tokens, provided by some of the above issuers, have a different default `aud` value specified, 
+so the preconfigured `allowed_audiences` attribute is set to match that.
+If the default audience should be included in the `allowed_audiences` as well as the preconfigured default,
 add `"default"` to the list in `oidc.allowed_audiences`.   
 e.g.
 ```terraform

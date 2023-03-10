@@ -1,12 +1,3 @@
-data google_project self {
-  project_id = var.project_id
-
-}
-
-locals {
-  default_audience = "https://iam.googleapis.com/projects/${data.google_project.self.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.self.id}/providers/%s"
-}
-
 resource google_iam_workload_identity_pool self {
   project = data.google_project.self.project_id
   workload_identity_pool_id = replace(var.workload_identity_pool.pool_id, "_", "-")
