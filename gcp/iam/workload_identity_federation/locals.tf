@@ -2,7 +2,7 @@ locals  {
   trusted_issuers_file = "${path.module}/trusted_issuers.yaml"
 
   identity_pool_providers_map_trusted = {
-    for provider, specs in var.workload_identity_pool.providers: provider =>
+    for provider, specs in var.workload_identity_pool_providers: provider =>
       contains(keys(yamldecode(file(local.trusted_issuers_file))), try(specs.oidc.issuer, "null")) ? yamldecode(
         templatefile(local.trusted_issuers_file, {
           owner = specs.owner
@@ -11,7 +11,7 @@ locals  {
   }
 
   identity_pool_providers = {
-    for provider, specs in var.workload_identity_pool.providers: provider => {
+    for provider, specs in var.workload_identity_pool_providers: provider => {
       project = var.project_id
       provider_id = provider
       display_name = lookup(specs, "display_name", provider)

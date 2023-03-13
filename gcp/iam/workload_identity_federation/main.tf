@@ -1,9 +1,9 @@
 resource google_iam_workload_identity_pool self {
   project = data.google_project.self.project_id
-  workload_identity_pool_id = replace(var.workload_identity_pool.pool_id, "_", "-")
-  display_name = var.workload_identity_pool.display_name == null ?  var.workload_identity_pool.pool_id : var.workload_identity_pool.display_name
-  description = var.workload_identity_pool.description
-  disabled = var.workload_identity_pool.disabled
+  workload_identity_pool_id = replace(var.pool_id, "_", "-")
+  display_name = var.display_name == null ?  var.pool_id : var.display_name
+  description = var.description
+  disabled = var.disabled
 }
 
 //noinspection HILUnresolvedReference

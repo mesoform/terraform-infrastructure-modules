@@ -1,6 +1,6 @@
 # Workload Identity Federation
 
-This module deploys a Workload Identity Pool, and it's Workload Identity Pool Providers (IDPs), for Workload Identity Federation.
+This module deploys a Workload Identity Pool (WIP), and it's Providers (WIP Providers), for Workload Identity Federation.
 [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) allows external entities
 to access Google Cloud resources without using service account keys.
 
@@ -16,96 +16,98 @@ See the [configuration](#configuration) section for implementation details.
 
 ## Configuration
 This module takes the following variables:
-* `project_id` - The project the pool is defined in
-* `workload_identity_pool` - Definition of a pool and its providers with the following attributes:
+* `project_id` - The project the WIP is created in
+* `pool_id` - ID for the WIP 
+* `display_name` (optional) - The display name for the WIP, if different than the pool_id
+* `description` (optional) - Description for the WIP
+* `disabled` (optional) - Whether the WIP is disabled (default `false`)
+* `workload_identity_pool_providers` - A map of WIP providers, with the provider ID's as the keys and the following 
+attributes:
 
-| Key                                |     Type     | Required | Description                                                                                                                                       |                                                           Default                                                           |
-|:-----------------------------------|:------------:|:--------:|:--------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------:|
-| `pool_id`                          |    string    |   true   | ID for the pool                                                                                                                                   |                                                            none                                                             |
-| `display_name`                     |    string    |  false   | The display name of the pool if different than the pool-id                                                                                        |                                                           pool-id                                                           |
-| `description`                      |    string    |  false   | Description for the pool                                                                                                                          |                                                            none                                                             |
-| `disabled`                         |     bool     |  false   | Whether the pool is disabled                                                                                                                      |                                                            false                                                            |
-| `providers`                        | map(object)  |  false   | Map with of provider-id and it's attributes                                                                                                       |                                                            none                                                             |
-| `providers.attribute_mapping`      | map(string)  |  false   | Maps attributes from OIDC claim to google attributes. `google.sub` is required, e.g. `google.sub=assertion.sub`                                   |                                                            none                                                             |
-| `providers.display_name`           |    string    |  false   | Display name for the provider                                                                                                                     |                                                         provider-id                                                         |
-| `providers.description`            |    string    |  false   | Description for the provider                                                                                                                      |                                                            none                                                             |
-| `providers.disabled`               |     bool     |  false   | Whether the provider is disabled                                                                                                                  |                                                            false                                                            |
-| `providers.attribute_condition`    |    string    |  false   | An expression to define required values for assertion claims                                                                                      |                                                            none                                                             |
-| `providers.owner`                  |    string    |  false   | If using a preconfigured `providers.oidc.issuer` this references the "owner" of the issuer, i.e. the organization or username.                    |                                                            none                                                             |
-| `providers.workspace_uuid`         |    string    |  false   | If `providers.oidc.issuer` is `bitbucket-pipelines`, this references the workspace uuid with the format: `{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}` |                                                            none                                                             |
-| `providers.oidc`                   |     map      |  false   | The configuration for an OIDC provider (Either this OR `aws` block can be set)                                                                    |                                                            none                                                             |
-| `providers.oidc.issuer`            |    string    |   true   | The preconfigured template to use, or the OIDC issuer uri                                                                                         |                                                            none                                                             |
-| `providers.oidc.allowed_audiences` | list(string) |  false   | Acceptable values for the `aud` field                                                                                                             | `"https://iam.googleapis.com/projects/project-number/locations/global/workloadIdentityPools/pool-id/providers/provider-id"` |
-| `providers.aws`                    |     map      |  false   | The configuration for an AWS provider (Either this OR `oidc` block can be set)                                                                    |                                                            none                                                             |
-| `providersaws.account_id`          |     map      |   true   | The id of the client aws account                                                                                                                  |                                                            none                                                             |
+| Key                      |     Type     | Required | Description                                                                                                                             |                                                           Default                                                           |
+|:-------------------------|:------------:|:--------:|:----------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------:|
+| `attribute_mapping`      | map(string)  |  false   | Maps attributes from OIDC claim to google attributes. `google.sub` is required, e.g. `google.sub=assertion.sub`                         |                                                            none                                                             |
+| `display_name`           |    string    |  false   | Display name for the provider                                                                                                           |                                                         provider-id                                                         |
+| `description`            |    string    |  false   | Description for the provider                                                                                                            |                                                            none                                                             |
+| `disabled`               |     bool     |  false   | Whether the provider is disabled                                                                                                        |                                                            false                                                            |
+| `attribute_condition`    |    string    |  false   | An expression to define required values for assertion claims                                                                            |                                                            none                                                             |
+| `owner`                  |    string    |  false   | If using a preconfigured `oidc.issuer` this references the "owner" of the issuer, i.e. the organization or username.                    |                                                            none                                                             |
+| `workspace_uuid`         |    string    |  false   | If `oidc.issuer` is `bitbucket-pipelines`, this references the workspace uuid with the format: `{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}` |                                                            none                                                             |
+| `oidc`                   |     map      |  false   | The configuration for an OIDC provider (Either this OR `aws` block can be set)                                                          |                                                            none                                                             |
+| `oidc.issuer`            |    string    |   true   | The preconfigured template to use, or the OIDC issuer uri                                                                               |                                                            none                                                             |
+| `oidc.allowed_audiences` | list(string) |  false   | Acceptable values for the `aud` field                                                                                                   | `"https://iam.googleapis.com/projects/project-number/locations/global/workloadIdentityPools/pool-id/providers/provider-id"` |
+| `aws`                    |     map      |  false   | The configuration for an AWS provider (Either this OR `oidc` block can be set)                                                          |                                                            none                                                             |
+| `aws.account_id`         |     map      |   true   | The id of the client aws account                                                                                                        |                                                            none                                                             |
 
 #### Example
 ```terraform
 module workload_identity_pool {
   source                 = "github.com/mesoform/terraform-infrastructure-modules//gcp/iam/workload_identity_federation"
   project_id             = "project_id"
-  workload_identity_pool = {
-    pool_id   = "cicd"
-    display_name = "CI/CD pool"
-    providers = {
-      github = {
-        attribute_condition = "assertion.repostory_owner=='Company' && assertion.actor=='personalAccount'"
-        attribute_mapping   = {
-          "google.subject"  = "assertion.repository"
-        }
-        owner = "Company"
-        oidc  = {
-          issuer = "github-actions"
-        }
+  pool_id = "cicd"
+  display_name = "CI/CD pool"
+  workload_identity_pool_providers = {
+    github-company1 = {
+      attribute_condition = "assertion.repostory_owner=='company1' && assertion.actor=='personalAccount'"
+      attribute_mapping   = {
+        "google.subject"  = "assertion.repository"
       }
-      bitbucket = {
-        owner          = "mesoform"
-        workspace_uuid = "{some-uuid}"
-        oidc           = {
-          issuer = "bitbucket-pipelines"
-        }
-      }
-      unknown = {
-        attribute_mapping = {
-          "google.subject" = "assertion.sub"
-          "attribute.tid"  = "assertion.tid"
-        }
-        oidc = {
-          issuer = "https://unknown.issuer"
-        }
+      owner = "company1"
+      oidc  = {
+        issuer = "github-actions"
       }
     }
-  }
+    bitbucket-mesoform = {
+       owner          = "mesoform"
+      workspace_uuid = "{some-uuid}"
+      oidc           = {
+        issuer = "bitbucket-pipelines"
+      }
+    }
+    unknown = {
+      attribute_mapping = {
+        "google.subject" = "assertion.sub"
+        "attribute.tid"  = "assertion.tid"
+      }
+      oidc = {
+        issuer = "https://unknown.issuer"
+      }
+    }
+  } 
 }
 ```
 
 Multiple pools can be configured at once using a `for_each` attribute, e.g.:
 ```terraform
 module workload_identity_pools {
-  source                 = "github.com/mesoform/terraform-infrastructure-modules//gcp/iam/workload_identity_federation"
-  for_each               = var.workload_identity_pools
-  project_id             = var.project_id
-  workload_identity_pool = each.value
+  source                           = "github.com/mesoform/terraform-infrastructure-modules//gcp/iam/workload_identity_federation"
+  for_each                         = var.workload_identity_pools
+  project_id                       = var.project_id
+  pool_id                          = each.value.pool_id
+  display_name                     = lookup(each.value, "display_name", null)
+  description                      = lookup(each.value, "description", "")
+  workload_identity_pool_providers = lookup(each.value, "providers", null)
 }
 ```
-where `var.workload_identity_pools` is set as:
+where `var.workload_identity_pools` is defined as:
 ```terraform
 workload_identity_pools = {
   cicd = {
     pool_id      = "cicd"
     display_name = "CI/CD pool"
     providers    = {
-      github = {
-        attribute_condition = "assertion.repostory_owner=='Company' && assertion.actor=='personalAccount'"
+      github-company1 = {
+        display_name = "Company1 Github"
+        attribute_condition = "assertion.repostory_owner=='company1' && assertion.actor=='personalAccount'"
         attribute_mapping   = {
           "google.subject" = "assertion.repository"
         }
-        owner = "Company"
+        owner = "company1"
         oidc  = {
           issuer = "github-actions"
         }
       }
-      bitbucket = {
+      bitbucket-mesoform = {
         owner          = "mesoform"
         workspace_uuid = "{some-uuid}"
         oidc           = {
@@ -149,7 +151,7 @@ This module has preconfigured Identity Provider settings for commonly used clien
 which can be used by setting `providers.oidc.issuer` to one of the issuers from the table below, 
 as well as setting the required attributes for the `workload_identity_pools` provider.
 
-Full defaults for preconfigured IDP can be found in the [`trusted_issuers.tf`](./trusted_issuers.yaml) file.
+Full defaults for preconfigured WIP Provider can be found in the [`trusted_issuers.tf`](./trusted_issuers.yaml) file.
 
 #### Trusted issuers
 | Issuer                | Required variable value                                                               |
