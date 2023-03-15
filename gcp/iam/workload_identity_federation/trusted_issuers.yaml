@@ -1,0 +1,52 @@
+azure:
+  issuer: "https://sts.windows.net/${owner}"
+  attributes:
+    "google.subject": "assertion.sub"
+    "google.groups": "assertion.groups"
+bitbucket-pipelines:
+  issuer: "https://api.bitbucket.org/2.0/workspaces/${owner}/pipelines-config/identity/oidc"
+  allowed_audiences:
+    - "ari:cloud:bitbucket::workspace/${workspace_uuid}"
+  attributes:
+    "google.subject": "assertion.sub"
+    "attribute.workspace_uuid": "assertion.workspaceUuid"
+    "attribute.repository": "assertion.repositoryUuid"
+    "attribute.git_ref": "assertion.branchName"
+  condition: "assertion.workspaceUuid=='${workspace_uuid}'"
+circleci:
+  issuer: "https://oidc.circleci.com/org/${owner}"
+  allowed_audiences:
+    - "${owner}"
+  attributes:
+    "google.subject": "assertion.sub"
+    "attribute.project_id": "assertion['oidc.circleci.com/project-id']"
+    "attribute.org_id": "assertion.aud"
+  condition: "assertion.aud=='${owner}'"
+github-actions:
+  issuer: "https://token.actions.githubusercontent.com"
+  attributes:
+    "google.subject": "assertion.sub"
+    "attribute.actor": "assertion.actor"
+    "attribute.repository": "assertion.repository"
+    "attribute.owner": "assertion.repository_owner"
+    "attribute.git_ref": "assertion.ref"
+  condition: "assertion.repository_owner=='${owner}'"
+gitlab:
+  issuer: "https://gitlab.com/"
+  allowed_audiences:
+    - "https://gitlab.com"
+  attributes:
+    "google.subject": "assertion.sub"
+    "attribute.namespace": "assertion.namespace_path"
+    "attribute.namespace_id": "assertion.namespace_id"
+    "attribute.project_id": "assertion.project_id"
+    "attribute.project_path": "assertion.project_path"
+  condition: "assertion.namespace_path=='${owner}'"
+terraform-cloud:
+  issuer: "https://app.terraform.io"
+  attributes:
+    "google.subject": "assertion.sub"
+    "attribute.organization": "assertion.terraform_organization_id"
+    "attribute.workspace_id": "assertion.terraform_workspace_id"
+    "attribute.workspace_name": "assertion.terraform_workspace_name"
+  condition: "assertion.terraform_organization_id=='${owner}'"
