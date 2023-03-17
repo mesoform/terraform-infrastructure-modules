@@ -12,7 +12,7 @@ bitbucket-pipelines:
     "attribute.workspace_uuid": "assertion.workspaceUuid"
     "attribute.repository": "assertion.repositoryUuid"
     "attribute.git_ref": "assertion.branchName"
-  condition: "assertion.workspaceUuid=='${workspace_uuid}'"
+  condition: "assertion.workspaceUuid=='{${workspace_uuid}}'"
 circleci:
   issuer: "https://oidc.circleci.com/org/${owner}"
   allowed_audiences:

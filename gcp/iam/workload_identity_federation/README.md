@@ -59,7 +59,7 @@ module workload_identity_pool {
     }
     bitbucket-mesoform = {
        owner          = "mesoform"
-      workspace_uuid = "{some-uuid}"
+      workspace_uuid = "some-uuid"
       oidc           = {
         issuer = "bitbucket-pipelines"
       }
@@ -109,7 +109,7 @@ workload_identity_pools = {
       }
       bitbucket-mesoform = {
         owner          = "mesoform"
-        workspace_uuid = "{some-uuid}"
+        workspace_uuid = "some-uuid"
         oidc           = {
           issuer = "bitbucket-pipelines"
         }
@@ -192,7 +192,7 @@ workload_identity_pool = {
   providers    = {
     bitbucket = {
       owner          = "workspaceName"
-      workspace_uuid = "{some-uuid}"
+      workspace_uuid = "some-uuid"
       oidc           = {
         issuer = "bitbucket-pipelines"
         allowed_audiences = ["default"]
