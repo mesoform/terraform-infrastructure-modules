@@ -8,7 +8,7 @@ workload_identity_pool_providers = {
       "attribute.git_ref" = null
     }
     owner = "companyWorkspace"
-    workspace_uuid = "{company-unique-id}"
+    workspace_uuid = "company-unique-id"
     oidc  = {
       issuer = "bitbucket-pipelines"
     }
