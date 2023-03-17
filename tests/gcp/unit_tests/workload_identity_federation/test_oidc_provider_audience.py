@@ -15,7 +15,7 @@ except Exception as e:
 """
 
 expected_data = {
-    "bitbucket": "ari:cloud:bitbucket::workspace/{company-unique-id}",
+    "bitbucket": "ari:cloud:bitbucket::workspace/company-unique-id",
     "circleci": "company",
     "github": "",
     "gitlab": "https://gitlab.com",
