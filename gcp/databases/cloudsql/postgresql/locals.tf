@@ -11,8 +11,8 @@ locals {
   databases = { for db in var.additional_databases : db.name => db }
   database_flags = merge(
     {
-      cloudsql_iam_authentication = "on"
-      log_min_messages = "ERROR"
+      "cloudsql.iam_authentication" = "on"
+      "log_min_messages" = "error"
     }, var.database_flags
   )
   users     = { for u in var.additional_users : u.name => u }
