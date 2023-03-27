@@ -2,14 +2,11 @@ name: 'Unit Tests'
 
 on:
   pull_request:
-    branches:
-      - main
-      - develop
-    types: [opened, synchronize, reopened, labeled]
   push:
     branches:
       - main
       - develop
+  workflow_dispatch:
 
 jobs:
   unit-tests:
