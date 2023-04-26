@@ -1,40 +1,22 @@
-name: 'Deployment Tests'
+name: 'Access Context Manager Deployment Tests'
 
 on:
   push:
     branches:
       - main
       - develop
+    paths:
+      - 'gcp/access_context_manager/**'
+
 
 permissions:
   contents: 'read'
   id-token: 'write'
 
 jobs:
-  ############################# Deployment Tests for GCP Access Context Manager ####################################
-  ## Job to check if secret with service account for deploying perimeter exists
-  check-vpc-sa:
-    runs-on: ubuntu-latest
-    outputs:
-      sa-exists: ${{ steps.check.outputs.EXISTS }}
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Check service account exists
-        id: check
-        run: |
-          if [[ "${{ secrets.GCP_VPC_SA_KEY }}" == *"private_key_id"* ]]; then
-            echo ::set-output name=EXISTS::true
-          else
-            echo ::set-output name=EXISTS::false
-          fi
-
-  # If service account exists run this job
   GCP-perimeter-tests:
     runs-on: ubuntu-latest
     needs: check-vpc-sa
-    if: needs.check-vpc-sa.outputs.sa-exists == 'true'
 
     env:
       working-directory: ./tests/gcp/deployment
@@ -57,7 +39,7 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
-          service_account: ${{secrets.GCP_VPC_SA_KEY}}
+          service_account: ${{secrets.GCP_SA_EMAIL}}
           workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER}}
           token_format: 'access_token'
           access_token_lifetime: 2400s # 20 minutes
