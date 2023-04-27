@@ -38,7 +38,7 @@ resource google_sql_database_instance default {
       for_each = [var.backup_configuration]
       content {
         binary_log_enabled             = false
-        enabled                        = lookup(backup_configuration.value, "enabled", null)
+        enabled                        = true
         start_time                     = lookup(backup_configuration.value, "start_time", null)
         location                       = lookup(backup_configuration.value, "location", null)
         point_in_time_recovery_enabled = lookup(backup_configuration.value, "point_in_time_recovery_enabled", false)
@@ -58,7 +58,7 @@ resource google_sql_database_instance default {
       content {
         ipv4_enabled       = lookup(ip_configuration.value, "ipv4_enabled", null)
         private_network    = lookup(ip_configuration.value, "private_network", null)
-        require_ssl        = lookup(ip_configuration.value, "require_ssl", null)
+        require_ssl        = lookup(ip_configuration.value, "require_ssl", true)
         allocated_ip_range = lookup(ip_configuration.value, "allocated_ip_range", null)
 
         dynamic authorized_networks {
@@ -88,10 +88,10 @@ resource google_sql_database_instance default {
     disk_type             = var.disk_type
     pricing_plan          = var.pricing_plan
     dynamic database_flags {
-      for_each = var.database_flags
+      for_each = local.database_flags
       content {
-        name  = lookup(database_flags.value, "name", null)
-        value = lookup(database_flags.value, "value", null)
+        name  = database_flags.key
+        value = database_flags.value
       }
     }
 

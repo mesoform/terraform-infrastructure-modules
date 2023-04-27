@@ -70,10 +70,10 @@ resource "google_sql_database_instance" "replicas" {
     user_labels           = lookup(each.value, "user_labels", var.user_labels)
 
     dynamic "database_flags" {
-      for_each = lookup(each.value, "database_flags", [])
+      for_each = local.database_flags
       content {
-        name  = lookup(database_flags.value, "name", null)
-        value = lookup(database_flags.value, "value", null)
+        name  = database_flags.key
+        value = database_flags.value
       }
     }
 
