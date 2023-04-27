@@ -8,6 +8,10 @@ on:
       - develop
   workflow_dispatch:
 
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
 jobs:
   unit-tests:
     name: 'Unit Tests'
