@@ -32,6 +32,18 @@ jobs:
       with:
         terraform_wrapper: false
 
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        service_account: ${{secrets.GCP_SA_EMAIL}}
+        workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER}}
+        token_format: 'access_token'
+        access_token_lifetime: 2400s # 20 minutes
+
+    # Install gcloud sdk
+    - name: Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+
     # Run unit tests in GCP module
     - name: Run GCP unit tests
       run: |
