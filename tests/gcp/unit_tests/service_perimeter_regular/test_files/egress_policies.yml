@@ -1,0 +1,10 @@
+egressPolicies:
+  - egressFrom:
+      identityType: ANY_IDENTITY
+    egressTo:
+      operations:
+        - serviceName: compute.googleapis.com
+          methodSelectors:
+            - method: '*'
+      resources:
+        - projects/000000000000

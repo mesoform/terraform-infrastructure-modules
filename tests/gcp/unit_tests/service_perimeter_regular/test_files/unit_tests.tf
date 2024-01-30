@@ -49,11 +49,34 @@ data external test_ingress_policy {
 output test_ingress_policy {
   value = data.external.test_ingress_policy.result
 }
-
 // Egress Policy
+data external test_egress_policy {
+  query = {"identity-type" = try(local.egress_policies[0]["egressFrom"]["identityType"], ""),
+            "serviceName" = try(local.egress_policies[0]["egressTo"]["operations"][0]["serviceName"], ""),
+            "method" = try(local.egress_policies[0]["egressTo"]["operations"][0]["methodSelectors"][0]["method"], ""),
+            "resource" = try(local.egress_policies[0]["egressTo"]["resources"][0], "")}
+  program = ["python", "${path.module}/python/test_egress_policy.py"]
+}
+
+output test_egress_policy {
+  value = data.external.test_egress_policy.result
+}
+
+// Empty Ingress Policy
+data external test_ingress_policy_non_existent{
+  query = local.ingress_file == null ? {} : {exists = true}
+  program = ["python", "${path.module}/python/test_ingress_policy_empty.py"]
+}
+
+output test_ingress_policy_non_existent_file{
+  value = data.external.test_ingress_policy_non_existent.result
+}
+
+
+// Empty Egress Policy
 data external test_egress_policy_non_existent{
   query = local.egress_file == null ? {} : {exists = true}
-  program = ["python", "${path.module}/python/test_egress_policy.py"]
+  program = ["python", "${path.module}/python/test_egress_policy_empty.py"]
 }
 
 output test_egress_policy_non_existent_file{
