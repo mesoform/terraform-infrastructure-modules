@@ -151,7 +151,7 @@ expected_data = {
     "speakerid.googleapis.com": "speakerid.googleapis.com",
     "speech.googleapis.com": "speech.googleapis.com",
     "sqladmin.googleapis.com": "sqladmin.googleapis.com",
-    "ssh-serialport.googleapis.c om":"ssh-serialport.googleapis.com",
+    "ssh-serialport.googleapis.com": "ssh-serialport.googleapis.com",
     "storage.googleapis.com": "storage.googleapis.com",
     "storageinsights.googleapis.com": "storageinsights.googleapis.com",
     "storagetransfer.googleapis.com": "storagetransfer.googleapis.com",
