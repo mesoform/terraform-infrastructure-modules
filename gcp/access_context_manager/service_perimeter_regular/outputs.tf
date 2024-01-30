@@ -1,9 +1,17 @@
+output "locals_ingress_policies_file_path" {
+  value = local.ingress_file
+}
+
+output "locals_egress_policies_file_path" {
+  value = local.egress_file
+}
+
 output "locals_ingress_policies" {
   value = local.ingress_policies
 }
 
 output "locals_egress_policies" {
-  value = local.ingress_policies
+  value = local.egress_policies
 }
 
 output locals_vpc_accessible_services {

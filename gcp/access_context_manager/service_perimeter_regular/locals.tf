@@ -1,9 +1,9 @@
 locals {
-  ingress_file      = try(fileexists(var.ingress_file_path), fileexists("./ingress_policies.yml")) ? file(var.ingress_file_path) : null
+  ingress_file      = fileexists(var.ingress_file_path) ? file(var.ingress_file_path) : null
   ingress_policies_read  = try(yamldecode(local.ingress_file), {})
   ingress_policies = {for index, policy in lookup(local.ingress_policies_read, "ingressPolicies", []): index => policy}
 
-  egress_file      = try(fileexists(var.egress_file_path), fileexists("./egress_policies.yml")) ? file(var.egress_file_path) : null
+  egress_file      = fileexists(var.egress_file_path) ? file(var.egress_file_path) : null
   egress_policies_read  = try(yamldecode(local.egress_file), {})
   egress_policies = {for index, policy in lookup(local.egress_policies_read, "egressPolicies", [] ): index => policy}
 
