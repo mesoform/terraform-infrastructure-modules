@@ -92,5 +92,24 @@ output test_ingress_policies {
 }
 
 output test_egress_policies {
-  value = module.ingress_egress_test.test_egress_policy_non_existent_file
+  value = module.ingress_egress_test.test_egress_policy
 }
+
+
+//Ingress and Egress
+module ingress_egress_empty_test{
+  source = "./test_files"
+  ingress_file_path = "./test_files/non_existent_ingress_policies_file.yml"
+  egress_file_path = "./test_files/non_existent_egress_policies_file.yml"
+  access_policy_name = "name"
+  name = "name"
+}
+
+output test_empty_ingress_policies {
+  value = module.ingress_egress_empty_test.test_ingress_policy_non_existent_file
+}
+
+output test_empty_egress_policies {
+  value = module.ingress_egress_empty_test.test_egress_policy_non_existent_file
+}
+
