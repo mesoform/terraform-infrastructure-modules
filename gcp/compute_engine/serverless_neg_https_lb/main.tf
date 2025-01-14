@@ -35,7 +35,7 @@ resource google_compute_region_network_endpoint_group cloud_function {
 }
 
 module serverless_neg_https_lb {
-  source  = "github.com/terraform-google-modules/terraform-google-lb-http//modules/serverless_negs?ref=v6.3.0"
+  source  = "github.com/terraform-google-modules/terraform-google-lb-http//modules/serverless_negs?ref=v9.3.0"
   project = var.project
   name = var.serverless_https_lb_name
   http_forward = var.serverless_https_lb_http_forward
