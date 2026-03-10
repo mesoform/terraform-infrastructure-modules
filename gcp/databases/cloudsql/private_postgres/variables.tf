@@ -196,3 +196,9 @@ variable read_replica_deletion_protection {
   type        = bool
   default     = false
 }
+
+variable cloudsql_availability_type {
+  description = "The availability type of the Cloud SQL instance. Can be ZONAL or REGIONAL."
+  type        = string
+  default     = "ZONAL"
+}

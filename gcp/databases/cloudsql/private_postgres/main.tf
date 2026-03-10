@@ -20,6 +20,8 @@ module cloudsql-postgres {
   zone = var.cloudsql_zone
   tier = var.cloudsql_instance_tier
 
+  availability_type = var.cloudsql_availability_type
+
   deletion_protection = var.cloudsql_deletion_protection
 
   database_flags = var.cloudsql_database_flags
