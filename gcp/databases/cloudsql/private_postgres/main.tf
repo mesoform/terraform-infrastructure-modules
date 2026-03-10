@@ -51,5 +51,9 @@ module cloudsql-postgres {
   secret_manager_project_id = var.secret_manager_project_id
   secret_manager_location = var.secret_manager_location
 
+  read_replicas                    = var.read_replicas
+  read_replica_name_suffix         = var.read_replica_name_suffix
+  read_replica_deletion_protection = var.read_replica_deletion_protection
+
   module_depends_on = [module.private-service-access.peering_completed]
 }

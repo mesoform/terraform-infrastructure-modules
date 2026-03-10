@@ -144,4 +144,55 @@ variable secret_manager_location {
   type        = string
   description = "The canonical IDs of the location to replicate data. For example: us-east1"
   default     = "europe-west2"
+                                                                                                                                                                                                                              }
+variable cloudsql_read_replicas {
+  description = "List of read replicas to create. Replicas will have the same tier, storage, and settings as the master instance unless overridden."
+  type = list(object({
+    name                  = string
+    zone                  = optional(string)
+    disk_autoresize       = optional(bool)
+    disk_autoresize_limit = optional(number)
+    user_labels           = optional(map(string))
+  }))
+  default = []
+}
+
+// Read Replicas
+variable read_replicas {
+  description = "List of read replicas to create. Encryption key is required for replica in different region. For replica in same region as master set encryption_key_name = null"
+  type = list(object({
+    name                  = string
+    tier                  = string
+    zone                  = string
+    disk_type             = string
+    disk_autoresize       = bool
+    disk_autoresize_limit = number
+    disk_size             = string
+    user_labels           = map(string)
+    database_flags = list(object({
+      name  = string
+      value = string
+    }))
+    ip_configuration = object({
+      authorized_networks = list(map(string))
+      ipv4_enabled        = bool
+      private_network     = string
+      require_ssl         = bool
+      allocated_ip_range  = string
+    })
+    encryption_key_name = string
+  }))
+  default = []
+}
+
+variable read_replica_name_suffix {
+  description = "The optional suffix to add to the read instance name"
+  type        = string
+  default     = ""
+}
+
+variable read_replica_deletion_protection {
+  description = "Used to block Terraform from deleting replica SQL Instances."
+  type        = bool
+  default     = false
 }
