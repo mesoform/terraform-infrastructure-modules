@@ -91,6 +91,11 @@ output read_replica_instance_names {
   description = "The instance names for the read replica instances"
 }
 
+output read_replica_instance_connection_names {
+  value       = [for r in google_sql_database_instance.replicas : r.connection_name]
+  description = "The connection names of the read replica instances."
+}
+
 // Resources
 output primary {
   value       = google_sql_database_instance.default

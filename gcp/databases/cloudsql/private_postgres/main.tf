@@ -20,6 +20,8 @@ module cloudsql-postgres {
   zone = var.cloudsql_zone
   tier = var.cloudsql_instance_tier
 
+  availability_type = var.cloudsql_availability_type
+
   deletion_protection = var.cloudsql_deletion_protection
 
   database_flags = var.cloudsql_database_flags
@@ -50,6 +52,10 @@ module cloudsql-postgres {
 
   secret_manager_project_id = var.secret_manager_project_id
   secret_manager_location = var.secret_manager_location
+
+  read_replicas                    = var.read_replicas
+  read_replica_name_suffix         = var.read_replica_name_suffix
+  read_replica_deletion_protection = var.read_replica_deletion_protection
 
   module_depends_on = [module.private-service-access.peering_completed]
 }
