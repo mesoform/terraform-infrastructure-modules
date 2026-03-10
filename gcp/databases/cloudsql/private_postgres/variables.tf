@@ -48,12 +48,9 @@ variable cloudsql_deletion_protection {
 }
 
 variable cloudsql_database_flags {
-  description = "The database flags for the CloudSQL instance"
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
+  description = "A map of database flags for the CloudSQL instance."
+  type        = map(string)
+  default     = {}
 }
 
 variable cloudsql_require_ssl {
@@ -145,18 +142,6 @@ variable secret_manager_location {
   description = "The canonical IDs of the location to replicate data. For example: us-east1"
   default     = "europe-west2"
                                                                                                                                                                                                                               }
-variable cloudsql_read_replicas {
-  description = "List of read replicas to create. Replicas will have the same tier, storage, and settings as the master instance unless overridden."
-  type = list(object({
-    name                  = string
-    zone                  = optional(string)
-    disk_autoresize       = optional(bool)
-    disk_autoresize_limit = optional(number)
-    user_labels           = optional(map(string))
-  }))
-  default = []
-}
-
 // Read Replicas
 variable read_replicas {
   description = "List of read replicas to create. Encryption key is required for replica in different region. For replica in same region as master set encryption_key_name = null"
@@ -169,10 +154,6 @@ variable read_replicas {
     disk_autoresize_limit = number
     disk_size             = string
     user_labels           = map(string)
-    database_flags = list(object({
-      name  = string
-      value = string
-    }))
     ip_configuration = object({
       authorized_networks = list(map(string))
       ipv4_enabled        = bool
