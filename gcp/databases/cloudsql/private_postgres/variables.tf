@@ -188,4 +188,5 @@ variable cloudsql_availability_type {
 variable enable_private_path_for_google_cloud_services {
   description = "Whether to enable private path for google services (e.g. BigQuery) to connect to primary instance"
   default = null
+  type = bool
 }
