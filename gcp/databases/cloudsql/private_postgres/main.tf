@@ -32,6 +32,7 @@ module cloudsql-postgres {
     private_network = data.google_compute_network.main.id
     require_ssl = var.cloudsql_require_ssl
     allocated_ip_range = null
+    enable_private_path_for_google_cloud_services = var.enable_private_path_for_google_cloud_services
   }
 
   backup_configuration = {
