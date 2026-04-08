@@ -160,6 +160,7 @@ variable read_replicas {
       private_network     = string
       require_ssl         = bool
       allocated_ip_range  = string
+      enable_private_path_for_google_cloud_services = optional(bool, false)
     })
     encryption_key_name = string
   }))
@@ -182,4 +183,10 @@ variable cloudsql_availability_type {
   description = "The availability type of the Cloud SQL instance. Can be ZONAL or REGIONAL."
   type        = string
   default     = "ZONAL"
+}
+
+variable enable_private_path_for_google_cloud_services {
+  description = "Whether to enable private path for google services (e.g. BigQuery) to connect to primary instance"
+  default = null
+  type = bool
 }

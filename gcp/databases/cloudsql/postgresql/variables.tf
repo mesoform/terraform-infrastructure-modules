@@ -165,6 +165,7 @@ variable ip_configuration {
     private_network     = string
     require_ssl         = bool
     allocated_ip_range  = string
+    enable_private_path_for_google_cloud_services = bool
   })
   default = {
     authorized_networks = []
@@ -172,6 +173,7 @@ variable ip_configuration {
     private_network     = null
     require_ssl         = null
     allocated_ip_range  = null
+    enable_private_path_for_google_cloud_services = null
   }
 }
 
@@ -193,6 +195,7 @@ variable read_replicas {
       private_network     = string
       require_ssl         = bool
       allocated_ip_range  = string
+      enable_private_path_for_google_cloud_services = bool
     })
     encryption_key_name = string
   }))
