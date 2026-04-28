@@ -88,8 +88,7 @@ resource "google_sql_database_instance" "replicas" {
   lifecycle {
     ignore_changes = [
       settings[0].disk_size,
-      settings[0].maintenance_window,
-      encryption_key_name,
+      settings[0].maintenance_window
     ]
   }
 
