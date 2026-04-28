@@ -190,3 +190,9 @@ variable enable_private_path_for_google_cloud_services {
   default = null
   type = bool
 }
+
+variable encryption_key_name {
+  description = "The self-link of the KMS key to use for encryption."
+  type        = string
+  default     = null
+}

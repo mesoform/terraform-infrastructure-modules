@@ -54,6 +54,8 @@ module cloudsql-postgres {
   secret_manager_project_id = var.secret_manager_project_id
   secret_manager_location = var.secret_manager_location
 
+  encryption_key_name = var.encryption_key_name
+
   read_replicas                    = var.read_replicas
   read_replica_name_suffix         = var.read_replica_name_suffix
   read_replica_deletion_protection = var.read_replica_deletion_protection
