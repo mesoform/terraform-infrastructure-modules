@@ -133,6 +133,15 @@ module secret-manager-db-host-ip {
   depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
 }
 
+module secret-manager-db-connection-name {
+  source = "../../../secret_manager"
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-connection-name"
+  secret_data = google_sql_database_instance.default.connection_name
+  depends_on = [null_resource.module_depends_on, google_sql_database_instance.default]
+}
+
 module secret-manager-db-server-ca-cert {
   source = "../../../secret_manager"
   project = var.secret_manager_project_id
