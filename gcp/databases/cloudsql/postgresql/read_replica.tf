@@ -98,3 +98,33 @@ resource "google_sql_database_instance" "replicas" {
     delete = var.delete_timeout
   }
 }
+
+module secret-manager-db-replica-server-ca-cert {
+  source = "../../../secret_manager"
+  for_each = local.replicas
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-replica-${each.key}-server-ca-cert"
+  secret_data = google_sql_database_instance.replicas[each.key].server_ca_cert.0.cert
+  depends_on = [null_resource.module_depends_on, google_sql_database_instance.replicas]
+}
+
+module secret-manager-db-replica-host-ip {
+  source = "../../../secret_manager"
+  for_each = local.replicas
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-replica-${each.key}-host-ip"
+  secret_data = google_sql_database_instance.replicas[each.key].private_ip_address
+  depends_on = [null_resource.module_depends_on, google_sql_database_instance.replicas]
+}
+
+module secret-manager-db-replica-connection-name {
+  source = "../../../secret_manager"
+  for_each = local.replicas
+  project = var.secret_manager_project_id
+  location = var.secret_manager_location
+  secret_id = "db-replica-${each.key}-connection-name"
+  secret_data = google_sql_database_instance.replicas[each.key].connection_name
+  depends_on = [null_resource.module_depends_on, google_sql_database_instance.replicas]
+}
