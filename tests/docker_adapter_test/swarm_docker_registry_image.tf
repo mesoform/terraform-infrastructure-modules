@@ -1,0 +1,1 @@
+../../mcp/swarm_docker_registry_image.tf
