@@ -41,6 +41,7 @@ module serverless_neg_https_lb {
   http_forward = var.serverless_https_lb_http_forward
   ssl = true
   managed_ssl_certificate_domains = var.managed_ssl_certificate_domains
+  ssl_policy = var.ssl_policy
   backends = local.all_backends
   https_redirect = var.https_redirect
   depends_on = [

@@ -26,6 +26,12 @@ variable managed_ssl_certificate_domains {
   type        = list(string)
 }
 
+variable ssl_policy {
+  description = "Self-link to SSL Policy to apply to the HTTPS proxy."
+  type        = string
+  default     = null
+}
+
 variable cloud_run_services {
   description = "List of Cloud Run services for backend"
   type = list(object(
