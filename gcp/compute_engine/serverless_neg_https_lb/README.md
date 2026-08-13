@@ -33,6 +33,7 @@ module serverless_neg_https_lb {
 | serverless_neg_name                | Name for serverless network endpoint group.                       | `string`                                                                               | n/a     |   yes    |
 | serverless_https_lb_name           | Name for the forwarding rule and prefix for supporting resources. | `string`                                                                               | n/a     |   yes    |
 | managed\_ssl\_certificate\_domains | Create Google-managed SSL certificates for specified domains.     | `list(string)`                                                                         | n/a     |   yes    |
+| ssl\_policy                        | Self-link to SSL Policy to apply to the HTTPS proxy.              | `string`                                                                               | `null`  | no       |
 | app_engine_services                | List of app engine services for load balancer backend.            | <pre>list(object({<br>    service name = string<br>    region = string<br>  }))</pre>  | []      |    no    |
 | cloud_functions                    | List of cloud functions for load balancer backend.                | <pre>list(object({<br>    function name = string<br>    region = string<br>  }))</pre> | []      |    no    |
 | cloud_run_services                 | List of cloud run services for load balancer backend.             | <pre>list(object({<br>    service name = string<br>    region = string<br>  }))</pre>  | []      |    no    |
